@@ -13,15 +13,15 @@
 
 String* createEmptyString() {
 
-	String *str = (String*) malloc(sizeof(String));
-	str->value = NULL;
-	str->size = 0;
-	return str;
+	return createNewString("");
+
 }
 
 String* createNewString(char *charArr) {
 
-	String *str = createEmptyString();
+	String *str = (String*) malloc(sizeof(String));
+	str->value = NULL;
+	str->size = 0;
 	setStringValue(str, charArr);
 	return str;
 
@@ -45,6 +45,22 @@ void setStringValue(String *str, char *charArr) {
 
 	str->value = strcpy(str->value, charArr);
 	str->value[str->size] = '\0';
+
+}
+
+/*
+ *
+ */
+String * stringNCopy( char * src, int count){
+
+	int i =0;
+	String * strRes = createEmptyString();
+
+	for (i = 0; i < count; ++i) {
+		appendCharToString(strRes , src[i]);
+	}
+
+	return strRes;
 
 }
 
@@ -101,7 +117,7 @@ int findNextNonBlankCharLocation(String *str, int offset) {
 	for (; i < str->size; ++i) {
 
 		currChar = str->value[i];
-		if (currChar != ' ' && currChar != '\t') {
+		if (!isspace(currChar)) {
 
 			return i;
 
@@ -124,7 +140,7 @@ String* popWord(String *str) {
 	for (subStart = 0; subStart < str->size; ++subStart) {
 
 		currChar = str->value[subStart];
-		if (currChar != ' ' && currChar != '\t') {
+		if (!isspace(currChar)) {
 			break;
 		}
 
@@ -133,7 +149,7 @@ String* popWord(String *str) {
 	for (subEnd = subStart; subEnd < str->size; subEnd++) {
 
 		currChar = str->value[subEnd];
-		if (currChar == ' ' || currChar == '\t') {
+		if (isspace(currChar)) {
 			break;
 		}
 		appendCharToString(newStr, currChar);

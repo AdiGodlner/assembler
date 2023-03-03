@@ -12,7 +12,7 @@
 
 #define MEM_ERR "failed to allocate memory"
 
-Entry * createEntry(int hash, String *key, String *value) {
+Entry * createEntry(int hash, String *key, void *value) {
 
 	Entry * entry = malloc(sizeof(Entry));
 

@@ -20,6 +20,7 @@
 HashTable* createDefualtHashTable() {
 
 	return createHashTable(DEFAULT_TABLE_SIZE);
+
 }
 
 HashTable* createHashTable(int tableSize) {
@@ -55,14 +56,14 @@ HashTable* createHashTable(int tableSize) {
 
 }
 
-void insertToTable(HashTable *table, String *key, String *data) {
+void insertToTable(HashTable *table, char *key, void *data) {
 
 	int hash, index;
 	double capacity;
 	Node *currNode = NULL, *newNode = NULL, *prevNode = NULL;
 	Entry *currEntry = NULL, *newEntry = NULL;
-
-	hash = hashcode(key);
+	String * keyString = createNewString(key);
+	hash = hashcode(keyString);
 	index = getHashIndex(table, hash);
 	currNode = table->bucketArr[index];
 
@@ -74,7 +75,7 @@ void insertToTable(HashTable *table, String *key, String *data) {
 		 */
 		if (currEntry->hash == hash) {
 
-			if (compareString(key, currEntry->key) == 0) {
+			if (compareString(keyString, currEntry->key) == 0) {
 				/* we found a table entry with the existing key
 				 * so we override the existing pointer this may cause floating pointers
 				 * but the responsibility should be on the caller ?
@@ -83,6 +84,8 @@ void insertToTable(HashTable *table, String *key, String *data) {
 				 * free the old and
 				 * */
 				currEntry->value = data;
+				printf("override %s = , %s \n", keyString->value, currEntry->key->value);
+
 				return;
 			}
 
@@ -95,21 +98,23 @@ void insertToTable(HashTable *table, String *key, String *data) {
 
 	/* if we got here it means there is no entry in the hashtable with the given key*/
 
-	newEntry = createEntry(hash, key, data);
+	newEntry = createEntry(hash, keyString, data);
 	newNode = createNode((void*) newEntry, NULL);
 
 	if (prevNode) {
 		prevNode->next = newNode;
+//		printf("new node in LIST ______ %s \n", keyString->value);
 	} else {
+//		printf("new node in bucket %s \n", keyString->value);
 		table->bucketArr[index] = newNode;
 	}
 
 	table->numEntrys += 1;
 	capacity = (double) table->numEntrys / (double) table->size;
 
-	if (capacity > table->loadFactor) {
-		resizeTable(table);
-	}
+//	if (capacity > table->loadFactor) {
+//		resizeTable(table);
+//	}
 
 }
 
@@ -158,7 +163,15 @@ void resizeTable(HashTable *table) {
 
 }
 
-String* getValueByKey(HashTable *table, String *key) {
+void * getValueByKey(HashTable *table, char *key){
+
+	String * keyString = createNewString(key);
+	void * value = getValueByKeyString(table, keyString);
+	deleteString(keyString);
+	return value;
+}
+
+void * getValueByKeyString(HashTable *table, String *key) {
 
 	int hash, index;
 	Node *currNode = NULL;
@@ -196,8 +209,6 @@ void printTable(HashTable * table){
 	Entry * entry = NULL;
 	printf("======================\n");
 
-//	table->bucketArr
-
 	for (i = 0; i < table->size; ++i) {
 
 		printf("%d | ", i );
@@ -206,7 +217,8 @@ void printTable(HashTable * table){
 		while(currNode){
 
 			entry = ( Entry * )currNode->data;
-			printf("{ %s : %s } -> ", entry->key->value, entry->value->value);
+			printf("{ |%s| : %s } -> ", entry->key->value, ((String *)entry->value)->value);
+//			printf("{ %s : %s } -> ", entry->key->value, "TODO: ");
 			currNode = currNode->next;
 		}
 		printf("NULL\n");
@@ -223,13 +235,12 @@ int getHashIndex(HashTable *table, int hash) {
 
 int hashcode(String *str) {
 
-	int i = 0, res;
+	int i = 0, res = 0;
 	char *strValue = str->value;
 	int size = str->size;
 
 	for (i = 0; i < size; ++i) {
 
-		//TODO chaeck that the hash function works
 		res += pow(strValue[i] * 31, size - i - 1);
 
 	}

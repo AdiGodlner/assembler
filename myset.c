@@ -26,76 +26,29 @@
 #define SYMDIFF_SET "symdiff_set"
 #define STOP "stop"
 
-RESULT_TYPE handleUserInput(String *userCmnd, set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleUserInput(String *userCmnd, Set *setArr[SET_ARR_SIZE]);
 RESULT_TYPE sendTofunction(char *operand, String *arguments,
-		set *setArr[SET_ARR_SIZE]);
+		Set *setArr[SET_ARR_SIZE]);
 
-RESULT_TYPE handleReadSet(String *arguments, set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE handlePrintSet(String *arguments, set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE handleUnionSet(String *arguments, set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE handleIntersectSet(String *arguments, set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE handleSubset(String *arguments, set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE handleSymdiffSet(String *arguments, set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleReadSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handlePrintSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleUnionSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleIntersectSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleSubset(String *arguments, Set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE handleSymdiffSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
 RESULT_TYPE handleStop(char *operand, String *arguments);
 
 RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		int *size);
-RESULT_TYPE getSetsFromStringArgs(String *arguments, set *setArr[SET_ARR_SIZE],
-		set *currSetsArr[], int currSetsArrSize, int checkExtraneousText);
-RESULT_TYPE getSetFromName(set **dest, char *setName, set *setArr[SET_ARR_SIZE]);
+RESULT_TYPE getSetsFromStringArgs(String *arguments, Set *setArr[SET_ARR_SIZE],
+		Set *currSetsArr[], int currSetsArrSize, int checkExtraneousText);
+RESULT_TYPE getSetFromName(Set **dest, char *setName, Set *setArr[SET_ARR_SIZE]);
 RESULT_TYPE popArgument(String *arguments, String *dest);
 RESULT_TYPE getIntFromName(char *str, int *numDest);
 
 void getLine(String *str);
 void printResultMsg(RESULT_TYPE resType);
 
-int main(void) {
-
-	RESULT_TYPE resType = SUCCESS;
-	set *setArr[SET_ARR_SIZE];
-	set *SETA = createNewSet();
-	set *SETB = createNewSet();
-	set *SETC = createNewSet();
-	set *SETD = createNewSet();
-	set *SETE = createNewSet();
-	set *SETF = createNewSet();
-	String *str = createEmptyString();
-
-	setArr[0] = SETA;
-	setArr[1] = SETB;
-	setArr[2] = SETC;
-	setArr[3] = SETD;
-	setArr[4] = SETE;
-	setArr[5] = SETF;
-
-	while (1) {
-
-		printf("please enter a line\n");
-		getLine(str);
-
-		printf("\nuser input:\n");
-		printString(str);
-		printf("\n");
-
-		resType = handleUserInput(str, setArr);
-
-		if (resType != IGNORE) {
-
-			printResultMsg(resType);
-			printf("======================================\n");
-
-			if (resType == EXIT || resType == UNEXPECTED_EOF) {
-				break;
-			}
-
-		}
-	}
-
-	deleteString(str);
-
-	return EXIT_SUCCESS;
-
-}
 
 /*
  * this method handles the String userCmnd given by the user
@@ -106,7 +59,7 @@ int main(void) {
  * UNEXPECTED_EOF if there is an unexpected EOF,
  * UNDEFINED_COMMAND_NAME if the command name given by the user is not one of the allowed possibilities specified in the white paper,
  */
-RESULT_TYPE handleUserInput(String *userCmnd, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleUserInput(String *userCmnd, Set *setArr[SET_ARR_SIZE]) {
 
 	String *operand = NULL;
 	char lastChar;
@@ -153,7 +106,7 @@ RESULT_TYPE handleUserInput(String *userCmnd, set *setArr[SET_ARR_SIZE]) {
  * and send it to be handled by its relevant function
  */
 RESULT_TYPE sendTofunction(char *operand, String *arguments,
-		set *setArr[SET_ARR_SIZE]) {
+		Set *setArr[SET_ARR_SIZE]) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -211,10 +164,10 @@ RESULT_TYPE handleStop(char *operand, String *arguments) {
 /*
  * this method handles the user cmnd for  read_set
  */
-RESULT_TYPE handleReadSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleReadSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
 	RESULT_TYPE resType;
-	set *currSetsArr[1];
+	Set *currSetsArr[1];
 	int size = 0;
 	int **intArrPtr;
 	int *intArr = NULL;
@@ -243,10 +196,10 @@ RESULT_TYPE handleReadSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
 /*
  * this method handles the user cmnd for  print_set
  */
-RESULT_TYPE handlePrintSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handlePrintSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
 	RESULT_TYPE resType;
-	set *currSetsArr[1];
+	Set *currSetsArr[1];
 	String *setStr = NULL;
 	String *extraneousText;
 
@@ -274,9 +227,9 @@ RESULT_TYPE handlePrintSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
 /*
  * this method handles the user cmnd for  UNION_SET
  */
-RESULT_TYPE handleUnionSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleUnionSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
-	set *currSetsArr[3];
+	Set *currSetsArr[3];
 
 	RESULT_TYPE resType;
 	resType = getSetsFromStringArgs(arguments, setArr, currSetsArr, 3, 1);
@@ -294,9 +247,9 @@ RESULT_TYPE handleUnionSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
 /*
  * this method handles the user cmnd for  symdiff_set
  */
-RESULT_TYPE handleSymdiffSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleSymdiffSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
-	set *currSetsArr[3];
+	Set *currSetsArr[3];
 
 	RESULT_TYPE resType;
 	resType = getSetsFromStringArgs(arguments, setArr, currSetsArr, 3, 1);
@@ -314,9 +267,9 @@ RESULT_TYPE handleSymdiffSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
 /*
  * this method handles the user cmnd for  sub_set
  */
-RESULT_TYPE handleSubset(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleSubset(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
-	set *currSetsArr[3];
+	Set *currSetsArr[3];
 
 	RESULT_TYPE resType;
 	resType = getSetsFromStringArgs(arguments, setArr, currSetsArr, 3, 1);
@@ -334,9 +287,9 @@ RESULT_TYPE handleSubset(String *arguments, set *setArr[SET_ARR_SIZE]) {
 /*
  * this method handles the user cmnd for  intersect_set
  */
-RESULT_TYPE handleIntersectSet(String *arguments, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE handleIntersectSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 
-	set *currSetsArr[3];
+	Set *currSetsArr[3];
 
 	RESULT_TYPE resType;
 	resType = getSetsFromStringArgs(arguments, setArr, currSetsArr, 3, 1);
@@ -486,8 +439,8 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
  * 'currSetsArrSize' = size of currSetsArr and the number of sets to pop from 'arguments'
  * 'checkExtraneousText' = a flag to check if there is ExtraneousText after popping all the requested sets
  */
-RESULT_TYPE getSetsFromStringArgs(String *arguments, set *setArr[SET_ARR_SIZE],
-		set *currSetsArr[], int currSetsArrSize, int checkExtraneousText) {
+RESULT_TYPE getSetsFromStringArgs(String *arguments, Set *setArr[SET_ARR_SIZE],
+		Set *currSetsArr[], int currSetsArrSize, int checkExtraneousText) {
 	int i = 0;
 	RESULT_TYPE resType;
 	String *setName = createEmptyString();
@@ -634,7 +587,7 @@ RESULT_TYPE popArgument(String *arguments, String *dest) {
  * UNDEFINED_SET_NAME if a set with 'setName' does not exist
  * the possible set names are SETA ,SETB ,SETC ,SETD ,SETE ,SETF
  */
-RESULT_TYPE getSetFromName(set **dest, char *setName, set *setArr[SET_ARR_SIZE]) {
+RESULT_TYPE getSetFromName(Set **dest, char *setName, Set *setArr[SET_ARR_SIZE]) {
 
 	int setSuffix;
 	if (strlen(setName) != 4) {

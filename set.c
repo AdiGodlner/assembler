@@ -5,18 +5,21 @@
 #include "set.h"
 #include "String.h"
 
-set* createNewSet() {
+Set* createNewSet() {
 
-	set *newSet;
-	newSet = (set*) malloc(sizeof(set));
+	Set *newSet;
+	newSet = (Set*) malloc(sizeof(Set));
 	clearSet(newSet);
 
 	return newSet;
 
 }
 
-void insertToSet(set *s, int num) {
+void insertToSet(Set *s, int num) {
 
+	if (num < 0 ) {
+		return ;
+	}
 	int location = num / 8;
 	unsigned int bit = 1 << (num % 8);
 	unsigned int byte = s->bits[location];
@@ -25,7 +28,7 @@ void insertToSet(set *s, int num) {
 
 }
 
-void read_set(set **s, int intArr[], int size) {
+void read_set(Set **s, int intArr[], int size) {
 
 	int i = 0;
 
@@ -43,16 +46,30 @@ void read_set(set **s, int intArr[], int size) {
 
 }
 
-//void printSetBinary(set * s){
-//
-//	int i = 0;
-//	for (i= 0; i < s->bits ; ++var) {
-//
-//	}
-//
-//}
+String * setToBinary(Set * s) {
 
-String* print_set(set *s) {
+	int i = 0, j = 0;
+	char currChar;
+	char * bits;
+	String * binStr = createEmptyString();
+
+	for (i = 0; i < 2; ++i) {
+		bits = s->bits;
+		currChar = bits[i];
+
+		for (j = 0; j < 8; ++j) {
+
+			appendCharToString(binStr, (currChar & (1 << j)) ? '1' : '0');
+
+		}
+	}
+
+	appendCharToString(binStr, '\n');
+
+	return binStr;
+}
+
+String * print_set(Set *s) {
 
 	int i, j, original = 0, count = 0;
 	unsigned int byte, bit;
@@ -102,7 +119,7 @@ String* print_set(set *s) {
 
 }
 
-void union_set(set *s1, set *s2, set *s3) {
+void union_set(Set *s1, Set *s2, Set *s3) {
 
 	int i = 0;
 
@@ -114,7 +131,7 @@ void union_set(set *s1, set *s2, set *s3) {
 
 }
 
-void intersect_set(set *s1, set *s2, set *s3) {
+void intersect_set(Set *s1, Set *s2, Set *s3) {
 
 	int i = 0;
 
@@ -126,7 +143,7 @@ void intersect_set(set *s1, set *s2, set *s3) {
 
 }
 
-void sub_set(set *s1, set *s2, set *s3) {
+void sub_set(Set *s1, Set *s2, Set *s3) {
 
 	int i = 0;
 
@@ -138,7 +155,7 @@ void sub_set(set *s1, set *s2, set *s3) {
 
 }
 
-void symdiff_set(set *s1, set *s2, set *s3) {
+void symdiff_set(Set *s1, Set *s2, Set *s3) {
 
 	int i = 0;
 
@@ -150,13 +167,13 @@ void symdiff_set(set *s1, set *s2, set *s3) {
 
 }
 
-void clearSet(set *s1) {
+void clearSet(Set *s1) {
 
 	memset(s1->bits, 0, sizeof(s1->bits));
 
 }
 
-int getLength(set *s) {
+int getLength(Set *s) {
 
 	return sizeof((s)->bits) / sizeof(char);
 }

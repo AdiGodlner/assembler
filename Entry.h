@@ -13,7 +13,7 @@ typedef struct {
 
 	int hash;
 	String * key;
-	String * value;
+	void * value;
 
 } Entry;
 
@@ -21,7 +21,7 @@ typedef struct {
 /*
  *
  */
-Entry* createEntry(int hash, String *key, String *value);
+Entry* createEntry(int hash, String *key, void *value);
 /*
  *
  */

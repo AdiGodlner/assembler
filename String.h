@@ -16,6 +16,10 @@ typedef struct {
 } String;
 
 /*
+ *
+ */
+String * stringNCopy( char * src, int count);
+/*
  * TODO add description
  */
 int compareString(String * str1 , String * str2);

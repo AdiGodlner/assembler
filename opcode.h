@@ -4,7 +4,7 @@
  *  Created on: 9 Feb 2023
  *      Author: Adi
  */
-
+#include "set.h"
 #ifndef OPCODE_H_
 #define OPCODE_H_
 
@@ -12,20 +12,23 @@ typedef struct {
 
 	String * name;
 	int code;
-	set * s;
+	Set * binaryWord;
 	int numOfParameters;
-	set srcAddressing;
-	set destAddressing;
+	Set * srcAddressing;
+	Set * destAddressing;
 
 
-} opcode;
+} Opcode;
 
 /*
  *
  */
-opcode * createOpcode(String * name, int code,int numOfParameters );
-
-
+Opcode* createOpcode(char *name, int code, int numOfParameters,
+		char *srcAddressingStr, char *destAddressingStr);
+/*
+ *
+ */
+void populateAddressingSet(Set ** addressingPtr, char *addressingStr);
 
 
 

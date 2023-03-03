@@ -41,12 +41,16 @@ void resizeTable(HashTable *table);
 /*
  *
  */
-String* getValueByKey(HashTable *table, String *key);
+void* getValueByKeyString(HashTable *table, String *key);
+/*
+ *
+ */
+void* getValueByKey(HashTable *table, char *key);
 
 /*
  *
  */
-void insertToTable(HashTable *table, String *key, String *data);
+void insertToTable(HashTable *table, char *key, void *data);
 
 /*
  *
