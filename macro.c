@@ -5,13 +5,13 @@
  *
  */
 
-#include  "HashTable.h"
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "macro.h"
-
+#include "HashTable.h"
 
 void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
@@ -23,29 +23,38 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 	if(getValueByKeyString(table, macroName) != NULL){
 
 		printf("error macro with %s is already defined", macroName->value);
-		//TODO exit?
+		EXIT_FAILURE;
 
 	}
 	deleteString(nameWarp);
+	EXIT_SUCCESS;
 
 
-//		//TODO: check all chars after end of macro name
-//		//TODO: exit after this error or stop file processing?
+//*		//TODO: check all chars after end of macro name
+//*		//TODO: exit after this error or stop file processing?
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
 
-		//TODO check if macro name is not an illegal name like "mov"
+//*		//TODO check if macro name is not an illegal name like "mov"
+		checkmcrName("LOOP");
+
 
 		/*Find the end of the macro definition*/
 		char *macroEnd = strstr(line, "endmcr");
 		if (macroEnd) {
 
-//				//TODO: check all chars after end of macro
-//				//TODO: exit after this error or stop file processing?
+			if(!isspace(macroEnd+1)){
+				//TODO: check all chars after end of macro
+				/*Illegal parametrs after end of of macro*/
+				printf("ERROR: Illegal parametrs after end of macro.");
+				EXIT_FAILURE;
+			}
+
+//*			//TODO: exit after this error or stop file processing?
 			insertToTable(table, macroName->value, macroBody);
 			deleteString(macroName);
 
-			return;
+			EXIT_SUCCESS;
 
 		} else {
 			appendToString(macroBody, line);
@@ -58,7 +67,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 /*
  * opens src copies macros to macro table
  * and unroll them to am file
- * TODO add tabs to format lables
+ ** TODO add tabs to format lables
  */
 void macroParse(char *srcFile) {
 
@@ -118,8 +127,9 @@ void macroParse(char *srcFile) {
 	fclose(amFile);
 	deleteString(destFile);
 	deleteString(lineString);
-	printTable(table);//TODO delete print table
+	printTable(table);//*TODO delete print table-makes an error is deleteTable is used
 	printf("macro parsed successfully");
+
 }
 
 String* filenameChange(char *fileName, char *suffix) {
@@ -131,7 +141,7 @@ String* filenameChange(char *fileName, char *suffix) {
 	dotPos = strrchr(fileName, '.');
 	if (!dotPos) {
 		/*Wrong filename input file name does not contain a legal suffix*/
-		//TODO: check if dotpos = allowed suffix ".am" ".as" "/foo"
+		//*TODO: check if dotpos = allowed suffix ".am" ".as" "/foo"
 		printf("Error: Illegal file name\n");
 		return NULL;
 	}
@@ -146,6 +156,35 @@ String* filenameChange(char *fileName, char *suffix) {
 
 }
 
+void checkmcrName(char *name){
+
+	/*List of commands and label names to check against*/
+    char *names[] = {"move", "cmp", "add", "sub",
+    		"not","clr","lea","inc","dec","jmp",
+			"bne", "red", "prn", "jsr","rts","stop",
+			"MAIN", "LOOP", "L1", "END",
+    		"STR", "LENGTH", "K"
+    };
+    int i;
+    /*Check if the name matches any command or labels*/
+    for (i=0; i < sizeof(names)/sizeof(names[0]); i++){
+    	if (strcmp(name, names[i]) == 0){
+    	/*Name matches, so it's not a valid  macro name*/
+    	printf("Invalid macro name %s, It matches a command or lable name.\n", name);
+
+    	EXIT_FAILURE;
+        }
+    }
+       /*Name does'nt match any of the command or lable names*/
+       printf("Macro name %s is valid.\n", name);
+       EXIT_SUCCESS;
+}
+
+
+
+
+
+/*Print if an error uccured with opening file */
 void printFileError(char *fileName) {
 
 	fprintf(stderr, "\n************************************\n");
