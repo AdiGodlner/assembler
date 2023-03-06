@@ -5,7 +5,6 @@
  *
  */
 
-
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -13,48 +12,50 @@
 #include "macro.h"
 #include "HashTable.h"
 
+//TODO change to int and return corect value depending of what we want to do
+
 void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 	String *macroBody = createNewString("");
 	String *macroName;
-	String *nameWarp = createNewString(line + 4);
+	String *nameWarp = createNewString(line);
 	macroName = popWord(nameWarp);
 
-	if(getValueByKeyString(table, macroName) != NULL){
+	if (getValueByKeyString(table, macroName) != NULL) {
 
 		printf("error macro with %s is already defined", macroName->value);
-		EXIT_FAILURE;
+		return;
 
 	}
 	deleteString(nameWarp);
-	EXIT_SUCCESS;
 
-
-//*		//TODO: check all chars after end of macro name
-//*		//TODO: exit after this error or stop file processing?
+	if (!ismcrNamevalid(macroName->value)) {
+		printf("Invalid macro name %s, It matches a command or lable name.\n",
+				macroName->value);
+	}
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
 
-//*		//TODO check if macro name is not an illegal name like "mov"
-		checkmcrName("LOOP");
-
+		int i;
 
 		/*Find the end of the macro definition*/
 		char *macroEnd = strstr(line, "endmcr");
 		if (macroEnd) {
+			for (i = 6; i < strlen(macroEnd); i++) {
 
-			if(!isspace(macroEnd+1)){
-				//TODO: check all chars after end of macro
-				/*Illegal parametrs after end of of macro*/
-				printf("ERROR: Illegal parametrs after end of macro.");
-				EXIT_FAILURE;
+				if (!isspace(macroEnd[i])) {
+
+					printf("\n ERROR: Illegal parametrs after end of macro.\n");
+					return;
+				}
+
 			}
 
-//*			//TODO: exit after this error or stop file processing?
+
 			insertToTable(table, macroName->value, macroBody);
 			deleteString(macroName);
 
-			EXIT_SUCCESS;
+			return;
 
 		} else {
 			appendToString(macroBody, line);
@@ -64,11 +65,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 }
 
-/*
- * opens src copies macros to macro table
- * and unroll them to am file
- ** TODO add tabs to format lables
- */
+
 void macroParse(char *srcFile) {
 
 	HashTable *table = createDefualtHashTable();
@@ -91,44 +88,53 @@ void macroParse(char *srcFile) {
 
 	}
 
-	/*Read input line by line till we see a macro, and copy the scr file into the dest file without the macros we found*/
+	/* Read input line by line till we see a macro,
+	 * and copy the scr file into the dest file without the macro name wrap we found,
+	 *  only macro body will be passed to .am file*/
 	char line[MAX_LINE_LEN];
 	String *lineString = createEmptyString();
 	String *firstWord;
-	void * macroBody;
+
+	void *macroBody;
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
+		if(isblankLine(line)){
+			continue;
+		}
+		textCorrecter(line);
 
-		if (strncmp(line, "mcr ", 4) == 0) {
+
+		setStringValue(lineString, line);
+		firstWord = popWord(lineString);
+
+		if (strncmp(firstWord->value, "mcr", 3) == 0) {
 			readMacro(asFile, table, line);
 
-		}
-		else {
+		} else {
 
-			setStringValue(lineString, line);
-			firstWord = popWord(lineString);
-			printf("|%s|", firstWord->value);
 			macroBody = getValueByKeyString(table, firstWord);
 
-			if (macroBody != NULL ) {
+			if (macroBody != NULL) {
 
-				fputs(((String*)macroBody)->value, amFile);
-				deleteString(firstWord);
+				fputs(((String*) macroBody)->value, amFile);
 
-			}else{
+			} else {
 				fputs(line, amFile);
 			}
 
-
 		}
+//
+		deleteString(firstWord);
 	}
+
+	printf("\nmacro where parsed successfully!\n");
+
 	/*Close input and output files*/
 	fclose(asFile);
 	fclose(amFile);
 	deleteString(destFile);
 	deleteString(lineString);
-	printTable(table);//*TODO delete print table-makes an error is deleteTable is used
-	printf("macro parsed successfully");
+	printTable(table); //*TODO delete print table-makes an error is deleteTable is used
 
 }
 
@@ -155,33 +161,113 @@ String* filenameChange(char *fileName, char *suffix) {
 	return newFileName;
 
 }
-
-void checkmcrName(char *name){
+int ismcrNamevalid(char *name) {
 
 	/*List of commands and label names to check against*/
-    char *names[] = {"move", "cmp", "add", "sub",
-    		"not","clr","lea","inc","dec","jmp",
-			"bne", "red", "prn", "jsr","rts","stop",
-			"MAIN", "LOOP", "L1", "END",
-    		"STR", "LENGTH", "K"
-    };
-    int i;
-    /*Check if the name matches any command or labels*/
-    for (i=0; i < sizeof(names)/sizeof(names[0]); i++){
-    	if (strcmp(name, names[i]) == 0){
-    	/*Name matches, so it's not a valid  macro name*/
-    	printf("Invalid macro name %s, It matches a command or lable name.\n", name);
+	char *names[] = { "move", "cmp", "add", "sub", "not", "clr", "lea", "inc",
+			"dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop", ".string",
+			".data", ".extrn", ".entr" };
+	int i;
+	/*Check if the name matches any command or labels*/
+	for (i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
+		if (strcmp(name, names[i]) == 0) {
+			/*Name matches, so it's not a valid  macro name*/
 
-    	EXIT_FAILURE;
-        }
-    }
-       /*Name does'nt match any of the command or lable names*/
-       printf("Macro name %s is valid.\n", name);
-       EXIT_SUCCESS;
+			return 0;
+		}
+	}
+	return 1;
+
 }
 
+/*Check that there aren't any illegal commas, brackets and if there is a blank line removes it same for extra spaces*/
+void textCorrecter(char *line) {
+
+	int i, j, k, len;
+
+	len = strlen(line);
 
 
+
+
+	/*Remove extra whitespace*/
+	for (i = j = 0; i < len; i++) {
+		if (!isspace(line[i])) {
+			line[j] = line[i];
+			j++;
+
+		} else {
+			k = i+1;
+			while(isspace(line[k])){
+				k++;
+			}
+			i = k-1;
+			line[j] = ' ';
+			j++;
+
+
+		}
+	}
+	/* we remove extra whitespace*/
+	line[j] = '\n';
+	j++;
+	line[j] = '\0';
+}
+
+void isbracketLegal(char * line){
+	/*Check for illegal commas and missing brackets*/
+
+	int i, j, k, len;
+	int commaCount = 0, bracketCount = 0;
+
+	len = strlen(line);
+
+	for (i = 0; i < len; i++) {
+
+		if (line[i] == ',') {
+
+			commaCount++;
+			if ((i == 0 || isspace(line[i - 1]))
+					|| (i + 1 < len && isspace(line[i + 1]))) {
+				/*Printing proper error message if an illegal comma is found*/
+				printf("ERROR: Illegal comma position %d\n", i);
+			}
+			/*Checking that both brackets appear*/
+		} else if (line[i] == '(') {
+			bracketCount++;
+
+		} else if (line[i] == ')') {
+			bracketCount--;
+
+		}
+	}
+	if (bracketCount != 0) {
+		/*if one of the brackes is missing or there are too many brackes, we print an proper error message*/
+		printf("ERROR: Missing brackets\n");
+	}
+
+}
+int isblankLine(char *line){
+
+
+	int i;
+	int len = strlen(line);
+
+	/*Removes blank lines*/
+	for(i= 0; i< len; i++){
+		if (isspace(line[i])){
+			if(line[i] =='\n'){
+			return 1;
+			}
+
+		}else{
+			return 0;
+		}
+
+	}
+	return 0;
+
+}
 
 
 /*Print if an error uccured with opening file */
@@ -192,4 +278,3 @@ void printFileError(char *fileName) {
 	fprintf(stderr, "\n************************************\n");
 
 }
-

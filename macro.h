@@ -56,6 +56,18 @@ void printFileError(char *fileName);
  * if a match is found an error message is printed and we EXIT_FAILURE,
  * else we print a succcess message and EXIT_SUCCSESS.
  */
-void checkmcrName(char *name);
+int ismcrNamevalid(char *name);
+
+
+/*
+ * This function resives a text and performs three tasks:
+ * it removes blank lines and extra whitespace,
+ * and ckecks for illegal commas and missing brackets.
+ */
+void textCorrecter(char *line);
+
+/*TODO*/
+int isblankLine( char *line);
+
 
 #endif /* MACRO_H_ */
