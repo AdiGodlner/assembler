@@ -12,32 +12,30 @@
 
 #define MEM_ERR "failed to allocate memory"
 
-
-
-void pushHead(Node * newNode, Node ** listHeadPtr ){
+void pushHead(Node *newNode, Node **listHeadPtr) {
 
 	newNode->next = *listHeadPtr;
 	*listHeadPtr = newNode;
 
 }
 
-void pushTail(Node * newNode, Node ** listHeadPtr ){
+void pushTail(Node *newNode, Node **listHeadPtr) {
 
 	if (*listHeadPtr == NULL) {
 		*listHeadPtr = newNode;
-			return;
+		return;
 	}
 
-	while((*listHeadPtr)->next !=NULL){
+	while ((*listHeadPtr)->next != NULL) {
 		*listHeadPtr = (*listHeadPtr)->next;
 	}
 
 	(*listHeadPtr)->next = newNode;
 
 }
-Node * createNode(void * data,  Node * next){
+Node* createNode(void *data, Node *next) {
 
-	Node * node = malloc(sizeof(Node));
+	Node *node = malloc(sizeof(Node));
 
 	if (node == NULL) {
 		printf(MEM_ERR);
@@ -50,19 +48,21 @@ Node * createNode(void * data,  Node * next){
 	return node;
 
 }
-//TODO if recursively is to much we can do this in a for loop
-void deleteNodeRecursive(Node * node, void (*deleteDataFunc)(void*)){
 
+void deleteList(Node *head, void (*deleteDataFunc)(void*)) {
 
-	if (node != NULL && node->next != NULL) {
-		deleteNodeRecursive((Node*)node->next,deleteDataFunc);
+	Node *nextNode;
+	while (head) {
+
+		nextNode = head->next;
+		deleteNode(head, deleteDataFunc);
+		head = nextNode;
+
 	}
 
-	deleteNode(node,deleteDataFunc);
 }
 
-
-void deleteNode(Node * node, void (*deleteDataFunc)(void*)){
+void deleteNode(Node *node, void (*deleteDataFunc)(void*)) {
 
 	deleteDataFunc(node->data);
 	free(node);

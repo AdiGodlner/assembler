@@ -33,11 +33,11 @@ void pushTail(Node * newNode, Node ** listHeadPtr );
  */
 
 Node * createNode(void * data, Node * next);
+
 /*
  *
  */
-void deleteNodeRecursive(Node * node, void (*deleteDataFunc)(void*));
-
+void deleteList(Node * head,void (*deleteDataFunc)(void*));
 /*
  *
  */

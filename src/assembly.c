@@ -11,6 +11,7 @@
 #include "macro.h"
 #include "Result.h"
 #include "Label.h"
+#include "Utils.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -23,34 +24,38 @@
 //TODO change char *srcFile to char **srcFiles
 void assemble(char *srcFile) {
 
+	//src file is .am file
+
 	RESULT_TYPE resType;
 	HashTable *symbolTable = createDefualtHashTable();
 	Node *instructionBinarysList = NULL;
 	Node *dataBinarysList = NULL;
-	resType = firstPassAssembly(srcFile, symbolTable, instructionBinarysList,
-			dataBinarysList);
+	Node *entryList = NULL;//TODO add this to fisrtPassFIleopen and all functions down the line
 
+	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysList,
+			dataBinarysList,entryList);
+
+	//TODO loop over entry list and write labels found in symbolTable to entry file
+	//TODO check entry and extern dont overlap
 	if (resType) {
+		//first pass failed
 //		return resType; // TODO handle error ?? do not run secoundPass
+	}else{
+//		first pass sucsses :)
 	}
 //TODO call secound pass
 
 	/* free heap meomory */
-	deleteNodeRecursive(instructionBinarysList, deleteSet);
-	deleteNodeRecursive(dataBinarysList, deleteSet);
+	deleteList(instructionBinarysList, deleteSet);
+	deleteList(dataBinarysList, deleteSet);
 	deleteTable(symbolTable, deleteString);
 
 }
 
-RESULT_TYPE firstPassAssembly(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList) {
+RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
+		Node *instructionBinarysList, Node *dataBinarysList,Node *entryList) {
 
-	int IC = 0, DC = 0, lineNumber = 0;
 	RESULT_TYPE resType = SUCCESS;
-
-	char line[MAX_LINE_LEN];
-	String *lineString = createEmptyString();
-	String *firstWord;
 
 	FILE *amFile = fopen(srcFile, "r");
 
@@ -59,46 +64,75 @@ RESULT_TYPE firstPassAssembly(char *srcFile, HashTable *symbolTable,
 		return FILE_NOT_FOUND;
 	}
 
-	while (fgets(line, MAX_LINE_LEN, amFile) != NULL) {
-
-		//line number is supposed to e used for error printing
-		lineNumber++;
-
-		setStringValue(lineString, line);
-		firstWord = popWord(lineString);
-
-		if (isLabel(firstWord)) {
-
-			resType = handleLabel(firstWord->value, symbolTable, lineString,
-					instructionBinarysList, dataBinarysList, &IC, &DC);
-		} else {
-
-			resType = handleNonLabel(firstWord->value, lineString,
-					instructionBinarysList, dataBinarysList, &IC, &DC);
-		}
-
-		deleteString(firstWord);
-
-		if (resType) {
-			break;
-		}
-
-	}
+	//firstPassAssembler actualy doing the passing
+	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysList, dataBinarysList,entryList);
 
 	fclose(amFile);
-	deleteString(lineString);
 
 //	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data
 	return resType;
 
 }
 
+RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
+		Node *instructionBinarysList, Node *dataBinarysList, Node* entryList) {
+
+	RESULT_TYPE resType = SUCCESS;
+	int lineNumber = 0;
+	char line[MAX_LINE_LEN];
+	String *lineString = createEmptyString();
+
+	while (fgets(line, MAX_LINE_LEN, amFile) != NULL) {
+
+		//line number is supposed to be used for error printing
+		lineNumber++;
+
+		setStringValue(lineString, line);
+		resType = lineFirstPass(lineString, symbolTable, instructionBinarysList,
+				dataBinarysList, entryList);
+
+		if (resType) {
+			//TODO print ERRORS with line number perror("");
+			break;
+		}
+
+	}
+
+	deleteString(lineString);
+
+	return resType;
+}
+
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
+		Node *instructionBinarysList, Node *dataBinarysList, Node * entryList) {
+
+	RESULT_TYPE resType = SUCCESS;
+	int IC = 0, DC = 0;
+	String *firstWord = popWord(lineString);
+
+	if (isLabel(firstWord)) {
+
+		resType = handleLabel(firstWord->value, symbolTable, lineString,
+				instructionBinarysList, dataBinarysList,entryList, &IC, &DC);
+	} else {
+
+		resType = handleNonLabel(firstWord->value, lineString,
+				instructionBinarysList, dataBinarysList,entryList, &IC, &DC);
+	}
+
+	deleteString(firstWord);
+
+	return resType;
+
+}
+
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList, int *ICPtr,
+		Node *instructionBinarysList, Node *dataBinarysList,Node * entryList, int *ICPtr,
 		int *DCPtr) {
 
-	int currDCAddres, currICAddres;
 	RESULT_TYPE resType = SUCCESS;
+
+	int currDCAddres, currICAddres;
 	String *firstWord;
 
 	//TODO check label is legal ( length < max length && starts with a letter )
@@ -109,10 +143,12 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 	currDCAddres = *DCPtr;
 	currICAddres = *ICPtr;
+
 	firstWord = popWord(line);
 
+	//TODO if handleNonLabel line is extern skip
 	resType = handleNonLabel(firstWord->value, line, instructionBinarysList,
-			dataBinarysList, ICPtr, DCPtr);
+			dataBinarysList,entryList, ICPtr, DCPtr);
 
 	if (!resType) {
 		//TODO check if there are other types of labels
@@ -125,28 +161,42 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 	}
 	deleteString(firstWord);
+
 	return resType;
 
 }
 
 RESULT_TYPE handleNonLabel(char *word, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList, int *ICPtr,
+		Node *instructionBinarysList, Node *dataBinarysList,Node * entryList, int *ICPtr,
 		int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	if (isData(word)) {
 
-		resType = handleData(line, dataBinarysList, DCPtr);
+//		resType = handleData(line, dataBinarysList, DCPtr);
 
 	} else if (isStringData(word)) {
 
 		//		TODO .string
+		resType = handleString(line, dataBinarysList, DCPtr);
+
+	} else if (isExtern(word)) {
+		resType = handleExtern(line, dataBinarysList, DCPtr);
+
+	} else if (isEntry(word)) {
+		resType = handleEntry(line, dataBinarysList, DCPtr);
+
+	}else{
+
+		//TODO function that turns opcode to binary
+		//TODO handle opcodes read string line and translate to opcode
 
 	}
 
 	return resType;
 }
+
 
 RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
@@ -183,6 +233,22 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
 }
 
+RESULT_TYPE handleString(String *line, Node *dataBinarysList, int *DCPtr) {
+
+	return SUCCESS;
+}
+RESULT_TYPE handleExtern(String *line, Node *dataBinarysList, int *DCPtr) {
+	//TODO open extern file with w mode
+	// A,R,E = 01
+	// cant have 2 extens with the same name
+	return SUCCESS;
+}
+RESULT_TYPE handleEntry(String *line, Node *dataBinarysList, int *DCPtr) {
+	//TODO open entry file with w mode
+
+	return SUCCESS;
+}
+
 void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 		int addres) {
 
@@ -190,7 +256,6 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 	label = createLabel(labelName);
 	label->type = type;
 	label->address = addres;
-	//done handling data insert label to table
 	insertToTable(labelsTable, labelName, label);
 
 }
@@ -211,7 +276,6 @@ int isEntry(char *str) {
 }
 
 int isLabel(String *str) {
-
 	return charAt(str, str->size - 1) == ':';
 
 }
@@ -220,190 +284,3 @@ void secoundPassAssembly() {
 
 }
 
-RESULT_TYPE popArgument(String *arguments, String *dest) {
-
-	int argStart = 0, argEnd = 0, nonBlankCharIndex = 0, size = 0;
-	char currChar = EOF;
-	int startSubStr, lenSubStr, i = 0;
-	String *temp;
-	char testChar;
-
-	/*skip the leading blank spaces before the argument */
-	argStart = findNextNonBlankCharLocation(arguments, 0);
-	if (argStart == -1) {
-		return NO_ARGUMENT_FOUND;
-	}
-
-	setStringValue(dest, "");
-	size = arguments->size;
-
-	/* copy argument */
-	for (argEnd = argStart; argEnd < size; ++argEnd) {
-
-		currChar = arguments->value[argEnd];
-
-		if (currChar == ',' || currChar == ' ' || currChar == '\t'
-				|| currChar == '\n') {
-
-			break;
-		} else {
-			appendCharToString(dest, currChar);
-
-		}
-
-	}
-	if (argStart == argEnd) {
-		/*
-		 if argStart  == argEnd then there is nothing but blank chars
-		 between the argument start and another ','
-		 that can mean either an ILLEAGAL_COMMA or a CONSECUTIVE_COMMAS
-		 ERROR we return an UNEXPECTED_COMMA ERROR and let the caller function
-		 Differentiate between the possible ERROR types because it has all the data to
-		 differentiate between the different possible RESULT_TYPES
-		 in the command given by the user
-		 or it is the end of the string which means that there was NO_ARGUMENT_FOUND
-		 */
-		if (currChar == ',') {
-			return UNEXPECTED_COMMA;
-
-		} else {
-			return NO_ARGUMENT_FOUND;
-		}
-
-	}
-
-	nonBlankCharIndex = findNextNonBlankCharLocation(arguments, argEnd);
-
-	testChar = arguments->value[nonBlankCharIndex];
-	if (testChar != ',' && testChar != '\n') {
-
-		/* we found non blank chars in the end of the argument that is not a ','
-		 * meaning
-		 * there is a missing comma or EXTRANEOUS_TEXT or
-		 */
-		return MISSING_COMMA;
-	}
-
-	/* after the argument there are only blank chars and a comma *
-	 * pop the argument from the input string; */
-	startSubStr = nonBlankCharIndex + 1;
-	lenSubStr = size - (nonBlankCharIndex + 1);
-	temp = createEmptyString();
-
-	for (i = 0; i < lenSubStr; ++i) {
-		appendCharToString(temp, arguments->value[startSubStr + i]);
-	}
-
-	appendCharToString(temp, arguments->value[startSubStr + i]);
-	setStringValue(arguments, temp->value);
-	deleteString(temp);
-
-	return SUCCESS;
-
-}
-
-//TODO change description in H file
-RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
-		int *size) {
-
-	RESULT_TYPE resType;
-	int tempSize = 0, num = 0;
-	int *numPtr = &num;
-	int *intArr = NULL;
-	int *temp = NULL;
-
-	String *numStr = createEmptyString();
-
-	while (1) {
-
-		resType = popArgument(arguments, numStr);
-
-		if (resType) {
-			if (resType == NO_ARGUMENT_FOUND) {
-				resType = SUCCESS;
-			}
-			break;
-
-		}
-
-		resType = getIntFromName(numStr->value, numPtr);
-
-		if (resType) {
-//			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR
-			printString(numStr);
-			//TODO handle this case ?
-			break;
-
-		}
-
-		tempSize++;
-		temp = realloc(intArr, sizeof(int) * tempSize);
-
-		if (temp == NULL) {
-			/*  realloc failed to  allocate memory successfully */
-			//TODO write memory allocation function that exists on failed meomer allocation
-			resType = MEMMORY_ALLOCATION_FAILURE;
-			break;
-		}
-
-		intArr = temp;
-		intArr[tempSize - 1] = num;
-
-	}
-
-	deleteString(numStr);
-	if (resType) {
-		if (temp != NULL) {
-			// TODO is this if even needed can't I just free  NULL;
-			/* in case there is an error we free the space we allocated on the heap */
-			free(temp);
-		}
-		return resType;
-	}
-
-	*intArrPtr = intArr;
-	*size = tempSize;
-
-	return SUCCESS;
-
-}
-
-RESULT_TYPE getIntFromName(char *str, int *numDest) {
-
-	int i = 0, digit = 0, temp = 0, isNegative = 0, decimalPlace = 1;
-	int j = 0;
-
-	char currChar = str[0];
-
-	if (currChar == '-') {
-		if (strlen(str) == 1) {
-			return VALUE_NOT_AN_INTEGER;
-		}
-		isNegative = 1;
-		i++;
-	} else if (currChar == '+') {
-		if (strlen(str) == 1) {
-			return VALUE_NOT_AN_INTEGER;
-		}
-		i++;
-	}
-
-	for (j = strlen(str) - 1; j >= i; j--) {
-
-		currChar = str[j];
-		if (!isdigit(currChar)) {
-			return VALUE_NOT_AN_INTEGER;
-		}
-
-		digit = (currChar - '0');
-		temp += decimalPlace * digit;
-		decimalPlace *= 10;
-
-	}
-
-	temp *= isNegative ? -1 : 1;
-	*numDest = temp;
-
-	return SUCCESS;
-
-}
