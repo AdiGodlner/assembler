@@ -11,19 +11,30 @@
 #include <stdlib.h>
 #include "String.h"
 #include "HashTable.h"
+#include "assembly.h"
 #include "Set.h"
 #include "opcode.h"
 #include "macro.h"
 
 void initOpcode(HashTable *table);
+void preAssembly(int argc, char **argv);
 
 int main(int argc, char **argv) {
 
-	int i = 0;
-	char *fileName ;
-	char *amSuffix = ".am";
-	String* newFileName;
+//	HashTable * opcodeTable = createDefualtHashTable();
+//	initOpcode(opcodeTable);
+//	preAssembly(argc, argv);
+	assemble("C:/Users/Adi/Desktop/foo.am");
+	printf("\nend :-)");
 
+	return EXIT_SUCCESS;
+
+}
+
+void preAssembly(int argc, char **argv) {
+
+	int i = 0;
+	char *fileName;
 
 	if (argc > 1) {
 		for (i = 1; i < argc; i++) {
@@ -33,9 +44,6 @@ int main(int argc, char **argv) {
 
 		}
 	}
-
-	printf("end :-)");
-	return EXIT_SUCCESS;
 
 }
 

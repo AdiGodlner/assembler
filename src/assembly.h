@@ -1,0 +1,110 @@
+/*
+ * assembly.h
+ *
+ *  Created on: 3 Mar 2023
+ *      Author: Adi
+ */
+
+#ifndef ASSEMBLY_H_
+#define ASSEMBLY_H_
+
+#include "Label.h"
+#include  "Result.h"
+#include  "HashTable.h"
+/*
+ *
+ */
+void assemble(char *srcFile);
+
+/*
+ *
+ */
+
+RESULT_TYPE firstPassAssembly(char *srcFile, HashTable *symbolTable,
+		Node *instructionBinarysList, Node *dataBinarysList);
+
+/*
+ *
+ */
+void secoundPassAssembly();
+
+/*
+ * this method pops the next argument in a the given String 'arguments' and stores
+ * it in the String 'dest';
+ *
+ * this method returns 'SUCCESS' RESULT_TYPE only if it found a valid argument
+ * a valid argument is a string of non blank chars that can have a prefix of blank chars
+ * and and a suffix of blank chars that is terminated by a ',' or '\n'
+ * otherwise this method returns a MISSING_COMMA RESULT_TYPE if there are two strings of non blank chars
+ * separated  by a a blank char
+ * or an UNEXPECTED_COMMA if the first non blank char of the string is a ','
+ * this method considers a blank char to be either ' ' or '\t'
+ */
+RESULT_TYPE popArgument(String *arguments, String *dest);
+
+/*
+ * this method pops all arguments from String arguments checks if they are integers
+ * and populates an integerArr pointed to by 'intArrPtr' with their integer representation
+ * this method returns LIST_NOT_TERMINATED_CORRECTLY if the last argument is not -1
+ * VALUE_OUT_OF_RANGE if the int represented in the argument is not between 0 and 127 or -1 the terminator integer
+ * EXTRANEOUS_TEXT if there is extraneous text after the -1 argument
+ * CONSECUTIVE_COMMAS if there are consecutive commas
+ * MISSING_COMMA if there is a missing comma
+ */
+RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
+		int *size);
+/*
+ * this method takes an int represented in the string 'str' and puts it in 'numDest'
+ * the method returns SUCCESS if the it was able to convert the string to an int
+ * and VALUE_NOT_AN_INTEGER if it couldn't
+ */
+RESULT_TYPE getIntFromName(char *str, int *numDest);
+/*
+ *
+ */
+int isLabel(String *str);
+/*
+ *
+ */
+RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
+		Node *instructionBinarysList, Node *dataBinarysList, int *ICPtr,
+		int *DCPtr);
+
+/*
+ *
+ */
+RESULT_TYPE handleNonLabel(char *word, String *line,
+		Node *instructionBinarysList, Node *dataBinarysList, int *ICPtr,
+		int *DCPtr);
+
+/*
+ *
+ */
+RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr);
+
+/*
+ *
+ */
+void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
+		int addres);
+/*
+ *
+ */
+int isData(char *str);
+
+/*
+ *
+ */
+int isStringData(char *str);
+
+/*
+ *
+ */
+int isExtern(char *str);
+
+/*
+ *
+ */
+int isEntry(char *str);
+
+#endif /* ASSEMBLY_H_ */

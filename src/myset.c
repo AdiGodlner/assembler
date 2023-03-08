@@ -1,7 +1,7 @@
 /*
  ============================================================================
  Name        : HW_22.c
- Author      : 
+ Author      :
  Version     :
  Copyright   : Your copyright notice
  ============================================================================
@@ -15,6 +15,7 @@
 #include "Result.h"
 #include "set.h"
 #include "String.h"
+#include "assembly.h"
 
 #define SET_PREFIX "SET"
 #define SET_ARR_SIZE 6
@@ -38,13 +39,9 @@ RESULT_TYPE handleSubset(String *arguments, Set *setArr[SET_ARR_SIZE]);
 RESULT_TYPE handleSymdiffSet(String *arguments, Set *setArr[SET_ARR_SIZE]);
 RESULT_TYPE handleStop(char *operand, String *arguments);
 
-RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
-		int *size);
 RESULT_TYPE getSetsFromStringArgs(String *arguments, Set *setArr[SET_ARR_SIZE],
 		Set *currSetsArr[], int currSetsArrSize, int checkExtraneousText);
 RESULT_TYPE getSetFromName(Set **dest, char *setName, Set *setArr[SET_ARR_SIZE]);
-RESULT_TYPE popArgument(String *arguments, String *dest);
-RESULT_TYPE getIntFromName(char *str, int *numDest);
 
 void getLine(String *str);
 void printResultMsg(RESULT_TYPE resType);
@@ -306,129 +303,6 @@ RESULT_TYPE handleIntersectSet(String *arguments, Set *setArr[SET_ARR_SIZE]) {
 }
 
 /*
- * this method pops all arguments from String arguments checks if they are integers
- * and populates an integerArr pointed to by 'intArrPtr' with their integer representation
- * this method returns LIST_NOT_TERMINATED_CORRECTLY if the last argument is not -1
- * VALUE_OUT_OF_RANGE if the int represented in the argument is not between 0 and 127 or -1 the terminator integer
- * EXTRANEOUS_TEXT if there is extraneous text after the -1 argument
- * CONSECUTIVE_COMMAS if there are consecutive commas
- * MISSING_COMMA if there is a missing comma
- */
-RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
-		int *size) {
-
-	RESULT_TYPE resType;
-	int tempSize = 0, num = 0;
-	int *numPtr = &num;
-	int *intArr = NULL;
-	int *temp = NULL;
-	String *extraneousText = NULL;
-	String *numStr = createEmptyString();
-
-	while (1) {
-
-		resType = popArgument(arguments, numStr);
-
-		if (resType) {
-			resType =
-					resType == MISSING_PARAMETER ?
-							LIST_NOT_TERMINATED_CORRECTLY : CONSECUTIVE_COMMAS;
-
-			break;
-		}
-
-		resType = getIntFromName(numStr->value, numPtr);
-		if (resType) {
-			printString(numStr);
-			break;
-		} else if (num == -1) {
-
-			extraneousText = popWord(arguments);
-
-			if (extraneousText->size) {
-				resType = EXTRANEOUS_TEXT;
-
-			}
-			deleteString(extraneousText);
-			break;
-
-		} else if (num < 0 || num > 127) {
-
-			resType = VALUE_OUT_OF_RANGE;
-			break;
-		}
-
-		tempSize++;
-		temp = realloc(intArr, sizeof(int) * tempSize);
-
-		if (temp == NULL) {
-			/*  realloc failed to  allocate memory successfully */
-			resType = MEMMORY_ALLOCATION_FAILURE;
-			break;
-		}
-
-		intArr = temp;
-		intArr[tempSize - 1] = num;
-
-	}
-
-	deleteString(numStr);
-	if (resType) {
-		if (temp != NULL) {
-			/* in case there is an error we free the space we allocated on the heap */
-			free(temp);
-		}
-		return resType;
-	}
-
-	*intArrPtr = intArr;
-	*size = tempSize;
-
-	return SUCCESS;
-
-}
-/*
- * this method takes an int represented in the string 'str' and puts it in 'numDest'
- * the method returns SUCCESS if the it was able to convert the string to an int
- * and VALUE_NOT_AN_INTEGER if it couldn't
- */
-RESULT_TYPE getIntFromName(char *str, int *numDest) {
-
-	int i = 0, digit = 0, temp = 0, isNegative = 0, decimalPlace = 1;
-	int j = 0;
-
-	char currChar = str[0];
-
-	if (currChar == '-') {
-		if (strlen(str) == 1) {
-			return VALUE_NOT_AN_INTEGER;
-		}
-		isNegative = 1;
-		i++;
-	}
-
-	for (j = strlen(str) - 1; j >= i; j--) {
-
-		currChar = str[j];
-		if (!isdigit(currChar)) {
-			return VALUE_NOT_AN_INTEGER;
-		}
-
-		digit = (currChar - '0');
-
-		temp += decimalPlace * digit;
-		decimalPlace *= 10;
-
-	}
-
-	temp *= isNegative ? -1 : 1;
-	*numDest = temp;
-
-	return SUCCESS;
-
-}
-
-/*
  * this method pops set name arguments from String  'arguments'
  * finds the sets represented by that name in 'setArr' and populates
  *    'currSetsArr' with a pointer to that set
@@ -485,99 +359,7 @@ RESULT_TYPE getSetsFromStringArgs(String *arguments, Set *setArr[SET_ARR_SIZE],
 
 }
 
-/*
- * this method pops the next argument in a the given String 'arguments' and stores
- * it in the String 'dest';
- *
- * this method returns 'SUCCESS' RESULT_TYPE only if it found a valid argument
- * a valid argument is a string of non blank chars that can have a prefix of blank chars
- * and and a suffix of blank chars that is terminated by a ',' or '\n'
- * otherwise this method returns a MISSING_COMMA RESULT_TYPE if there are two strings of non blank chars
- * separated  by a a blank char
- * or an UNEXPECTED_COMMA if the first non blank char of the string is a ','
- * this method considers a blank char to be either ' ' or '\t'
- */
-RESULT_TYPE popArgument(String *arguments, String *dest) {
 
-	int argStart = 0, argEnd = 0, nonBlankCharIndex = 0, size = 0;
-	char currChar = EOF;
-	int startSubStr, lenSubStr, i = 0;
-	String *foo;
-	char testChar;
-
-	/*skip the leading blank spaces before the argument */
-	argStart = findNextNonBlankCharLocation(arguments, 0);
-	if (argStart == -1) {
-		return MISSING_PARAMETER;
-	}
-
-	setStringValue(dest, "");
-	size = arguments->size;
-
-	/* copy argument */
-	for (argEnd = argStart; argEnd < size; ++argEnd) {
-
-		currChar = arguments->value[argEnd];
-
-		if (currChar == ',' || currChar == ' ' || currChar == '\t'
-				|| currChar == '\n') {
-
-			break;
-		} else {
-			appendCharToString(dest, currChar);
-
-		}
-
-	}
-	if (argStart == argEnd) {
-		/*
-		 if argStart  == argEnd then there is nothing but blank chars
-		 between the argument start and another ','
-		 that can mean either an ILLEAGAL_COMMA or a CONSECUTIVE_COMMAS
-		 ERROR we return an UNEXPECTED_COMMA ERROR and let the caller function
-		 Differentiate between the possible ERROR types because it has all the data to
-		 differentiate between the different possible RESULT_TYPES
-		 in the command given by the user
-		 or it is the end of the string which means that there is a MISSING_PARAMETER
-		 */
-		if (currChar == ',') {
-			return UNEXPECTED_COMMA;
-
-		} else {
-			return MISSING_PARAMETER;
-		}
-
-	}
-
-	nonBlankCharIndex = findNextNonBlankCharLocation(arguments, argEnd);
-
-	testChar = arguments->value[nonBlankCharIndex];
-	if (testChar != ',' && testChar != '\n') {
-
-		/* we found non blank chars in the end of the argument that is not a ','
-		 * meaning
-		 * there is a missing comma or EXTRANEOUS_TEXT or
-		 */
-		return MISSING_COMMA;
-	}
-
-	/* after the argument there are only blank chars and a comma *
-	 * pop the argument from the input string; */
-	startSubStr = nonBlankCharIndex + 1;
-	lenSubStr = size - (nonBlankCharIndex + 1);
-	foo = createEmptyString();
-
-	for (i = 0; i < lenSubStr; ++i) {
-		appendCharToString(foo, arguments->value[startSubStr + i]);
-	}
-
-	appendCharToString(foo, arguments->value[startSubStr + i]);
-	setStringValue(arguments, foo->value);
-	deleteString(foo);
-
-	return SUCCESS;
-
-}
 
 /*
  * this method finds the set represented by the string 'setName'
