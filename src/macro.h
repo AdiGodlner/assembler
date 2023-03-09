@@ -65,21 +65,6 @@ void textCorrecter(char *line);
 
 
 /*
- * This function ckecks for illegal position or missing brackets.
- */
-int isbracketLegal(char * line);
-
-/*
- * This function ckecks for illegal quotes in the text, and return 1, if is legal.
- */
-int isquoteLegal(char * line);
-
-/*
- * This function ckecks for illegal commas in the text, and return 1, if is legal.
- */
-int isCommaLegal(char *line);
-
-/*
  * This function removes blank lines and extra whitespace from the text.
  * and return 1, if is legal.
  */

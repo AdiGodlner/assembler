@@ -200,3 +200,95 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
 	return SUCCESS;
 
 }
+
+int isbracketLegal(char * line){
+	/*Check for illegal commas and missing brackets*/
+
+	int i, len;
+	int bracketCount = 0;
+
+	len = strlen(line);
+
+	for (i = 0; i < len; i++) {
+
+		if ((line[i] == ')')|| (line[i] == '(')) {
+
+			bracketCount++;
+			if ((i == 0 || isspace(line[i - 1]))
+					|| (i + 1 < len && isspace(line[i + 1]))) {
+				/*Printing proper error message if an illegal comma is found*/
+				printf("ERROR: Illegal bracket position %d\n", i);
+			}
+			/*Checking that both brackets appear*/
+		} else if (line[i] == '(') {
+			bracketCount++;
+
+		} else if (line[i] == ')') {
+			bracketCount--;
+
+		}
+	}
+	if (bracketCount != 0) {
+		/*if one of the brackes is missing or there are too many brackes, we print an proper error message*/
+		printf("ERROR: Missing brackets\n");
+		return 0;
+	}
+	return 1;
+
+}
+
+
+int isquoteLegal(char * line){
+
+	int i = 0;
+	int quoteCount = 0;
+
+
+	while (line[i] != '\0') {
+
+		if (line[i] == '"'){
+			/*if we fint quote we increment the count*/
+			quoteCount++;
+
+		}
+		/*if quote count is even*/
+		else if (quoteCount % 2 == 0) {
+			i++;
+
+		} else{
+			/*if quote count is odd or the character isn't a quote we print an proper error message*/
+			printf("ERROR: Missing quotes\n");
+			return 0;
+		}
+
+	}
+
+	return 1;
+
+
+}
+
+int isCommaLegal(char *line){
+
+	int i, len;
+	int commaCount = 0;
+
+	len = strlen(line);
+
+	for (i = 0; i < len; i++) {
+
+		if (line[i] == ',') {
+
+			commaCount++;
+			if ((i == 0 || isspace(line[i - 1]))
+					|| (i + 1 < len && isspace(line[i + 1]))) {
+				/*Printing proper error message if an illegal comma is found*/
+				printf("ERROR: Illegal comma position %d\n", i);
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+

@@ -38,23 +38,26 @@ RESULT_TYPE assembler(char *srcFile) {
 			dataBinarysList,entryList);
 
 	//TODO loop over entry list and write labels found in symbolTable to entry file
-	//TODO check entry and extern dont overlap
+
 	if (resType) {
 		//first pass failed
-//		return resType; // TODO handle error ?? do not run secoundPass
-		perror("\nERROR:First Pass has failed, can't move to second pass.\n");
+		// TODO handle error ?? do not run secoundPass
+		pritnf("\nERROR:First Pass has failed, can't move to second pass.\n");
 		return FIRST_PASS_FAILURE;
+
 	}else{
-		pritnf("\nFIRST PASS - Was passed successfuly, moving over to second pass.\n");
-		return SUCCESS;
+		pritnf("\nFIRST PASS - Was passed successfully, moving over to second pass.\n");
+
 	}
-//TODO call secound pass
+
 	secoundPassAssembler();
 
-	/* free heap meomory */
+	/* free heap memory */
 	deleteList(instructionBinarysList, deleteSet);
 	deleteList(dataBinarysList, deleteSet);
 	deleteTable(symbolTable, deleteString);
+
+	return SUCCESS;
 
 }
 

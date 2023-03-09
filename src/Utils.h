@@ -42,4 +42,19 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 RESULT_TYPE getIntFromName(char *str, int *numDest);
 
 
+/*
+ * This function ckecks for illegal position or missing brackets.
+ */
+int isbracketLegal(char * line);
+
+/*
+ * This function ckecks for illegal quotes in the text, and return 1, if is legal.
+ */
+int isquoteLegal(char * line);
+
+/*
+ * This function ckecks for illegal commas in the text, and return 1, if is legal.
+ */
+int isCommaLegal(char *line);
+
 #endif /* SRC_UTILS_H_ */
