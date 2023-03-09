@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "Result.h"
+#include "Utils.h"
 #include "set.h"
 #include "String.h"
 #include "assembly.h"

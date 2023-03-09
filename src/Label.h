@@ -9,7 +9,7 @@
 #define LABEL_H_
 
 #include "LinkedList.h"
-#include "Set.h"
+#include "set.h"
 
 typedef enum {
 
@@ -19,10 +19,10 @@ typedef enum {
 
 typedef struct {
 
-	String * name;//TODO remove if not used
+	String * name;/*TODO remove if not used */
 	LABEL_TYPE type;
 	int address;
-	int size;//TODO remove if not used
+	int size;/*TODO remove if not used*/
 
 } Label;
 

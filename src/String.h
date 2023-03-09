@@ -66,7 +66,7 @@ void concatStrings(String *str1, String *str2);
 /*
  * this method frees the spaces allocated to String on the heap
  */
-void deleteString(String *str);
+void deleteString(void *str);
 /*
  *
  * this method sets the Strings 'str' value to the given char array 'charArr'

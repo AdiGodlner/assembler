@@ -64,7 +64,7 @@ Set* duplicateSet(Set * src);
 /*
  *
  */
-void deleteSet(Set *set);
+void deleteSet(void *set);
 
 /*
  * this method inserts one integer to a given set 's'

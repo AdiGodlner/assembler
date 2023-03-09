@@ -12,7 +12,7 @@
 #include "String.h"
 #include "HashTable.h"
 #include "assembly.h"
-#include "Set.h"
+#include "set.h"
 #include "opcode.h"
 #include "macro.h"
 
@@ -21,9 +21,9 @@ void preAssembly(int argc, char **argv);
 
 int main(int argc, char **argv) {
 
-//	HashTable * opcodeTable = createDefualtHashTable();
-//	initOpcode(opcodeTable);
-//	preAssembly(argc, argv);
+/*	HashTable * opcodeTable = createDefualtHashTable();
+	initOpcode(opcodeTable);
+	preAssembly(argc, argv);*/
 	assemble("C:/Users/Adi/Desktop/foo.am");
 	printf("\nend :-)");
 
@@ -49,11 +49,9 @@ void preAssembly(int argc, char **argv) {
 
 void initOpcode(HashTable *table) {
 
-//	char *addres0123 = "0,1,2,3";
 	char *addres013 = "0,1,3";
 	char *addres123 = "1,2,3";
 	char *addres13 = "1,3";
-//	char *addres12 = "1,2";
 	char *addres1 = "1";
 	char *empty = "";
 

@@ -68,7 +68,7 @@ String * stringNCopy( char * src, int count){
 
 char charAt(String * str, int index){
 	if (index > str->size || index < 0) {
-		return NULL;
+		return -1;
 	}
 	return str->value[index];
 }
@@ -98,9 +98,9 @@ void appendCharToString(String *str, char c) {
 
 }
 
-void deleteString(String *str) {
+void deleteString(void *str) {
 	if (str != NULL) {
-		free(str->value);
+		free(((String*)str)->value);
 		free(str);
 
 	}

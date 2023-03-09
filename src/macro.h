@@ -11,7 +11,7 @@
 
 #define MAX_LINE_LEN 82
 #define MAX_MACRO_NAME_LEN 32
-//#define MAX_FILE_NAME 156
+/*#define MAX_FILE_NAME 156*/
 #define MAX_MACROS 1000
 #include "HashTable.h"
 #include <stdio.h>

@@ -93,7 +93,7 @@ RESULT_TYPE popArgument(String *arguments, String *dest) {
 
 }
 
-//TODO change description in H file
+/*TODO change description in H file */
 RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		int *size) {
 
@@ -110,9 +110,11 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		resType = popArgument(arguments, numStr);
 
 		if (resType) {
+
 			if (resType == NO_ARGUMENT_FOUND) {
 				resType = SUCCESS;
 			}
+
 			break;
 
 		}
@@ -120,9 +122,9 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		resType = getIntFromName(numStr->value, numPtr);
 
 		if (resType) {
-//			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR
+/*			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR */
 			printString(numStr);
-			//TODO handle this case ?
+			/*TODO handle this case ?*/
 			break;
 
 		}
@@ -132,7 +134,7 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 
 		if (temp == NULL) {
 			/*  realloc failed to  allocate memory successfully */
-			//TODO write memory allocation function that exists on failed meomer allocation
+			/*TODO write memory allocation function that exists on failed meomer allocation */
 			resType = MEMMORY_ALLOCATION_FAILURE;
 			break;
 		}
@@ -140,15 +142,15 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		intArr = temp;
 		intArr[tempSize - 1] = num;
 
+		deleteString(numStr);
+
 	}
 
-	deleteString(numStr);
 	if (resType) {
-		if (temp != NULL) {
-			// TODO is this if even needed can't I just free  NULL;
-			/* in case there is an error we free the space we allocated on the heap */
-			free(temp);
-		}
+		/* in case there is an error we free the space we allocated on the heap */
+		deleteString(numStr);
+		free(temp);
+
 		return resType;
 	}
 

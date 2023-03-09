@@ -163,7 +163,7 @@ void resizeTable(HashTable *table) {
 			entry = (Entry*) currNode->data;
 			index = getHashIndex(table, entry->hash);
 			nextNode = currNode->next;
-			pushHead(currNode, newBucketArr + index); // does this work?
+			pushHead(currNode, newBucketArr + index);
 			currNode = nextNode;
 
 		}
@@ -183,7 +183,7 @@ void* getValueByKey(HashTable *table, char *key) {
 	return value;
 }
 
-//TODO maybe switch this with getValueByKey
+/*TODO maybe switch this with getValueByKey */
 void* getValueByKeyString(HashTable *table, String *key) {
 
 	int hash, index;

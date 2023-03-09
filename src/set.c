@@ -24,19 +24,21 @@ Set* duplicateSet(Set * src){
 
 }
 
-void deleteSet(Set *set){
+void deleteSet(void *set){
 
 	free(set);
 }
 
 void insertToSet(Set *s, int num) {
 
+	int location ;
+	unsigned int bit , byte;
 	if (num < 0 ) {
 		return ;
 	}
-	int location = num / 8;
-	unsigned int bit = 1 << (num % 8);
-	unsigned int byte = s->bits[location];
+	location = num / 8;
+	bit = 1 << (num % 8);
+	byte = s->bits[location];
 	byte = byte | bit;
 	s->bits[location] = byte;
 
