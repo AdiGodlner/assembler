@@ -11,12 +11,13 @@
 #include "Label.h"
 #include  "Result.h"
 #include  "HashTable.h"
+#include "macro.h"
 #include <stdio.h>
 #include <stdlib.h>
 /*
  *
  */
-void assemble(char *srcFile);
+RESULT_TYPE assembler(char *srcFile);
 
 /*
  *
@@ -38,12 +39,27 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 /*
  *
  */
-void secoundPassAssembly();
+void secoundPassAssembler();
 
 /*
  *
  */
 int isLabel(String *str);
+
+
+
+/*
+ * This function get a lable name as a parameter,
+ * it check if the name allready exists in the Lable table,
+ * if so it printes an relevant error message.
+ * it checkes that the lable name isn't longer than the MAX_LENGTH,
+ *  if else printes an relevant error message.
+ * Last check this function does it's checkint if the lable name starts with a letter,
+ * if else printes an relevant error message.
+ *
+ */
+
+
 /*
  *
  */
@@ -77,8 +93,12 @@ RESULT_TYPE handleEntry(String *line, Node *dataBinarysList, int *DCPtr);
 /*
  *
  */
-void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
-		int addres);
+void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type, int address);
+
+
+
+
+
 /*
  *
  */

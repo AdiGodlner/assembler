@@ -12,7 +12,7 @@
 #include "macro.h"
 #include "HashTable.h"
 
-/*TODO change to int and return corect value depending of what we want to do */
+//TODO change to int and return corect value depending of what we want to do
 
 void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
@@ -68,13 +68,9 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 void macroParse(char *srcFile) {
 
-	char *amSuffix = ".am";
-	char line[MAX_LINE_LEN];
-	void *macroBody;
 	HashTable *table = createDefualtHashTable();
+	char *amSuffix = ".am";
 	String *destFile = filenameChange(srcFile, amSuffix);
-	String *firstWord, *lineString ;
-	FILE *amFile ;
 
 	/*Open scr file .as*/
 	FILE *asFile = fopen(srcFile, "r");/*read from file*/
@@ -85,7 +81,7 @@ void macroParse(char *srcFile) {
 	}
 
 	/*Open dest file .am*/
-	amFile = fopen(destFile->value, "w");/*read and write to the file*/
+	FILE *amFile = fopen(destFile->value, "w");/*read and write to the file*/
 	if (!amFile) {
 		printFileError(destFile->value);
 		return;
@@ -95,8 +91,11 @@ void macroParse(char *srcFile) {
 	/* Read input line by line till we see a macro,
 	 * and copy the scr file into the dest file without the macro name wrap we found,
 	 *  only macro body will be passed to .am file*/
+	char line[MAX_LINE_LEN];
+	String *lineString = createEmptyString();
+	String *firstWord;
 
-	lineString = createEmptyString();
+	void *macroBody;
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
 		if(isblankLine(line)){
@@ -124,9 +123,8 @@ void macroParse(char *srcFile) {
 			}
 
 		}
-
+//
 		deleteString(firstWord);
-
 	}
 
 	printf("\nmacro where parsed successfully!\n");
@@ -134,11 +132,9 @@ void macroParse(char *srcFile) {
 	/*Close input and output files*/
 	fclose(asFile);
 	fclose(amFile);
-
-	/*free space on the heap*/
 	deleteString(destFile);
 	deleteString(lineString);
-	deleteTable(table, deleteString);
+	printTable(table); //*TODO delete print table-makes an error is deleteTable is used
 
 }
 
@@ -151,7 +147,7 @@ String* filenameChange(char *fileName, char *suffix) {
 	dotPos = strrchr(fileName, '.');
 	if (!dotPos) {
 		/*Wrong filename input file name does not contain a legal suffix*/
-		/*TODO: check if dotpos = allowed suffix ".am" ".as" "/foo" */
+		//*TODO: check if dotpos = allowed suffix ".am" ".as" "/foo"
 		printf("Error: Illegal file name\n");
 		return NULL;
 	}
@@ -184,7 +180,7 @@ int ismcrNamevalid(char *name) {
 
 }
 
-/*Check that there aren't any illegal commas, brackets and if there is a blank line removes it same for extra spaces*/
+/*removes blank line and  extra spaces*/
 void textCorrecter(char *line) {
 
 	int i, j, k, len;
@@ -218,23 +214,23 @@ void textCorrecter(char *line) {
 	line[j] = '\0';
 }
 
-void isbracketLegal(char * line){
+int isbracketLegal(char * line){
 	/*Check for illegal commas and missing brackets*/
 
 	int i, len;
-	int commaCount = 0, bracketCount = 0;
+	int bracketCount = 0;
 
 	len = strlen(line);
 
 	for (i = 0; i < len; i++) {
 
-		if (line[i] == ',') {
+		if ((line[i] == ')')|| (line[i] == '(')) {
 
-			commaCount++;
+			bracketCount++;
 			if ((i == 0 || isspace(line[i - 1]))
 					|| (i + 1 < len && isspace(line[i + 1]))) {
 				/*Printing proper error message if an illegal comma is found*/
-				printf("ERROR: Illegal comma position %d\n", i);
+				printf("ERROR: Illegal bracket position %d\n", i);
 			}
 			/*Checking that both brackets appear*/
 		} else if (line[i] == '(') {
@@ -248,9 +244,71 @@ void isbracketLegal(char * line){
 	if (bracketCount != 0) {
 		/*if one of the brackes is missing or there are too many brackes, we print an proper error message*/
 		printf("ERROR: Missing brackets\n");
+		return 0;
 	}
+	return 1;
 
 }
+
+
+int isquoteLegal(char * line){
+
+	int i = 0;
+	int quoteCount = 0;
+
+
+	while (line[i] != '\0') {
+
+		if (line[i] == '"'){
+			/*if we fint quote we increment the count*/
+			quoteCount++;
+
+		}
+		/*if quote count is even*/
+		else if (quoteCount % 2 == 0) {
+			i++;
+
+		} else{
+			/*if quote count is odd or the character isn't a quote we print an proper error message*/
+			printf("ERROR: Missing quotes\n");
+			return 0;
+		}
+
+	}
+
+	return 1;
+
+
+}
+
+int isCommaLegal(char *line){
+
+	int i, len;
+	int commaCount = 0;
+
+	len = strlen(line);
+
+	for (i = 0; i < len; i++) {
+
+		if (line[i] == ',') {
+
+			commaCount++;
+			if ((i == 0 || isspace(line[i - 1]))
+					|| (i + 1 < len && isspace(line[i + 1]))) {
+				/*Printing proper error message if an illegal comma is found*/
+				printf("ERROR: Illegal comma position %d\n", i);
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+
+
+
+
+
 int isblankLine(char *line){
 
 
@@ -277,8 +335,8 @@ int isblankLine(char *line){
 /*Print if an error uccured with opening file */
 void printFileError(char *fileName) {
 
-	fprintf(stderr, "\n************************************\n");
-	fprintf(stderr, "   Error: Failed to open file %s\n", fileName);
-	fprintf(stderr, "\n************************************\n");
+	fprintf(stdout, "\n************************************\n");
+	fprintf(stdout, "   Error: Failed to open file %s\n", fileName);
+	fprintf(stdout, "\n************************************\n");
 
 }

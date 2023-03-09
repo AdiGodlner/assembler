@@ -11,11 +11,9 @@
 
 #define MAX_LINE_LEN 82
 #define MAX_MACRO_NAME_LEN 32
-/*#define MAX_FILE_NAME 156*/
+//#define MAX_FILE_NAME 156
 #define MAX_MACROS 1000
 #include "HashTable.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 
 
@@ -55,20 +53,36 @@ void printFileError(char *fileName);
 /*
  * This function gates a macro name as a parameter,
  * and chacks if it matches any of command or lable names,
- * if a match is found an error message is printed and we EXIT_FAILURE,
- * else we print a succcess message and EXIT_SUCCSESS.
+ * if a match is found an error message is printed and we return 0,
+ * else we print a succcess message and return 1.
  */
 int ismcrNamevalid(char *name);
 
-
 /*
- * This function resives a text and performs three tasks:
- * it removes blank lines and extra whitespace,
- * and ckecks for illegal commas and missing brackets.
+ * removes blank line and  extra spaces
  */
 void textCorrecter(char *line);
 
-/*TODO*/
+
+/*
+ * This function ckecks for illegal position or missing brackets.
+ */
+int isbracketLegal(char * line);
+
+/*
+ * This function ckecks for illegal quotes in the text, and return 1, if is legal.
+ */
+int isquoteLegal(char * line);
+
+/*
+ * This function ckecks for illegal commas in the text, and return 1, if is legal.
+ */
+int isCommaLegal(char *line);
+
+/*
+ * This function removes blank lines and extra whitespace from the text.
+ * and return 1, if is legal.
+ */
 int isblankLine( char *line);
 
 
