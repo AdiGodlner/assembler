@@ -22,6 +22,7 @@
 #define UNEXPECTED_EOF_STR "Unexpected EOF (end of file)\n"
 #define MEMMORY_ALLOCATION_FAILURE_STR "Memory allocation failure\n"
 #define STOP_STR  "STOP\n"
+#define STRING_ILlEGAL_DEFENITION_STR  "The String is illegal\n"
 
 char* getResultMsg(RESULT_TYPE resType) {
 

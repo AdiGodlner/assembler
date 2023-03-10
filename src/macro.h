@@ -11,9 +11,11 @@
 
 #define MAX_LINE_LEN 82
 #define MAX_MACRO_NAME_LEN 32
-//#define MAX_FILE_NAME 156
+/*#define MAX_FILE_NAME 156*/
 #define MAX_MACROS 1000
 #include "HashTable.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -33,8 +35,8 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
  * This function opens the source file for reading,
  * And when the macros are parsed successfully creates an .am file for writing.
  * the name of the file stays the same just the suffix changes,
- * (examle prog.as is changed to prog.am)
- * The .am file contain same input as the sorce file, but without the macro defenition,
+ * (example prog.as is changed to prog.am)
+ * The .am file contain same input as the src file, but without the macro definition,
  * just the macro body is placed in to the /am file.
  */
 void macroParse(char *srcFile);
@@ -45,7 +47,7 @@ void macroParse(char *srcFile);
 String* filenameChange(char *fileName, char *suffix);
 
 /*
- * This function is used to print an error message when there is aproblem whith opening a file.
+ * This function is used to print an error message when there is a problem with opening a file.
  */
 void printFileError(char *fileName);
 
@@ -53,21 +55,20 @@ void printFileError(char *fileName);
 /*
  * This function gates a macro name as a parameter,
  * and chacks if it matches any of command or lable names,
- * if a match is found an error message is printed and we return 0,
- * else we print a succcess message and return 1.
+ * if a match is found an error message is printed and we EXIT_FAILURE,
+ * else we print a succcess message and EXIT_SUCCSESS.
  */
 int ismcrNamevalid(char *name);
 
+
 /*
- * removes blank line and  extra spaces
+ * This function resives a text and performs three tasks:
+ * it removes blank lines and extra whitespace,
+ * and ckecks for illegal commas and missing brackets.
  */
 void textCorrecter(char *line);
 
-
-/*
- * This function removes blank lines and extra whitespace from the text.
- * and return 1, if is legal.
- */
+/*TODO*/
 int isblankLine( char *line);
 
 

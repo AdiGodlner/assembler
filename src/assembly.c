@@ -12,89 +12,111 @@
 #include "Result.h"
 #include "Label.h"
 #include "Utils.h"
-#include "macro.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-
-//TODO find all repeating macros and put them in one file with extern?
+/*TODO find all repeating macros and put them in one file with extern?*/
 #define MAX_LINE_LEN 82/*adding two to max length, for new line and null charecter*/
-#define MAX_LABEL_LENGTH 31/*adding one to max length, for null charecter*/
+#define MAX_LABEL_LENGTH 30/*TODO 30 or 31 adding one to max length, for null charecter*/
 
-//TODO change char *srcFile to char **srcFiles
-RESULT_TYPE assembler(char *srcFile) {
+/*TODO change char *srcFile to char **srcFiles*/
+void assemble(char *srcFile) {
 
-	//src file is .am file
+	/*src file is .am file*/
 
 	RESULT_TYPE resType;
 	HashTable *symbolTable = createDefualtHashTable();
 	Node *instructionBinarysList = NULL;
 	Node *dataBinarysList = NULL;
-	Node *entryList = NULL;//TODO add this to fisrtPassFileOpen and all functions down the line
+	Node *entryList = NULL;
 
 	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysList,
-			dataBinarysList,entryList);
+			dataBinarysList, entryList);
 
-	//TODO loop over entry list and write labels found in symbolTable to entry file
-
+	/*	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data */
+	/*TODO check entry and extern dont overlap */
 	if (resType) {
-		//first pass failed
-		// TODO handle error ?? do not run secoundPass
-		pritnf("\nERROR:First Pass has failed, can't move to second pass.\n");
-		return FIRST_PASS_FAILURE;
-
-	}else{
-		pritnf("\nFIRST PASS - Was passed successfully, moving over to second pass.\n");
-
+		/*first pass failed
+		 TODO handle error ?? do not run secoundPass
+		 */
+		perror("\nERROR:First Pass has failed, can't move to second pass.\n");
+//		return FIRST_PASS_FAILURE;
+	} else {
+		/* first pass sucsses :) */
+		printf(
+				"\nFIRST PASS - Was passed successfuly, moving over to second pass.\n");
 	}
 
-	secoundPassAssembler();
-
-	/* free heap memory */
+	foobar(entryList, symbolTable, srcFile);
+//	TODO secoundPassAssembler();
+	/* free heap meomory */
 	deleteList(instructionBinarysList, deleteSet);
 	deleteList(dataBinarysList, deleteSet);
 	deleteTable(symbolTable, deleteString);
+
+}
+
+RESULT_TYPE foobar(Node *entryList, HashTable *symbolTable, char *srcFileName) {
+
+	/*TODO write a function loop over entry list and write labels found in symbolTable to entry file
+	 * if a label was not found delete the file and return failed RESULT_TYPE  */
+//	String *temp = createEmptyString();
+//	Node node = entryList;
+//	while(node != NULL) {
+//
+//		String name = node->data;
+//		Label *label = getValueByKey(symbolTable, name);
+////	label ==NULL delete entry file and return error;
+//		label->address;
+//		//TODO turn addres to a char*
+//		appendToString(name, addresChar);
+//		// ""
+//		// "loop 100\nfoo120
+//		appendToString(temp, " addres\n");
+//
+//	}
+
+	//write temp to file
 
 	return SUCCESS;
 
 }
 
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList,Node *entryList) {
+		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
 
 	RESULT_TYPE resType = SUCCESS;
 
-	FILE *amFile = fopen(srcFile, "r");/*Opening in reading mode, for the first pass*/
+	FILE *amFile = fopen(srcFile, "r");
 
 	if (!amFile) {
 		printFileError(srcFile);
 		return FILE_NOT_FOUND;
 	}
 
-	//firstPassAssembler actually doing the passing
-	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysList, dataBinarysList,entryList);
+	/*firstPassAssembler actualy doing the passing*/
+	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysList,
+			dataBinarysList, entryList);
 
 	fclose(amFile);
 
-//	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data
 	return resType;
 
 }
 
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node* entryList) {
+		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
 
 	RESULT_TYPE resType = SUCCESS;
-	int lineNumber = 1;
+	int lineNumber = 0;
 	char line[MAX_LINE_LEN];
 	String *lineString = createEmptyString();
 
 	while (fgets(line, MAX_LINE_LEN, amFile) != NULL) {
 
-		//line number is supposed to be used for error printing
-
+		/* TODO line number is supposed to be used for error printing */
 		lineNumber++;
 
 		setStringValue(lineString, line);
@@ -102,8 +124,8 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 				dataBinarysList, entryList);
 
 		if (resType) {
-			//TODO print ERRORS with line number perror("");
-			fprintf("ERROR:   at line %d\n", __LINE__);
+			/*TODO print ERRORS with line number perror("");*/
+			printf("ERROR:   at line %d\n", lineNumber);
 			break;
 		}
 
@@ -114,22 +136,24 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 	return resType;
 }
 
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node * entryList) {
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
+		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
 
 	RESULT_TYPE resType = SUCCESS;
 	int IC = 0, DC = 0;
 	String *firstWord = popWord(lineString);
 
 	if (isLabel(firstWord)) {
-		/*Handele the lable part, and insert it to the lable table after checking that lable is valid*/
-		resType = handleLabel(firstWord->value, symbolTable, lineString,
-				instructionBinarysList, dataBinarysList,entryList, &IC, &DC);
+
+		resType = handleLabel(firstWord->value, labelTable, lineString,
+				instructionBinarysList, dataBinarysList, entryList, &IC, &DC);
 	} else {
 
-		/*Passing the non lable part to the function, to check if the parameters after it are valid */
-		resType = handleNonLabel(firstWord->value, lineString,
-				instructionBinarysList, dataBinarysList,entryList, &IC, &DC);
+		resType = handleNonLabel(firstWord->value, lineString, labelTable,
+				instructionBinarysList, dataBinarysList, entryList, &IC, &DC);
+		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
+			resType = SUCCESS;
+		}
 	}
 
 	deleteString(firstWord);
@@ -137,51 +161,33 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 	return resType;
 
 }
-/*Handele the lable part, and insert it to the lable table after checking that lable is valid*/
+
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList,Node * entryList, int *ICPtr,
-		int *DCPtr) {
+		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList,
+		int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	int currDCAddres, currICAddres;
 	String *firstWord;
 
-	//TODO check label is legal ( length < max length && starts with a letter )
-	if (isKeyInTable(labelsTable, labelName)) {
+	resType = checkLabelLegality(labelsTable, labelName);
 
-			//TODO handle error?
-		return LABEL_ALLREADY_EXISTS;
-
+	if (resType) {
+		return resType;
 	}
-	if(!isalpha(labelName)){
-
-		return LABEL_ILLEGAL_DEFENITION;
-	}
-	if(strlen(labelName)>= MAX_LABEL_LENGTH){
-
-		return LABLE_INVALID_LENGTH;
-	}
-	return resType;
-
-
-
-
-
-
 
 	currDCAddres = *DCPtr;
 	currICAddres = *ICPtr;
 
 	firstWord = popWord(line);
 
-	//TODO if handleNonLabel line is extern skip
-	resType = handleNonLabel(firstWord->value, line, instructionBinarysList,
-			dataBinarysList,entryList, ICPtr, DCPtr);
+	/*TODO if handleNonLabel line is extern skip */
+	resType = handleNonLabel(firstWord->value, line, labelsTable,
+			instructionBinarysList, dataBinarysList, entryList, ICPtr, DCPtr);
 
-	if (!resType) {
-		//TODO check if there are other types of labels
-		// TODO check if there are commands that labels are not allowed to have like .extern maybe?
+	if (resType == SUCCESS) {
+		/* TODO check if there are commands that labels are not allowed to have like .extern maybe? */
 		if (currDCAddres != *DCPtr) {
 			insertLabel(labelName, labelsTable, DATA, currDCAddres);
 		} else {
@@ -189,63 +195,67 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 		}
 
 	}
+
 	deleteString(firstWord);
+
+	if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
+		resType = SUCCESS;
+	}
 
 	return resType;
 
 }
-/*Passing the non lable part to the function, to check if the parameters after it are valid */
-RESULT_TYPE handleNonLabel(char *word, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList,Node * entryList, int *ICPtr,
-		int *DCPtr) {
+
+RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
+		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList,
+		int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	if (isData(word)) {
 
-//		resType = handleData(line, dataBinarysList, DCPtr);
+		resType = handleData(line, dataBinarysList, DCPtr);
 
 	} else if (isStringData(word)) {
 
-		//		TODO .string
 		resType = handleString(line, dataBinarysList, DCPtr);
 
 	} else if (isExtern(word)) {
-		resType = handleExtern(line, dataBinarysList, DCPtr);
+
+		resType = handleExtern(labelsTable, line);
 
 	} else if (isEntry(word)) {
-		resType = handleEntry(line, dataBinarysList, DCPtr);
+		resType = handleEntry(labelsTable, line, entryList);
 
-	}else{
+	} else {
 
-		//TODO function that turns opcode to binary
-		//TODO handle opcodes read string line and translate to opcode
+		/*TODO function that turns opcode to binary */
+		/*TODO handle opcodes read string line and translate to opcode*/
 
 	}
 
 	return resType;
 }
 
-
 RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
+	RESULT_TYPE resType = SUCCESS;
+	Set *binaryWord;
+	Node *node;
 	int size = 0, i = 0, currInt;
 	int **intArrPtr;
 	int *intArr = NULL;
 	intArrPtr = &intArr;
-	RESULT_TYPE resType = SUCCESS;
-	Set *binaryWord;
-	Node *node;
-
-	//get intArrAllocates memory on the heap to intArr
+	/* get intArrAllocates memory on the heap to intArr */
 	resType = getIntArrfromStringArgs(line, intArrPtr, &size);
+
 	if (resType) {
-		//TODO handle error return ? free Label
+		/*TODO handle error return ?*/
 		printf("ERROR");
 		return resType;
 	}
 
-	//TODO handle intArr is empty || size == 0 meaning there were no arguments
+	/* TODO handle intArr is empty || size == 0 meaning there were no arguments */
 	for (i = 0; i < size; ++i) {
 
 		currInt = intArr[i];
@@ -265,70 +275,112 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 RESULT_TYPE handleString(String *line, Node *dataBinarysList, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
-	int i = 0;
+	int i = 1;
+	String *quote;
+	char *str;
+	Set *binaryWord;
+	Node *node;
 
-	resType = isquoteLegal(line);
+	resType = checkStringIllegal(line->value);
 
-	if (!resType){
-		printf("\nERROR: The String is ilegal, cause of missing quotes in the string.\n");
-		return MISSING_QUOTE;
-	}
-	char *restOfString;
-	if(!isalpha(restOfString)){
-
-		if(!isdigit(restOfString)||!ispunct(restOfString)){
-
-			return STRING_ILlEGAL_DEFENITION;
-		}
-
-
+	if (resType) {
+		return resType;
 	}
 
-	while(restOfString[i] != '\0'){
+	quote = popWord(line);
+	str = quote->value;
 
-		if (restOfString[i] == ','){
-			printf("\nERROR: The String is ilegal,commas aren't alowed in the string.\n");
-			return ILLEGAL_COMMA;
-		}
+	while (str[i] != '"') {
+
+		binaryWord = intToBinaryWord(str[i]);
+		node = createNode(binaryWord, NULL);
+		pushTail(node, &dataBinarysList);
+		(*DCPtr)++;
 
 	}
 
-	return SUCCESS;
+	binaryWord = intToBinaryWord('\0');
+	node = createNode(binaryWord, NULL);
+	pushTail(node, &dataBinarysList);
+	(*DCPtr)++;
+
+	deleteString(quote);
+
+	return resType;
 
 }
-RESULT_TYPE handleExtern( char *destFile, String *line, Node *dataBinarysList, int *DCPtr) {
 
-	RESULT_TYPE resType = SUCCESS;
-	/*Opening extern file in writing mode, to pass the exttern lables that where found*/
-	FILE *extFile = fopen(destFile, "w");
-/*If we couldnt open the extern file, we print a proper error message*/
-	if (!extFile) {
-		printFileError(destFile);
-		return FILE_NOT_FOUND;
-	}
+RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 
-	//TODO open extern file with w mode
-	// A,R,E = 01
-	// can have 2 extens with the same name
-	return SUCCESS;
-	fclose(extFile);
-}
-RESULT_TYPE handleEntry(char *destFile,String *line, Node *dataBinarysList, int *DCPtr) {
-	//TODO open entry file with w mode
-	RESULT_TYPE resType = SUCCESS;
-		/*Opening entry file in writing mode, to pass the entry lables that where found*/
-		FILE *entFile = fopen(destFile, "w");
-	/*If we couldnt open the entry file, we print a proper error message*/
-		if (!entFile) {
-			printFileError(destFile);
-			return FILE_NOT_FOUND;
+	RESULT_TYPE resType = EXTERN_CREATED;
+	String *labelName = popWord(line);
+	String *extraText;
+	Label *label;
+
+	/* check if w is in table AND w that is in table is not extern */
+	if (isKeyInTable(labelsTable, labelName->value)) {
+		label = (Label*) getValueByKey(labelsTable, labelName->value);
+
+		if (label->type != EXTERNAL) {
+
+			resType = LABEL_ALLREADY_EXISTS;
 		}
 
-		//TODO open extern file with w mode
-		// A,R,E = 01
-		// can have 2 extens with the same name
-		return SUCCESS;
-		fclose(entFile);
+	}
+
+	extraText = popWord(line);
+
+	if (extraText->size) {
+		resType = EXTRANEOUS_TEXT;
+
+	} else {
+		label = createLabel(labelName->value);
+		label->type = EXTERNAL;
+		label->address = -1;
+		insertToTable(labelsTable, labelName->value, label);
+
+	}
+
+	deleteString(labelName);
+	deleteString(extraText);
+
+	return resType;
+
+}
+
+RESULT_TYPE handleEntry(HashTable *labelsTable, String *line, Node *entryList) {
+
+	RESULT_TYPE resType = ENTRY_CREATED;
+	String *labelName = popWord(line);
+	String *extraText;
+	Label *label;
+	Node *node;
+	/* check if w is in table AND w that is in table is not extern */
+	if (isKeyInTable(labelsTable, labelName->value)) {
+		label = (Label*) getValueByKey(labelsTable, labelName->value);
+
+		if (label->type == EXTERNAL) {
+
+			resType = LABEL_EXTERNALY_EXISTS;
+		}
+
+	}
+
+	extraText = popWord(line);
+
+	if (extraText->size) {
+		resType = EXTRANEOUS_TEXT;
+		deleteString(labelName);
+
+	} else {
+
+		node = createNode(labelName, NULL);
+		pushHead(node, &entryList);
+	}
+
+	deleteString(extraText);
+
+	return resType;
 }
 
 void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
@@ -339,6 +391,22 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 	label->type = type;
 	label->address = addres;
 	insertToTable(labelsTable, labelName, label);
+
+}
+
+RESULT_TYPE checkLabelLegality(HashTable *labelsTable, char *labelName) {
+
+	if (isKeyInTable(labelsTable, labelName)) {
+		return LABEL_ALLREADY_EXISTS;
+	}
+	if (!isalpha(*labelName)) {
+		return LABEL_ILLEGAL_DEFENITION;
+	}
+	if (strlen(labelName) >= MAX_LABEL_LENGTH) {
+		return LABLE_INVALID_LENGTH;
+	}
+
+	return SUCCESS;
 
 }
 
@@ -362,8 +430,11 @@ int isLabel(String *str) {
 
 }
 
-void secoundPassAssembler() {
+void secoundPassAssembly() {
+
+	//TODO open extern file with w mode
+	// A,R,E = 01
+	// can have 2 extens with the same name
 
 }
-
 

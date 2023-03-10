@@ -122,7 +122,7 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		resType = getIntFromName(numStr->value, numPtr);
 
 		if (resType) {
-/*			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR */
+			/*			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR */
 			printString(numStr);
 			/*TODO handle this case ?*/
 			break;
@@ -201,7 +201,7 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
 
 }
 
-int isbracketLegal(char * line){
+int isbracketLegal(char *line) {
 	/*Check for illegal commas and missing brackets*/
 
 	int i, len;
@@ -211,7 +211,7 @@ int isbracketLegal(char * line){
 
 	for (i = 0; i < len; i++) {
 
-		if ((line[i] == ')')|| (line[i] == '(')) {
+		if ((line[i] == ')') || (line[i] == '(')) {
 
 			bracketCount++;
 			if ((i == 0 || isspace(line[i - 1]))
@@ -237,38 +237,40 @@ int isbracketLegal(char * line){
 
 }
 
-
-int isquoteLegal(char * line){
+RESULT_TYPE checkStringIllegal(char *line) {
 
 	int i = 0;
 	int quoteCount = 0;
 
+	for (i = 0; i < strlen(line); i++) {
 
-	while (line[i] != '\0') {
-
-		if (line[i] == '"'){
+		if (line[i] == '"') {
 			/*if we fint quote we increment the count*/
 			quoteCount++;
-
-		}
-		/*if quote count is even*/
-		else if (quoteCount % 2 == 0) {
-			i++;
-
-		} else{
-			/*if quote count is odd or the character isn't a quote we print an proper error message*/
-			printf("ERROR: Missing quotes\n");
-			return 0;
+			if (quoteCount == 2) {
+				i++;//TODO does this work????
+				break;
+			}
 		}
 
+		if (!isalnum(line[i]) && !ispunct(line[i])) {
+
+			return STRING_ILlEGAL_DEFENITION;
+
+		}
 	}
 
-	return 1;
+	for (; i < strlen(line); i++) {
+		if (!isspace(line[i])) {
+			return EXTRANEOUS_TEXT;
+		}
+	}
 
+	return SUCCESS;
 
 }
 
-int isCommaLegal(char *line){
+int isCommaLegal(char *line) {
 
 	int i, len;
 	int commaCount = 0;
@@ -290,5 +292,4 @@ int isCommaLegal(char *line){
 	}
 	return 1;
 }
-
 
