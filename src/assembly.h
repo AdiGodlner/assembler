@@ -77,6 +77,10 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable * labelsTable,
 /*
  *
  */
+RESULT_TYPE  handleInstructions(char* word, String * line, Node *instructionBinarysList, int *ICPtr);
+/*
+ *
+ */
 RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr);
 /*
  *

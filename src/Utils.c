@@ -226,3 +226,53 @@ int isCommaLegal(char *line) {
 	return 1;
 }
 
+
+RESULT_TYPE * popArgument(String *argumernts,String * dest, int isLastArgument) {
+
+	RESULT_TYPE resType = SUCCESS;
+	int i = 0;
+	char currChar;
+	String *newStr = createEmptyString();
+
+	for (i = 0; i <= argumernts->size; ++i) {
+
+		currChar = charAt(argumernts, i);
+		if (isspace(currChar)) {
+			continue;
+		}
+
+		else if (currChar == ',' || currChar == '\n' || currChar == '\0') {
+
+			if (isLastArgument && currChar == ',') {
+				resType =  UNEXPECTED_COMMA;//TODO maybe change this resType
+
+			} else if (newStr->size  == 0 && currChar == ',') {
+				resType = CONSECUTIVE_COMMAS;
+
+			} else if (newStr->size  == 0 &&  i == argumernts->size) {
+					resType = INPUT_IS_EMPTRY;
+
+			}
+
+			break;
+
+		} else {
+			appendCharToString(newStr, currChar);
+		}
+
+	}
+
+	if (resType) {
+		/* in case there is an error we free the space we allocated on the heap */
+		deleteString(newStr);
+
+	}
+
+	*dest = *newStr;
+
+	return resType;
+
+}
+
+
+

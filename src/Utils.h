@@ -11,6 +11,7 @@
 #include "Result.h"
 #include "LinkedList.h"
 /*
+ * TODO check description
  * this method pops the next argument in a the given String 'arguments' and stores
  * it in the String 'dest';
  *
@@ -22,7 +23,7 @@
  * or an UNEXPECTED_COMMA if the first non blank char of the string is a ','
  * this method considers a blank char to be either ' ' or '\t'
  */
-String * popArgument(String *str) ;
+RESULT_TYPE * popArgument(String *argumernts,String * dest, int isLastArgument);
 
 /*
  * this method pops all arguments from String arguments checks if they are integers

@@ -28,7 +28,7 @@ String* createNewString(char *charArr) {
 
 }
 
-String * duplicateString(String * str){
+String* duplicateString(String *str) {
 
 	return createNewString(str->value);
 
@@ -53,20 +53,20 @@ void setStringValue(String *str, char *charArr) {
 /*
  *
  */
-String * stringNCopy( char * src, int count){
+String* stringNCopy(char *src, int count) {
 
-	int i =0;
-	String * strRes = createEmptyString();
+	int i = 0;
+	String *strRes = createEmptyString();
 
 	for (i = 0; i < count; ++i) {
-		appendCharToString(strRes , src[i]);
+		appendCharToString(strRes, src[i]);
 	}
 
 	return strRes;
 
 }
 
-char charAt(String * str, int index){
+char charAt(String *str, int index) {
 	if (index > str->size || index < 0) {
 		return -1;
 	}
@@ -100,7 +100,7 @@ void appendCharToString(String *str, char c) {
 
 void deleteString(void *str) {
 	if (str != NULL) {
-		free(((String*)str)->value);
+		free(((String*) str)->value);
 		free(str);
 
 	}
@@ -113,7 +113,7 @@ void printString(String *str) {
 
 }
 
-int compareString(String * str1 , String * str2){
+int compareString(String *str1, String *str2) {
 
 	return strcmp(str1->value, str2->value);
 }

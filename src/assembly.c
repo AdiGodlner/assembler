@@ -223,6 +223,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 	if (isKeyInTable(labelsTable, labelName)) {
 		return LABEL_ALLREADY_EXISTS;
 	}
+
 	resType = checkLabelLegality(labelsTable, labelName);
 
 	if (resType) {
@@ -278,15 +279,64 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 		resType = handleEntry(labelsTable, line, entryListPtr);
 
 	} else {
-		(*ICPtr)++;
-//		handleInstructions();
-		/*TODO function that turns opcode to binary */
-		/*TODO handle opcodes read string line and translate to opcode*/
+
+		resType = handleInstructions(word, line, instructionBinarysList, ICPtr);
 
 	}
 
 	return resType;
 }
+
+
+RESULT_TYPE  handleInstructions(char* word, String * line, Node *instructionBinarysList, int *ICPtr){
+	/*TODO function that turns opcode to binary */
+	/*TODO handle opcodes read string line and translate to opcode*/
+
+	static HashTable * opCodeTable = NULL;
+	RESULT_TYPE resType = SUCCESS;
+	String ** paramArr = NULL;
+	String * currParam = NULL;
+	Opcode *opCode = NULL;
+	Set *binaryWord = NULL;
+	int i = 0;
+	int addresingType = -1;
+
+	if (!opCodeTable ) {
+		initOpcode(opCodeTable);
+	}
+
+	if (!isKeyInTable(opCodeTable, word)) {
+		return ILLEGAL_OPCODE;
+	}
+
+	opCode = (Opcode*)getValueByKey(opCodeTable, word);
+	paramArr = malloc(sizeof(String*) * opCode->numOfParameters );
+
+	for (i= 0; i < opCode->numOfParameters; i++) {
+
+		 resType = popArgument(line, currParam, i == (opCode->numOfParameters -1));
+
+		 if (resType) {
+			break;
+		}
+
+		//TODO check currParam is legal
+		 addresingType = getParamAddresingType(currParam);
+
+		 // TODO how do I know if its a src address or destAddres?
+		 // TODO do some opCOdes have only srcAdress or only destAdress?
+
+		paramArr[i] = currParam;
+
+	}
+
+	//TODO check for EXTRANEOUS_TEXT
+	//TODO duplicate the bianry
+
+	free(paramArr);
+	return resType ;
+}
+
 
 RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
@@ -305,7 +355,6 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 		return resType;
 	}
 
-	/* TODO handle intArr is empty || size == 0 meaning there were no arguments */
 	for (i = 0; i < size; ++i) {
 
 		currInt = intArr[i];
@@ -464,6 +513,7 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 
 RESULT_TYPE checkLabelLegality(HashTable *labelsTable, char *labelName) {
 
+	//TODO check that label is not a reserved words like jmp or bne like we did in macro
 	int i = 0;
 
 	if (!isalpha(*labelName)) {
