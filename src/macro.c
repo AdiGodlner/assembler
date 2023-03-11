@@ -89,7 +89,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 	amFile = fopen(destFile->value, "w");/*read and write to the file*/
 	if (!amFile) {
 		printFileError(destFile->value);
-		return;
+		return CATSTROPIC_FAILURE;
 
 	}
 
@@ -140,6 +140,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 	deleteString(destFile);
 	deleteString(lineString);
 	deleteTable(table, deleteString);
+	return SUCCESS;
 
 }
 

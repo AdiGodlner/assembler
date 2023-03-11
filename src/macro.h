@@ -14,6 +14,7 @@
 /*#define MAX_FILE_NAME 156*/
 #define MAX_MACROS 1000
 #include "HashTable.h"
+#include "Result.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,7 +40,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
  * The .am file contain same input as the src file, but without the macro definition,
  * just the macro body is placed in to the /am file.
  */
-void macroParse(char *srcFile);
+RESULT_TYPE macroParse(char *srcFile);
 
 /*
  * This function changes the source file name  to .am file

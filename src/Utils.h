@@ -36,7 +36,6 @@ String * popArgument(String *str) ;
 RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		int *size);
 
-RESULT_TYPE fooma(String* argumernts, Node **headPtrPtr);
 /*
  * this method takes an int represented in the string 'str' and puts it in 'numDest'
  * the method returns SUCCESS if the it was able to convert the string to an int

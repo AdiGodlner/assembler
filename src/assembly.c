@@ -38,14 +38,14 @@ void assembler(char *srcFile) {
 
 	printTable(symbolTable, labelToString);
 	/*	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data */
+
 	if (entryList != NULL) {
 		writeEntryToFile(srcFile, entryList, symbolTable);
 	}
 
 	if (resType) {
 		/*first pass failed
-		 TODO handle error ?? do not run secoundPass
-		 TODO print all errors here !!!
+		 TODO handle error do not run secoundPass
 		 */
 		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
 //		return FIRST_PASS_FAILURE;
@@ -69,10 +69,9 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 	RESULT_TYPE resType = SUCCESS;
 	char *entSuffix = ".ent";
 	String *destFile = filenameChange(srcFile, entSuffix);
-	FILE *entFile = fopen(destFile->value, "w");/*write to file*/
+	FILE *entFile = fopen(destFile->value, "w");
 
 	if (!entFile) {
-//		printFileError(destFile->value);
 		return FILE_NOT_FOUND;
 
 	}
@@ -84,7 +83,6 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 		Label *label = (Label*) getValueByKey(symbolTable, name->value);
 
 		if (label == NULL) {
-			/*If an error occured ,delete the file and print a proper ERROR message */
 			resType = UNDEFINED_ENTRY_LABLE;
 			break;
 		}
@@ -109,6 +107,7 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 	/*closing file after use*/
 	fclose(entFile);
 
+	/*If an error occurred ,delete the file */
 	if (resType) {
 		remove(destFile->value);
 	}
@@ -146,6 +145,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 		Node *instructionBinarysList, Node *dataBinarysList,
 		Node **entryListPtr) {
 
+	int IC = 0, DC = 0;
 	RESULT_TYPE lineProcesingResult = SUCCESS;
 	RESULT_TYPE resType = SUCCESS;
 	int lineNumber = 0;
@@ -158,11 +158,12 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 		setStringValue(lineString, line);
 		lineProcesingResult = lineFirstPass(lineString, symbolTable,
-				instructionBinarysList, dataBinarysList, entryListPtr);
+				instructionBinarysList, dataBinarysList, entryListPtr, &IC, &DC);
 
 		if (lineProcesingResult) {
 
 			// TODO custom error messages for every resType
+			// TODO print all errors here
 			printf("ERROR:   at line %d | resType %d \n", lineNumber,
 					lineProcesingResult);
 
@@ -182,22 +183,22 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 		Node *instructionBinarysList, Node *dataBinarysList,
-		Node **entryListPtr) {
+		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
-	int IC = 0, DC = 0;
+
 	String *firstWord = popWord(lineString);
 
 	if (isLabel(firstWord)) {
 
 		resType = handleLabel(firstWord->value, labelTable, lineString,
-				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
-				&DC);
+				instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+				DCPtr);
 	} else {
 
 		resType = handleNonLabel(firstWord->value, lineString, labelTable,
-				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
-				&DC);
+				instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+				DCPtr);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
 			resType = SUCCESS;
 		}
@@ -263,8 +264,7 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 	RESULT_TYPE resType = SUCCESS;
 
 	if (isData(word)) {
-		(*DCPtr)++;
-//		resType = handleData(line, dataBinarysList, DCPtr);
+		resType = handleData(line, dataBinarysList, DCPtr);
 
 	} else if (isStringData(word)) {
 
@@ -316,7 +316,7 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 	}
 
 	free(intArr);
-	*DCPtr += size;
+	(*DCPtr) += size;
 
 	return resType;
 

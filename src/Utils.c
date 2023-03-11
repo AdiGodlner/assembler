@@ -11,17 +11,16 @@
 #include <string.h>
 #include <ctype.h>
 
-
-RESULT_TYPE fooma(String* argumernts, Node **headPtrPtr){
+RESULT_TYPE getIntArrfromStringArgs(String *argumernts, int **intArrPtr,
+		int *size) {
 
 	RESULT_TYPE resType = SUCCESS;
-	int i =0, num = 0, elementIndex = 0;
+	int i = 0, num = 0, elementIndex = 0;
 	char currChar;
-	String * currNumStr = createEmptyString();
+	String *currNumStr = createEmptyString();
 	int *numPtr = &num;
-	Node * head = NULL;
-	Node * newNode = NULL;
-	*headPtrPtr = head;
+	int *temp = NULL;
+	int *intArr = NULL;
 
 	for (i = 0; i <= argumernts->size; ++i) {
 
@@ -35,74 +34,47 @@ RESULT_TYPE fooma(String* argumernts, Node **headPtrPtr){
 			resType = getIntFromName(currNumStr->value, numPtr);
 			if (resType) {
 
+				if (resType == INPUT_IS_EMPTRY) {
+					if (i == argumernts->size) {
+						if (elementIndex != 0) {
+							resType = MISSING_ARGUMNET;
+						} else {
+							resType = INPUT_IS_EMPTRY;
+						}
+					}else {
+						resType = CONSECUTIVE_COMMAS;
+					}
+
+				}
+
 				break;
+
 			}
 
-			newNode = createNode(*numPtr, NULL);
-			pushTail(newNode , headPtrPtr);
+			elementIndex++;
+			temp = realloc(intArr, sizeof(int) * elementIndex);
+
+			if (temp == NULL) {
+				/*TODO write memory allocation function that exists on failed meomer allocation */
+				resType = MEMMORY_ALLOCATION_FAILURE;
+				break;
+
+			}
+
+			intArr = temp;
+			intArr[elementIndex - 1] = num;
+
 			setStringValue(currNumStr, "");
 
-		}else{
+		} else {
 
 			appendCharToString(currNumStr, currChar);
 
 		}
 
-
-
 	}
 
 	deleteString(currNumStr);
-	return resType;
-
-}
-
-/*TODO change description in H file */
-RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
-		int *size) {
-
-	RESULT_TYPE resType = SUCCESS;
-	int tempSize = 0, num = 0;
-	int *numPtr = &num;
-	int *intArr = NULL;
-	int *temp = NULL;
-	String * numStr;
-
-	while (resType == SUCCESS) {
-
-//		fooma(arguments, headPtrPtr);
-//		numStr = popArgument(arguments );
-
-		if (numStr->size == 0 ) {
-
-			if (arguments->size != 0) {
-				resType = CONSECUTIVE_COMMAS;
-			}
-			break;
-
-		}
-
-		resType = getIntFromName(numStr->value, numPtr);
-		deleteString(numStr);
-
-		if (resType) {
-			break;
-		}
-
-		tempSize++;
-		temp = realloc(intArr, sizeof(int) * tempSize);
-
-		if (temp == NULL) {
-			/*  realloc failed to  allocate memory successfully */
-			/*TODO write memory allocation function that exists on failed meomer allocation */
-			resType = MEMMORY_ALLOCATION_FAILURE;
-			break;
-		}
-
-		intArr = temp;
-		intArr[tempSize - 1] = num;
-
-	}
 
 	if (resType) {
 		/* in case there is an error we free the space we allocated on the heap */
@@ -112,9 +84,9 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 	}
 
 	*intArrPtr = intArr;
-	*size = tempSize;
+	*size = elementIndex;
 
-	return SUCCESS;
+	return resType;
 
 }
 

@@ -48,8 +48,9 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 /*
  *
  */
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node **entryListPtr);
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
 /*
  *
  */

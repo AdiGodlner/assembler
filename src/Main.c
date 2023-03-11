@@ -27,15 +27,7 @@ int main(int argc, char **argv) {
 	preAssembly(argc, argv);*/
 
 	assembler("C:/Users/Adi/Desktop/foo.am");
-//	Node * head = NULL;
-//	String * argumernts = createNewString(" 22 , 31 ,67,-1 ");
-//	fooma(argumernts, &head);
-//	while(head){
-//
-//		printf("%d\n",head->data);
-//
-//		head = head->next;
-//	}
+
 	printf("\nend :-)");
 
 	return EXIT_SUCCESS;
