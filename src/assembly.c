@@ -22,7 +22,7 @@
 #define MAX_LABEL_LENGTH 30/*TODO 30 or 31 adding one to max length, for null charecter*/
 
 /*TODO change char *srcFile to char **srcFiles*/
-void assemble(char *srcFile) {
+void assembler(char *srcFile) {
 
 	/*src file is .am file*/
 
@@ -31,15 +31,21 @@ void assemble(char *srcFile) {
 	Node *instructionBinarysList = NULL;
 	Node *dataBinarysList = NULL;
 	Node *entryList = NULL;
+	Node **entryListPtr = &entryList;
 
 	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysList,
-			dataBinarysList, entryList);
+			dataBinarysList, entryListPtr);
 
+	printTable(symbolTable, labelToString);
 	/*	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data */
-	/*TODO check entry and extern dont overlap */
+	if (entryList != NULL) {
+		writeEntryToFile(srcFile, entryList, symbolTable);
+	}
+
 	if (resType) {
 		/*first pass failed
 		 TODO handle error ?? do not run secoundPass
+		 TODO print all errors here !!!
 		 */
 		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
 //		return FIRST_PASS_FAILURE;
@@ -49,8 +55,7 @@ void assemble(char *srcFile) {
 				"\nFIRST PASS - Was passed successfuly, moving over to second pass.\n");
 	}
 
-	foobar(entryList, symbolTable, srcFile);
-//	TODO secoundPassAssembler();
+	//	TODO secoundPassAssembler();
 	/* free heap meomory */
 	deleteList(instructionBinarysList, deleteSet);
 	deleteList(dataBinarysList, deleteSet);
@@ -58,34 +63,65 @@ void assemble(char *srcFile) {
 
 }
 
-RESULT_TYPE foobar(Node *entryList, HashTable *symbolTable, char *srcFileName) {
+RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
+		HashTable *symbolTable) {
 
-	/*TODO write a function loop over entry list and write labels found in symbolTable to entry file
-	 * if a label was not found delete the file and return failed RESULT_TYPE  */
-//	String *temp = createEmptyString();
-//	Node node = entryList;
-//	while(node != NULL) {
-//
-//		String name = node->data;
-//		Label *label = getValueByKey(symbolTable, name);
-////	label ==NULL delete entry file and return error;
-//		label->address;
-//		//TODO turn addres to a char*
-//		appendToString(name, addresChar);
-//		// ""
-//		// "loop 100\nfoo120
-//		appendToString(temp, " addres\n");
-//
-//	}
+	RESULT_TYPE resType = SUCCESS;
+	char *entSuffix = ".ent";
+	String *destFile = filenameChange(srcFile, entSuffix);
+	FILE *entFile = fopen(destFile->value, "w");/*write to file*/
 
-	//write temp to file
+	if (!entFile) {
+//		printFileError(destFile->value);
+		return FILE_NOT_FOUND;
 
-	return SUCCESS;
+	}
+	Node *node = entryList;
+
+	while (node != NULL) {
+
+		String *name = (String*) node->data;
+		Label *label = (Label*) getValueByKey(symbolTable, name->value);
+
+		if (label == NULL) {
+			/*If an error occured ,delete the file and print a proper ERROR message */
+			resType = UNDEFINED_ENTRY_LABLE;
+			break;
+		}
+
+		int labelAddress = label->address;
+		// only labels of type extern have address of -1;
+		if (labelAddress < 0) {
+
+			resType = LABEL_IS_EXTERN_AND_ENTRY;
+			break;
+
+		}
+		char addrStr[4];/*3 digit address + \0*/
+		sprintf(addrStr, "%03d", labelAddress);/*Printing to file in the requested format*/
+		addrStr[3] = '\0';
+		fprintf(entFile, "%s\t%s\n", name->value, addrStr);/*LABLE    100*/
+
+		node = node->next;/*moving to next entry lable in list*/
+
+	}
+
+	/*closing file after use*/
+	fclose(entFile);
+
+	if (resType) {
+		remove(destFile->value);
+	}
+
+	deleteString(destFile);
+
+	return resType;
 
 }
 
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -98,7 +134,7 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 
 	/*firstPassAssembler actualy doing the passing*/
 	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysList,
-			dataBinarysList, entryList);
+			dataBinarysList, entryListPtr);
 
 	fclose(amFile);
 
@@ -107,7 +143,8 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 }
 
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr) {
 
 	RESULT_TYPE lineProcesingResult = SUCCESS;
 	RESULT_TYPE resType = SUCCESS;
@@ -120,13 +157,14 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 		lineNumber++;
 
 		setStringValue(lineString, line);
-		lineProcesingResult = lineFirstPass(lineString, symbolTable, instructionBinarysList,
-				dataBinarysList, entryList);
+		lineProcesingResult = lineFirstPass(lineString, symbolTable,
+				instructionBinarysList, dataBinarysList, entryListPtr);
 
 		if (lineProcesingResult) {
 
 			// TODO custom error messages for every resType
-			printf("ERROR:   at line %d | resType %d \n", lineNumber, lineProcesingResult);
+			printf("ERROR:   at line %d | resType %d \n", lineNumber,
+					lineProcesingResult);
 
 			if (resType == SUCCESS) {
 				resType = lineProcesingResult;
@@ -143,7 +181,8 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 }
 
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 	int IC = 0, DC = 0;
@@ -152,11 +191,13 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 	if (isLabel(firstWord)) {
 
 		resType = handleLabel(firstWord->value, labelTable, lineString,
-				instructionBinarysList, dataBinarysList, entryList, &IC, &DC);
+				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
+				&DC);
 	} else {
 
 		resType = handleNonLabel(firstWord->value, lineString, labelTable,
-				instructionBinarysList, dataBinarysList, entryList, &IC, &DC);
+				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
+				&DC);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
 			resType = SUCCESS;
 		}
@@ -169,14 +210,18 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 }
 
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList,
-		int *ICPtr, int *DCPtr) {
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	int currDCAddres, currICAddres;
 	String *firstWord;
 
+	labelName[strlen(labelName) - 1] = '\0';
+	if (isKeyInTable(labelsTable, labelName)) {
+		return LABEL_ALLREADY_EXISTS;
+	}
 	resType = checkLabelLegality(labelsTable, labelName);
 
 	if (resType) {
@@ -189,7 +234,8 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 	firstWord = popWord(line);
 
 	resType = handleNonLabel(firstWord->value, line, labelsTable,
-			instructionBinarysList, dataBinarysList, entryList, ICPtr, DCPtr);
+			instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+			DCPtr);
 
 	if (resType == SUCCESS) {
 		if (currDCAddres != *DCPtr) {
@@ -211,14 +257,14 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 }
 
 RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList,
-		int *ICPtr, int *DCPtr) {
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	if (isData(word)) {
-
-		resType = handleData(line, dataBinarysList, DCPtr);
+		(*DCPtr)++;
+//		resType = handleData(line, dataBinarysList, DCPtr);
 
 	} else if (isStringData(word)) {
 
@@ -229,10 +275,11 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 		resType = handleExtern(labelsTable, line);
 
 	} else if (isEntry(word)) {
-		resType = handleEntry(labelsTable, line, entryList);
+		resType = handleEntry(labelsTable, line, entryListPtr);
 
 	} else {
-
+		(*ICPtr)++;
+//		handleInstructions();
 		/*TODO function that turns opcode to binary */
 		/*TODO handle opcodes read string line and translate to opcode*/
 
@@ -320,6 +367,12 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 	String *extraText;
 	Label *label;
 
+	resType = checkLabelLegality(labelsTable, labelName->value);
+		if (resType) {
+			deleteString(labelName);
+			return resType;
+		}
+
 	/* check if w is in table AND w that is in table is not extern */
 	if (isKeyInTable(labelsTable, labelName->value)) {
 		label = (Label*) getValueByKey(labelsTable, labelName->value);
@@ -327,6 +380,8 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 		if (label->type != EXTERNAL) {
 
 			resType = LABEL_ALLREADY_EXISTS;
+			deleteString(labelName);
+			return resType;
 		}
 
 	}
@@ -351,13 +406,21 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 
 }
 
-RESULT_TYPE handleEntry(HashTable *labelsTable, String *line, Node *entryList) {
+RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
+		Node **entryListPtr) {
 
 	RESULT_TYPE resType = ENTRY_CREATED;
 	String *labelName = popWord(line);
 	String *extraText;
 	Label *label;
 	Node *node;
+
+	resType = checkLabelLegality(labelsTable, labelName->value);
+	if (resType) {
+		deleteString(labelName);
+		return resType;
+	}
+
 	/* check if w is in table AND w that is in table is not extern */
 	if (isKeyInTable(labelsTable, labelName->value)) {
 		label = (Label*) getValueByKey(labelsTable, labelName->value);
@@ -365,6 +428,8 @@ RESULT_TYPE handleEntry(HashTable *labelsTable, String *line, Node *entryList) {
 		if (label->type == EXTERNAL) {
 
 			resType = LABEL_EXTERNALY_EXISTS;
+			deleteString(labelName);
+			return resType;
 		}
 
 	}
@@ -378,7 +443,7 @@ RESULT_TYPE handleEntry(HashTable *labelsTable, String *line, Node *entryList) {
 	} else {
 
 		node = createNode(labelName, NULL);
-		pushHead(node, &entryList);
+		pushHead(node, entryListPtr);
 	}
 
 	deleteString(extraText);
@@ -399,11 +464,16 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 
 RESULT_TYPE checkLabelLegality(HashTable *labelsTable, char *labelName) {
 
-	if (isKeyInTable(labelsTable, labelName)) {
-		return LABEL_ALLREADY_EXISTS;
-	}
+	int i = 0;
+
 	if (!isalpha(*labelName)) {
 		return LABEL_ILLEGAL_DEFENITION;
+	}
+	for (i = 1; i < strlen(labelName); ++i) {
+		if (!isalnum(labelName[i])) {
+			return LABEL_ILLEGAL_DEFENITION;
+		}
+
 	}
 	if (strlen(labelName) >= MAX_LABEL_LENGTH) {
 		return LABLE_INVALID_LENGTH;

@@ -66,7 +66,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 }
 
 
-void macroParse(char *srcFile) {
+RESULT_TYPE macroParse(char *srcFile) {
 
 	char *amSuffix = ".am";
 	char line[MAX_LINE_LEN];
@@ -81,7 +81,7 @@ void macroParse(char *srcFile) {
 
 	if (!asFile) {
 		printFileError(srcFile);
-		return;
+		return CATSTROPIC_FAILURE;
 	}
 
 	/*Open dest file .am*/

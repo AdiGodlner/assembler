@@ -30,6 +30,10 @@ typedef struct {
 /*
  *
  */
+String* labelToString(void * label);
+/*
+ *
+ */
 void deleteLabel(Label *label);
 /*
  *
