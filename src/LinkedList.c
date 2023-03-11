@@ -19,6 +19,7 @@ void pushHead(Node *newNode, Node **listHeadPtr) {
 
 }
 
+//TODO fix this ??
 void pushTail(Node *newNode, Node **listHeadPtr) {
 
 	if (*listHeadPtr == NULL) {

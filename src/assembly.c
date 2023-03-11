@@ -41,7 +41,7 @@ void assemble(char *srcFile) {
 		/*first pass failed
 		 TODO handle error ?? do not run secoundPass
 		 */
-		perror("\nERROR:First Pass has failed, can't move to second pass.\n");
+		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
 //		return FIRST_PASS_FAILURE;
 	} else {
 		/* first pass sucsses :) */
@@ -109,6 +109,7 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 		Node *instructionBinarysList, Node *dataBinarysList, Node *entryList) {
 
+	RESULT_TYPE lineProcesingResult = SUCCESS;
 	RESULT_TYPE resType = SUCCESS;
 	int lineNumber = 0;
 	char line[MAX_LINE_LEN];
@@ -116,24 +117,29 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 	while (fgets(line, MAX_LINE_LEN, amFile) != NULL) {
 
-		/* TODO line number is supposed to be used for error printing */
 		lineNumber++;
 
 		setStringValue(lineString, line);
-		resType = lineFirstPass(lineString, symbolTable, instructionBinarysList,
+		lineProcesingResult = lineFirstPass(lineString, symbolTable, instructionBinarysList,
 				dataBinarysList, entryList);
 
-		if (resType) {
-			/*TODO print ERRORS with line number perror("");*/
-			printf("ERROR:   at line %d\n", lineNumber);
-			break;
+		if (lineProcesingResult) {
+
+			// TODO custom error messages for every resType
+			printf("ERROR:   at line %d | resType %d \n", lineNumber, lineProcesingResult);
+
+			if (resType == SUCCESS) {
+				resType = lineProcesingResult;
+			}
+
+//			 break;/*TODO break?* should all errors in a file be printed and passed back up the chain*/
 		}
 
 	}
 
 	deleteString(lineString);
 
-	return resType;
+	return lineProcesingResult;
 }
 
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
@@ -182,12 +188,10 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 	firstWord = popWord(line);
 
-	/*TODO if handleNonLabel line is extern skip */
 	resType = handleNonLabel(firstWord->value, line, labelsTable,
 			instructionBinarysList, dataBinarysList, entryList, ICPtr, DCPtr);
 
 	if (resType == SUCCESS) {
-		/* TODO check if there are commands that labels are not allowed to have like .extern maybe? */
 		if (currDCAddres != *DCPtr) {
 			insertLabel(labelName, labelsTable, DATA, currDCAddres);
 		} else {
@@ -246,12 +250,11 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 	int **intArrPtr;
 	int *intArr = NULL;
 	intArrPtr = &intArr;
+
 	/* get intArrAllocates memory on the heap to intArr */
 	resType = getIntArrfromStringArgs(line, intArrPtr, &size);
 
 	if (resType) {
-		/*TODO handle error return ?*/
-		printf("ERROR");
 		return resType;
 	}
 

@@ -9,6 +9,7 @@
 #define SRC_UTILS_H_
 
 #include "Result.h"
+#include "LinkedList.h"
 /*
  * this method pops the next argument in a the given String 'arguments' and stores
  * it in the String 'dest';
@@ -21,7 +22,7 @@
  * or an UNEXPECTED_COMMA if the first non blank char of the string is a ','
  * this method considers a blank char to be either ' ' or '\t'
  */
-RESULT_TYPE popArgument(String *arguments, String *dest);
+String * popArgument(String *str) ;
 
 /*
  * this method pops all arguments from String arguments checks if they are integers
@@ -34,6 +35,8 @@ RESULT_TYPE popArgument(String *arguments, String *dest);
  */
 RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		int *size);
+
+RESULT_TYPE fooma(String* argumernts, Node **headPtrPtr);
 /*
  * this method takes an int represented in the string 'str' and puts it in 'numDest'
  * the method returns SUCCESS if the it was able to convert the string to an int

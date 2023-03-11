@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "String.h"
+#include "Utils.h"
 #include "HashTable.h"
 #include "assembly.h"
 #include "set.h"
@@ -24,7 +25,17 @@ int main(int argc, char **argv) {
 /*	HashTable * opcodeTable = createDefualtHashTable();
 	initOpcode(opcodeTable);
 	preAssembly(argc, argv);*/
-	assemble("C:/Users/Adi/Desktop/foo.am");
+
+//	assemble("C:/Users/Adi/Desktop/foo.am");
+	Node * head = NULL;
+	String * argumernts = createNewString(" 22 , 31 ,67,-1 ");
+	fooma(argumernts, &head);
+	while(head){
+
+		printf("%d\n",head->data);
+
+		head = head->next;
+	}
 	printf("\nend :-)");
 
 	return EXIT_SUCCESS;

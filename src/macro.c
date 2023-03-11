@@ -12,7 +12,7 @@
 #include "macro.h"
 #include "HashTable.h"
 
-/*TODO change to int and return corect value depending of what we want to do */
+/*TODO change to int and return correct value depending of what we want to do */
 
 void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 

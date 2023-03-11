@@ -11,85 +11,49 @@
 #include <string.h>
 #include <ctype.h>
 
-RESULT_TYPE popArgument(String *arguments, String *dest) {
 
-	int argStart = 0, argEnd = 0, nonBlankCharIndex = 0, size = 0;
-	char currChar = EOF;
-	int startSubStr, lenSubStr, i = 0;
-	String *temp;
-	char testChar;
+RESULT_TYPE fooma(String* argumernts, Node **headPtrPtr){
 
-	/*skip the leading blank spaces before the argument */
-	argStart = findNextNonBlankCharLocation(arguments, 0);
-	if (argStart == -1) {
-		return NO_ARGUMENT_FOUND;
-	}
+	RESULT_TYPE resType = SUCCESS;
+	int i =0, num = 0, elementIndex = 0;
+	char currChar;
+	String * currNumStr = createEmptyString();
+	int *numPtr = &num;
+	Node * head = NULL;
+	Node * newNode = NULL;
+	*headPtrPtr = head;
 
-	setStringValue(dest, "");
-	size = arguments->size;
+	for (i = 0; i <= argumernts->size; ++i) {
 
-	/* copy argument */
-	for (argEnd = argStart; argEnd < size; ++argEnd) {
+		currChar = charAt(argumernts, i);
+		if (isspace(currChar)) {
+			continue;
+		}
 
-		currChar = arguments->value[argEnd];
+		else if (currChar == ',' || currChar == '\n' || currChar == '\0') {
 
-		if (currChar == ',' || currChar == ' ' || currChar == '\t'
-				|| currChar == '\n') {
+			resType = getIntFromName(currNumStr->value, numPtr);
+			if (resType) {
 
-			break;
-		} else {
-			appendCharToString(dest, currChar);
+				break;
+			}
+
+			newNode = createNode(*numPtr, NULL);
+			pushTail(newNode , headPtrPtr);
+			setStringValue(currNumStr, "");
+
+		}else{
+
+			appendCharToString(currNumStr, currChar);
 
 		}
 
-	}
-	if (argStart == argEnd) {
-		/*
-		 if argStart  == argEnd then there is nothing but blank chars
-		 between the argument start and another ','
-		 that can mean either an ILLEAGAL_COMMA or a CONSECUTIVE_COMMAS
-		 ERROR we return an UNEXPECTED_COMMA ERROR and let the caller function
-		 Differentiate between the possible ERROR types because it has all the data to
-		 differentiate between the different possible RESULT_TYPES
-		 in the command given by the user
-		 or it is the end of the string which means that there was NO_ARGUMENT_FOUND
-		 */
-		if (currChar == ',') {
-			return UNEXPECTED_COMMA;
 
-		} else {
-			return NO_ARGUMENT_FOUND;
-		}
 
 	}
 
-	nonBlankCharIndex = findNextNonBlankCharLocation(arguments, argEnd);
-
-	testChar = arguments->value[nonBlankCharIndex];
-	if (testChar != ',' && testChar != '\n') {
-
-		/* we found non blank chars in the end of the argument that is not a ','
-		 * meaning
-		 * there is a missing comma or EXTRANEOUS_TEXT or
-		 */
-		return MISSING_COMMA;
-	}
-
-	/* after the argument there are only blank chars and a comma *
-	 * pop the argument from the input string; */
-	startSubStr = nonBlankCharIndex + 1;
-	lenSubStr = size - (nonBlankCharIndex + 1);
-	temp = createEmptyString();
-
-	for (i = 0; i < lenSubStr; ++i) {
-		appendCharToString(temp, arguments->value[startSubStr + i]);
-	}
-
-	appendCharToString(temp, arguments->value[startSubStr + i]);
-	setStringValue(arguments, temp->value);
-	deleteString(temp);
-
-	return SUCCESS;
+	deleteString(currNumStr);
+	return resType;
 
 }
 
@@ -97,36 +61,32 @@ RESULT_TYPE popArgument(String *arguments, String *dest) {
 RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		int *size) {
 
-	RESULT_TYPE resType;
+	RESULT_TYPE resType = SUCCESS;
 	int tempSize = 0, num = 0;
 	int *numPtr = &num;
 	int *intArr = NULL;
 	int *temp = NULL;
+	String * numStr;
 
-	String *numStr = createEmptyString();
+	while (resType == SUCCESS) {
 
-	while (1) {
+//		fooma(arguments, headPtrPtr);
+//		numStr = popArgument(arguments );
 
-		resType = popArgument(arguments, numStr);
+		if (numStr->size == 0 ) {
 
-		if (resType) {
-
-			if (resType == NO_ARGUMENT_FOUND) {
-				resType = SUCCESS;
+			if (arguments->size != 0) {
+				resType = CONSECUTIVE_COMMAS;
 			}
-
 			break;
 
 		}
 
 		resType = getIntFromName(numStr->value, numPtr);
+		deleteString(numStr);
 
 		if (resType) {
-			/*			current arguments is not an integer VALUE_NOT_AN_INTEGER ERROR */
-			printString(numStr);
-			/*TODO handle this case ?*/
 			break;
-
 		}
 
 		tempSize++;
@@ -142,13 +102,10 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 		intArr = temp;
 		intArr[tempSize - 1] = num;
 
-		deleteString(numStr);
-
 	}
 
 	if (resType) {
 		/* in case there is an error we free the space we allocated on the heap */
-		deleteString(numStr);
 		free(temp);
 
 		return resType;
@@ -164,18 +121,22 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 RESULT_TYPE getIntFromName(char *str, int *numDest) {
 
 	int i = 0, digit = 0, temp = 0, isNegative = 0, decimalPlace = 1;
-	int j = 0;
-
+	int j = 0, size;
 	char currChar = str[0];
+	size = strlen(str);
+
+	if (size == 0) {
+		return INPUT_IS_EMPTRY;
+	}
 
 	if (currChar == '-') {
-		if (strlen(str) == 1) {
+		if (size == 1) {
 			return VALUE_NOT_AN_INTEGER;
 		}
 		isNegative = 1;
 		i++;
 	} else if (currChar == '+') {
-		if (strlen(str) == 1) {
+		if (size == 1) {
 			return VALUE_NOT_AN_INTEGER;
 		}
 		i++;
@@ -248,7 +209,7 @@ RESULT_TYPE checkStringIllegal(char *line) {
 			/*if we fint quote we increment the count*/
 			quoteCount++;
 			if (quoteCount == 2) {
-				i++;//TODO does this work????
+				i++; //TODO does this work????
 				break;
 			}
 		}
