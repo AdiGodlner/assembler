@@ -170,7 +170,8 @@ int ismcrNamevalid(char *name) {
 	/*List of commands and label names to check against*/
 	char *names[] = { "move", "cmp", "add", "sub", "not", "clr", "lea", "inc",
 			"dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop", ".string",
-			".data", ".extrn", ".entr" };
+			".data", ".extrn", ".entry", "string", "data", "extrn", "entry",
+			"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7" };
 	int i;
 	/*Check if the name matches any command or labels*/
 	for (i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
