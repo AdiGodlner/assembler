@@ -11,10 +11,11 @@
 #include <stdlib.h>
 #include "macro.h"
 #include "HashTable.h"
+#include "Result.h"
 
 /*TODO change to int and return correct value depending of what we want to do */
 
-void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
+RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 	String *macroBody = createNewString("");
 	String *macroName;
@@ -24,7 +25,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 	if (getValueByKeyString(table, macroName) != NULL) {
 
 		printf("error macro with %s is already defined", macroName->value);
-		return;
+		return MACRO_NAME_ALREADY_EXIST;
 
 	}
 	deleteString(nameWarp);
@@ -46,7 +47,7 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 				if (!isspace(macroEnd[i])) {
 
 					printf("\n ERROR: Illegal parametrs after end of macro.\n");
-					return;
+					return EXTRANEOUS_TEXT;
 				}
 
 			}
@@ -55,13 +56,14 @@ void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 			insertToTable(table, macroName->value, macroBody);
 			deleteString(macroName);
 
-			return;
+			return SUCCESS;
 
 		} else {
 			appendToString(macroBody, line);
 		}
 
 	}
+	return SUCCESS;
 
 }
 
@@ -82,14 +84,14 @@ RESULT_TYPE macroParse(char *srcFile) {
 
 	if (!asFile) {
 		printFileError(srcFile);
-		return CATSTROPIC_FAILURE;
+		return FILE_OPEN_FAILURE;
 	}
 
 	/*Open dest file .am*/
 	amFile = fopen(destFile->value, "w");/*read and write to the file*/
 	if (!amFile) {
 		printFileError(destFile->value);
-		return CATSTROPIC_FAILURE;
+		return FILE_OPEN_FAILURE;
 
 	}
 
@@ -154,7 +156,7 @@ String* filenameChange(char *fileName, char *suffix) {
 	if (!dotPos) {
 		/*Wrong filename input file name does not contain a legal suffix*/
 		/*TODO: check if dotpos = allowed suffix ".am" ".as" "/foo" */
-		printf("Error: Illegal file name\n");
+		printf("Error: Illegal file name.\n");
 		return NULL;
 	}
 

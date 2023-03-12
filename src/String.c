@@ -181,4 +181,43 @@ String* popWord(String *str) {
 	return newStr;
 
 }
+char* fromDecimalToBinary(int decimal){
+
+	/*Convert decimal to binary with 14 bits*/
+	char *binary = (char*)malloc(15 * sizeof(char));
+	sprintf(binary, "%014d", decimal);
+	char A_R_E[3];/*including NULL charector*/
+	char destOp[3];
+	char srcOp[3];
+	char opcode[5];
+	char operand2[3];
+	char operand1[3];
+
+	strncpy(A_R_E, binary, 2);
+	A_R_E[2] = '\0';
+
+	strncpy(destOp, binary+2, 2);
+	destOp[2] = '\0';
+
+	strncpy(srcOp, binary+4, 2);
+	srcOp[2] = '\0';
+
+	strncpy(opcode, binary+6, 4);
+	opcode[4] = '\0';
+
+	strncpy(operand2, binary+10, 2);
+	operand2[2] = '\0';
+
+	strncpy(operand1, binary+12, 2);
+	operand1[2] = '\0';
+
+	char *result = (char*)malloc(15 * sizeof(char));
+
+	sprintf(result, "%s%s%s%s%s%s", operand1, operand2, opcode, srcOp, destOp, A_R_E);
+
+	return result;
+//TODO DO we free here???
+	free(binary);
+
+}
 

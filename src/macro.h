@@ -29,7 +29,7 @@
  * Else it places the macro name to a macro table,
  * and it designate the macro body to place it later in to the .am fila,
  */
-void readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
+RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
 
 
 /*

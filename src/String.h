@@ -95,4 +95,11 @@ int findNextNonBlankCharLocation(String *str, int offset);
  */
 String* popWord(String *str);
 
+/*
+ * This method converts a decimal number to a 14-bit binary string in the required format.
+ * @param 'int' decimal number that need to be converted.
+ * @return result, the binary string.
+ */
+char* fromDecimalToBinary(int decimal);
+
 #endif /* STRING_H_ */
