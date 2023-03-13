@@ -20,20 +20,39 @@ void pushHead(Node *newNode, Node **listHeadPtr) {
 }
 
 //TODO fix this ??
-void pushTail(Node *newNode, Node **listHeadPtr) {
+//void pushTailOLD(Node *newNode, Node **listHeadPtr) {
+//
+//	if (*listHeadPtr == NULL) {
+//		*listHeadPtr = newNode;
+//		return;
+//	}
+//
+//	while ((*listHeadPtr)->next != NULL) {
+//		*listHeadPtr = (*listHeadPtr)->next;
+//	}
+//
+//	(*listHeadPtr)->next = newNode;
+//
+//}
 
-	if (*listHeadPtr == NULL) {
-		*listHeadPtr = newNode;
+void pushTail(Node *newNode, Node **headPtr ) {
+
+	Node *last = *headPtr;
+
+	if (*headPtr == NULL) {
+		*headPtr = newNode;
 		return;
 	}
 
-	while ((*listHeadPtr)->next != NULL) {
-		*listHeadPtr = (*listHeadPtr)->next;
+	while (last->next != NULL) {
+		last = last->next;
 	}
 
-	(*listHeadPtr)->next = newNode;
+	last->next = newNode;
 
+	return;
 }
+
 Node* createNode(void *data, Node *next) {
 
 	Node *node = malloc(sizeof(Node));

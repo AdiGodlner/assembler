@@ -233,6 +233,7 @@ RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
 	int i = 0;
 	char currChar;
 	String *newStr = createEmptyString();
+	String * temp;
 
 	for (i = 0; i <= argumernts->size; ++i) {
 
@@ -268,8 +269,12 @@ RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
 		deleteString(newStr);
 
 	}
-
+	//new str is the argument
+//	we need to pop it froom arguments
+	temp = createNewString(argumernts->value + i +1);
+	setStringValue(argumernts, temp->value);
 	*dest = *newStr;
+	deleteString(temp);
 
 	return resType;
 

@@ -327,7 +327,8 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 			isSrcRegister = -1;
 	RESULT_TYPE resType = SUCCESS;
 	int addresingType = -1;
-	String *currParam;
+	String foo;
+	String *currParam = &foo;
 	Set **paramArr = NULL;
 	Set *opCodebinaryWord = NULL;
 	Set *parambinaryWord = NULL;
@@ -409,12 +410,14 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 	pushTail(newNode, &instructionBinarysList);
 
 	for (j = 0; j < i; ++j) {
+		//TODO push tail doesnot push to tail
 		newNode = createNode(paramArr[j], NULL);
 		pushTail(newNode, &instructionBinarysList);
 	}
 
-	(*ICPtr) += 1 + i;
-	free(paramArr);
+//	(*ICPtr) += 1 + i;
+
+//	free(paramArr);
 
 	return resType;
 
@@ -456,16 +459,16 @@ int getParamAddresingType(String *param) {
 		return 3;
 
 	} else {
-		return 2;
+		return 1;
 	}
 
 }
 
 int isInstructionParamValid(String *param) {
 
-	int *ignore = NULL;
+	int ignore = 0;
 	if (param->value[0] == '#') {
-		if (getIntFromName((param->value) + 1, ignore) == SUCCESS) {
+		if (getIntFromName((param->value) + 1, &ignore) == SUCCESS) {
 			return 1;
 		}
 
