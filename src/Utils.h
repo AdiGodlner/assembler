@@ -23,7 +23,7 @@
  * or an UNEXPECTED_COMMA if the first non blank char of the string is a ','
  * this method considers a blank char to be either ' ' or '\t'
  */
-RESULT_TYPE * popArgument(String *argumernts,String * dest, int isLastArgument);
+RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument);
 
 /*
  * this method pops all arguments from String arguments checks if they are integers

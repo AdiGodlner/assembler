@@ -8,13 +8,14 @@
 #ifndef ASSEMBLY_H_
 #define ASSEMBLY_H_
 
-#include "Label.h"
-#include  "Result.h"
-#include  "HashTable.h"
 #include <stdio.h>
-#include <stdlib.h>
 
-
+#include "HashTable.h"
+#include "Label.h"
+#include "LinkedList.h"
+#include "opcode.h"
+#include "Result.h"
+#include "String.h"
 
 /*
  *
@@ -27,7 +28,8 @@
  * After it we put the entry lable name and address in an .ent file in a format as: LABLE     100.
  * If no entry lables were found were not deleting the .ent file if already it has been created.
  */
-RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList, HashTable *symbolTable);
+RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
+		HashTable *symbolTable);
 /*
  *
  */
@@ -38,19 +40,21 @@ void assembler(char *srcFile);
  */
 
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node **entryListPtr);
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr);
 
 /*
  *
  */
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node **entryListPtr);
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr);
 /*
  *
  */
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 		Node *instructionBinarysList, Node *dataBinarysList,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
+		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
  *
  */
@@ -64,20 +68,21 @@ int isLabel(String *str);
  *
  */
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList, Node **entryListPtr,
-		int *ICPtr, int *DCPtr);
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
  *
  */
-RESULT_TYPE handleNonLabel(char *word, String *line, HashTable * labelsTable,
-		Node *instructionBinarysList, Node *dataBinarysList, Node **entryListPtr,
-		int *ICPtr, int *DCPtr) ;
+RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
+		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
  *
  */
-RESULT_TYPE  handleInstructions(char* word, String * line, Node *instructionBinarysList, int *ICPtr);
+RESULT_TYPE handleInstructions(char *word, String *line,
+		Node *instructionBinarysList, int *ICPtr);
 /*
  *
  */
@@ -93,7 +98,8 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line);
 /*
  *
  */
-RESULT_TYPE handleEntry(HashTable *labelsTable, String *line, Node **entryListPtr);
+RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
+		Node **entryListPtr);
 /*
  *
  */
@@ -102,7 +108,18 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 /*
  *
  */
-RESULT_TYPE checkLabelLegality(HashTable *labelsTable, char *labelName) ;
+RESULT_TYPE checkLabelLegality(char *labelName);
+
+RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
+		Node *instructionBinarysList, int *ICPtr);
+
+/*
+ *
+ */
+Set* createParamBinaryWord(String *param, int addresingType);
+int isInstructionParamValid(String *param);
+
+int getParamAddresingType(String *param);
 /*
  *
  */

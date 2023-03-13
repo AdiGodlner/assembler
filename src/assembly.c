@@ -158,7 +158,8 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 		setStringValue(lineString, line);
 		lineProcesingResult = lineFirstPass(lineString, symbolTable,
-				instructionBinarysList, dataBinarysList, entryListPtr, &IC, &DC);
+				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
+				&DC);
 
 		if (lineProcesingResult) {
 
@@ -224,7 +225,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 		return LABEL_ALLREADY_EXISTS;
 	}
 
-	resType = checkLabelLegality(labelsTable, labelName);
+	resType = checkLabelLegality(labelName);
 
 	if (resType) {
 		return resType;
@@ -287,56 +288,194 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 	return resType;
 }
 
+RESULT_TYPE handleInstructions(char *word, String *line,
+		Node *instructionBinarysList, int *ICPtr) {
 
-RESULT_TYPE  handleInstructions(char* word, String * line, Node *instructionBinarysList, int *ICPtr){
-	/*TODO function that turns opcode to binary */
-	/*TODO handle opcodes read string line and translate to opcode*/
-
-	static HashTable * opCodeTable = NULL;
+	static HashTable *opCodeTable = NULL;
 	RESULT_TYPE resType = SUCCESS;
-	String ** paramArr = NULL;
-	String * currParam = NULL;
 	Opcode *opCode = NULL;
-	Set *binaryWord = NULL;
-	int i = 0;
-	int addresingType = -1;
 
-	if (!opCodeTable ) {
+	if (!opCodeTable) {
+		opCodeTable = createDefualtHashTable();
 		initOpcode(opCodeTable);
 	}
-
 	if (!isKeyInTable(opCodeTable, word)) {
 		return ILLEGAL_OPCODE;
 	}
 
-	opCode = (Opcode*)getValueByKey(opCodeTable, word);
-	paramArr = malloc(sizeof(String*) * opCode->numOfParameters );
+	opCode = (Opcode*) getValueByKey(opCodeTable, word);
 
-	for (i= 0; i < opCode->numOfParameters; i++) {
+	//check if opcode is jmp jsr or bne
+	if (isValueInSet(opCode->destAddressing, 2)) {
+		//TODO handle jsr jmp and bne
+//TODO change name of function
+//		handleComplexOpcode();
+	} else {
+		resType = handleSimpleOpcode(line, opCode, instructionBinarysList,
+				ICPtr);
 
-		 resType = popArgument(line, currParam, i == (opCode->numOfParameters -1));
+	}
 
-		 if (resType) {
+	return resType;
+}
+
+//TODO change name of function
+RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
+		Node *instructionBinarysList, int *ICPtr) {
+
+	int i = 0, j = 0, isAddresingTypeValid = -1, isSrcParam = -1,
+			isSrcRegister = -1;
+	RESULT_TYPE resType = SUCCESS;
+	int addresingType = -1;
+	String *currParam;
+	Set **paramArr = NULL;
+	Set *opCodebinaryWord = NULL;
+	Set *parambinaryWord = NULL;
+	Node *newNode;
+
+	opCodebinaryWord = createNewSet();
+	writeCodeToBinaryWord(opCodebinaryWord, opCode->code);
+
+	paramArr = malloc(sizeof(String*) * opCode->numOfParameters);
+
+	for (i = 0; i < opCode->numOfParameters; i++) {
+
+		resType = popArgument(line, currParam,
+				i == (opCode->numOfParameters - 1));
+
+		if (resType) {
 			break;
 		}
 
-		//TODO check currParam is legal
-		 addresingType = getParamAddresingType(currParam);
+		if (!isInstructionParamValid(currParam)) {
+			resType = ILLEGAL_PARAM;
+			break;
+		}
 
-		 // TODO how do I know if its a src address or destAddres?
-		 // TODO do some opCOdes have only srcAdress or only destAdress?
+		addresingType = getParamAddresingType(currParam);
+		isSrcParam = (opCode->numOfParameters == 2 && i == 0);
+		// check if its a src parameter or dest parameter
+		if (isSrcParam) {
+			//check if parameter type is allowed
+			isAddresingTypeValid = isValueInSet(opCode->srcAddressing,
+					addresingType);
+		} else {
+			//check if parameter type is allowed
+			isAddresingTypeValid = isValueInSet(opCode->destAddressing,
+					addresingType);
+		}
 
-		paramArr[i] = currParam;
+		if (!isAddresingTypeValid) {
+			resType = ILLEGAL_ADDRESSTYPE;
+			break;
+		}
+
+		//write address to opCodeBinary
+		if (isSrcParam) {
+
+			isSrcRegister = addresingType == 3;
+			parambinaryWord = createParamBinaryWord(currParam, addresingType);
+			paramArr[i] = parambinaryWord;
+			writeSrcToBinaryWord(opCodebinaryWord, addresingType);
+
+		} else {
+			if (isSrcRegister && addresingType == 3) {
+
+				writeDestRegiserToBinaryWord(paramArr[i],
+						atoi(currParam->value + 1));
+
+			} else {
+
+				parambinaryWord = createParamBinaryWord(currParam,
+						addresingType);
+
+				paramArr[i] = parambinaryWord;
+			}
+
+			writeDestToBinaryWord(opCodebinaryWord, addresingType);
+
+		}
 
 	}
 
 	//TODO check for EXTRANEOUS_TEXT
-	//TODO duplicate the bianry
 
+	if (resType) {
+		//TODO handle erros
+		return resType;
+	}
+
+	newNode = createNode(opCodebinaryWord, NULL);
+	pushTail(newNode, &instructionBinarysList);
+
+	for (j = 0; j < i; ++j) {
+		newNode = createNode(paramArr[j], NULL);
+		pushTail(newNode, &instructionBinarysList);
+	}
+
+	(*ICPtr) += 1 + i;
 	free(paramArr);
-	return resType ;
+
+	return resType;
+
 }
 
+Set* createParamBinaryWord(String *param, int addresingType) {
+
+	Set *parambinaryWord;
+	int num;
+	if (addresingType == 3) {
+		parambinaryWord = createNewSet();
+		num = atoi(param->value + 1);
+		writeSrcRegiserToBinaryWord(parambinaryWord, num);
+		return parambinaryWord;
+
+	} else if (addresingType == 2) {
+		//TODO handle jmo and jsr
+		return NULL;
+
+	} else if (addresingType == 0) {
+		num = atoi(param->value);
+		parambinaryWord = intToBinaryWordWithOffset(num, 2);
+		return parambinaryWord;
+
+	} else {
+		// addresingType == 1
+		return NULL;
+
+	}
+
+}
+
+int getParamAddresingType(String *param) {
+
+	if (param->value[0] == '#') {
+		return 0;
+	} else if (param->size == 2 && param->value[0] == 'r'
+			&& param->value[1] - '0' >= 0 && param->value[1] - '0' < 8) {
+		return 3;
+
+	} else {
+		return 2;
+	}
+
+}
+
+int isInstructionParamValid(String *param) {
+
+	int *ignore = NULL;
+	if (param->value[0] == '#') {
+		if (getIntFromName((param->value) + 1, ignore) == SUCCESS) {
+			return 1;
+		}
+
+	} else if (checkLabelLegality(param->value) == SUCCESS) {
+
+		return 1;
+	}
+
+	return 0;
+}
 
 RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
@@ -416,11 +555,11 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 	String *extraText;
 	Label *label;
 
-	resType = checkLabelLegality(labelsTable, labelName->value);
-		if (resType) {
-			deleteString(labelName);
-			return resType;
-		}
+	resType = checkLabelLegality(labelName->value);
+	if (resType) {
+		deleteString(labelName);
+		return resType;
+	}
 
 	/* check if w is in table AND w that is in table is not extern */
 	if (isKeyInTable(labelsTable, labelName->value)) {
@@ -464,7 +603,7 @@ RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
 	Label *label;
 	Node *node;
 
-	resType = checkLabelLegality(labelsTable, labelName->value);
+	resType = checkLabelLegality(labelName->value);
 	if (resType) {
 		deleteString(labelName);
 		return resType;
@@ -511,7 +650,7 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 
 }
 
-RESULT_TYPE checkLabelLegality(HashTable *labelsTable, char *labelName) {
+RESULT_TYPE checkLabelLegality(char *labelName) {
 
 	//TODO check that label is not a reserved words like jmp or bne like we did in macro
 	int i = 0;

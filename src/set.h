@@ -77,6 +77,10 @@ void insertToSet(Set *s, int num);
  */
 void clearSet(Set* s1 );
 /*
+ *
+ */
+int isValueInSet(Set * set, int value);
+/*
  * this method returns the length of the array used to store the members of the set
  */
 int getLength(Set *s);

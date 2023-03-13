@@ -64,7 +64,7 @@ void read_set(Set **s, int intArr[], int size) {
 
 String * setToBinaryString(Set * s) {
 
-	int i = 0, j = 0;
+	int i = 0, j = 0, temp;
 	char currChar;
 	char * bits;
 	String * binStr = createEmptyString();
@@ -75,7 +75,8 @@ String * setToBinaryString(Set * s) {
 
 		for (j = 0; j < 8; ++j) {
 
-			appendCharToString(binStr, (currChar & (1 << j)) ? '1' : '0');
+			temp = (currChar & (1 << j));
+			appendCharToString(binStr, temp ? '1' : '0');
 
 		}
 	}
@@ -186,6 +187,23 @@ void clearSet(Set *s1) {
 	memset(s1->bits, 0, sizeof(s1->bits));
 
 }
+
+
+int isValueInSet(Set * set, int value){
+
+	int location ;
+	unsigned int bit ;
+
+	if (value < 0 ) {
+		return 0;
+	}
+
+	location = value / 8;
+	bit = 1 << (value % 8);
+	return  set->bits[location] & bit;
+
+}
+
 
 int getLength(Set *s) {
 

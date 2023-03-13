@@ -14,33 +14,22 @@
 
 #define OPCODE_LENGTH 4
 #define MAX_ADDRESSING_LENGTH 4
-#define OPCODE_START_INDEX 5
+#define OPCODE_START_INDEX 6
 
 Opcode* createOpcode(char *name, int code, int numOfParameters,
 		char *srcAddressingStr, char *destAddressingStr) {
 
-	int opcodeBinary[OPCODE_LENGTH];
-	int i = 0, temp;
 	Opcode *opcode;
-	Set *binaryWord = NULL, *srcAddressing = NULL, *destAddressing = NULL;
-	Set **binaryWordPtr = &binaryWord;
+	Set *srcAddressing = NULL, *destAddressing = NULL;
 	Set **srcAddressingPtr = &srcAddressing;
 	Set **destAddressingPtr = &destAddressing;
 
 	opcode = malloc(sizeof(Opcode));
 
 	if (opcode == NULL) {
+		//TODO FIX MEMORY PRINTS
 		printf("memm prob create opcode TODO fix later");
 	}
-
-	for (i = 0; i < OPCODE_LENGTH; ++i) {
-		temp = (code % 2);
-		opcodeBinary[i] = temp ? (OPCODE_START_INDEX + i) : -1;
-		code /= 2;
-
-	}
-
-	read_set(binaryWordPtr, opcodeBinary, OPCODE_LENGTH);
 
 	populateAddressingSet(srcAddressingPtr, srcAddressingStr);
 	populateAddressingSet(destAddressingPtr, destAddressingStr);
@@ -48,13 +37,73 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 	opcode->name = createNewString(name);
 	opcode->code = code; /* is the code variable really usefull? */
 	opcode->numOfParameters = numOfParameters;
-	opcode->binaryWord = binaryWord;
+//	opcode->binaryWord = binaryWord;
 	opcode->srcAddressing = srcAddressing;
 	opcode->destAddressing = destAddressing;
 
 	return opcode;
 
 }
+
+//TODO #define macros / numbers
+
+void writeAREToBinaryWord(Set *binaryWord, int are){
+
+	writeToBinaryWord(binaryWord, are, 0, 2);
+
+}
+void writeDestToBinaryWord(Set *binaryWord, int dest){
+
+	writeToBinaryWord(binaryWord, dest, 2, 2);
+
+}
+void writeSrcToBinaryWord(Set *binaryWord, int src){
+
+	writeToBinaryWord(binaryWord, src, 4, 2);
+
+}
+void writeCodeToBinaryWord(Set *binaryWord, int code){
+
+	writeToBinaryWord(binaryWord, code, OPCODE_START_INDEX, OPCODE_LENGTH);
+
+}
+void writeSecondOperandToBinaryWord(Set *binaryWord, int operand){
+
+	writeToBinaryWord(binaryWord, operand, 10, 2);
+
+}
+void writeFirstOperandToBinaryWord(Set *binaryWord, int operand){
+
+	writeToBinaryWord(binaryWord, operand, 12, 2);
+
+}
+void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg){
+	writeToBinaryWord(binaryWord, reg, 2, 6);
+
+}
+void writeDestRegiserToBinaryWord(Set *binaryWord, int reg){
+	writeToBinaryWord(binaryWord, reg, 8, 6);
+
+}
+
+void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length){
+
+	int i = 0;
+	int temp;
+	int opcodeBinary[length];
+
+	for (i = 0; i < length; ++i) {
+
+		temp = (decimal % 2);
+		opcodeBinary[i] = temp ? (offset + i) : -1;
+		decimal /= 2;
+
+	}
+
+	read_set(&binaryWord, opcodeBinary, length);
+
+}
+
 
 void populateAddressingSet(Set ** addressingPtr, char *addressingStr) {
 
@@ -86,28 +135,21 @@ Set * charToBinaryWord(char c){
 }
 
 Set* intToBinaryWord(int num){
+	return intToBinaryWordWithOffset(num, 0);
+}
+
+Set* intToBinaryWordWithOffset(int num, int offset){
 
 	int i =0;
 	Set * set = createNewSet();
 	/*TODO define 14 as a macro */
 	for (i= 0; i < 14; ++i) {
 		if (num & (1<<i)) {
-			insertToSet(set, i);
+			insertToSet(set, i +offset);
 		}
 	}
 
 	return set;
-}
-
-
-String * opcodeToString(Opcode * opcode){
-
-	/*TODO maybe change the String it returns to better represent opcode not really important*/
-	/*TODO or maybe change the String it returns the end output required by the secound pass */
-
-	return setToBinaryString(opcode->binaryWord);
-
-
 }
 
 
@@ -119,7 +161,7 @@ void initOpcode(HashTable *table) {
 	char *addres1 = "1";
 	char *empty = "";
 
-	Opcode *moveOpCode = createOpcode("move", 0, 2, addres013, addres13);
+	Opcode *moveOpCode = createOpcode("mov", 0, 2, addres013, addres13);
 	Opcode *cmpOpCode = createOpcode("cmp", 1, 2, addres013, addres013);
 	Opcode *addOpCode = createOpcode("add", 2, 2, addres013, addres13);
 	Opcode *subOpCode = createOpcode("sub", 3, 2, addres013, addres13);
@@ -136,7 +178,7 @@ void initOpcode(HashTable *table) {
 	Opcode *rtsOpCode = createOpcode("rts", 14, 0, empty, empty);
 	Opcode *stopOpCode = createOpcode("stop", 15, 0, empty, empty);
 
-	insertToTable(table, "move", moveOpCode);
+	insertToTable(table, "mov", moveOpCode);
 	insertToTable(table, "cmp", cmpOpCode);
 	insertToTable(table, "add", addOpCode);
 	insertToTable(table, "sub", subOpCode);

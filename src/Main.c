@@ -18,13 +18,12 @@
 #include "macro.h"
 
 void preAssembly(int argc, char **argv);
-
+String* foo(void *bar);
 int main(int argc, char **argv) {
 
-/*	HashTable * opcodeTable = createDefualtHashTable();
-	initOpcode(opcodeTable);
-	preAssembly(argc, argv);*/
-
+//	HashTable *opcodeTable = createDefualtHashTable();
+//	initOpcode(opcodeTable);
+	preAssembly(argc, argv);
 	assembler("C:/Users/Adi/Desktop/foo.am");
 
 	printf("\nend :-)");
@@ -32,6 +31,7 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 
 }
+
 
 void preAssembly(int argc, char **argv) {
 
@@ -48,5 +48,4 @@ void preAssembly(int argc, char **argv) {
 	}
 
 }
-
 

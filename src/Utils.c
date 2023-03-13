@@ -227,7 +227,7 @@ int isCommaLegal(char *line) {
 }
 
 
-RESULT_TYPE * popArgument(String *argumernts,String * dest, int isLastArgument) {
+RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
 
 	RESULT_TYPE resType = SUCCESS;
 	int i = 0;
@@ -238,6 +238,7 @@ RESULT_TYPE * popArgument(String *argumernts,String * dest, int isLastArgument) 
 
 		currChar = charAt(argumernts, i);
 		if (isspace(currChar)) {
+			//TODO check for missing comma
 			continue;
 		}
 
