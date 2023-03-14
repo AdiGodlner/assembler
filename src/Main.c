@@ -32,17 +32,17 @@ int main(int argc, char **argv) {
 
 void preAssembly(int argc, char **argv) {
 
-	int i = 0;
-	char *fileName;
+//	int i = 0;
+//	char *fileName;
+//
+//	if (argc > 1) {
+//		for (i = 1; i < argc; i++) {
 
-	if (argc > 1) {
-		for (i = 1; i < argc; i++) {
+//			fileName = argv[i];
+			macroParse("C:/Users/Adi/Desktop/foo.txt");
 
-			fileName = argv[i];
-			macroParse(fileName);
-
-		}
-	}
+//		}
+//	}
 
 }
 

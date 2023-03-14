@@ -113,10 +113,16 @@ RESULT_TYPE checkLabelLegality(char *labelName);
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 
+
 /*
  *
  */
-Set* createParamBinaryWord(String *param, int addresingType);
+RESULT_TYPE spam(String *line, Opcode *opCode, Node ***paramArrPtr,
+		Set *opCodebinaryWord, int *size) ;
+/*
+ *
+ */
+Node * createParamBinaryWord(String *param, int addresingType);
 int isInstructionParamValid(String *param);
 
 int getParamAddresingType(String *param);

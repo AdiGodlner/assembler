@@ -10,10 +10,16 @@
 #ifndef LINKEDLIST_H_
 #define LINKEDLIST_H_
 
+typedef enum {
+
+	SET, STRING
+
+} DATA_TYPE;
 
 typedef struct Node{
 
 	void * data;
+	DATA_TYPE TYPE;
 	struct Node * next;
 
 } Node;

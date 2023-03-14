@@ -112,7 +112,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 		firstWord = popWord(lineString);
 
 		if (strncmp(firstWord->value, "mcr", 3) == 0) {
-			readMacro(asFile, table, line);
+			readMacro(asFile, table, lineString->value);
 
 		} else {
 

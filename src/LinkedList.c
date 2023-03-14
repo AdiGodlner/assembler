@@ -19,22 +19,6 @@ void pushHead(Node *newNode, Node **listHeadPtr) {
 
 }
 
-//TODO fix this ??
-//void pushTailOLD(Node *newNode, Node **listHeadPtr) {
-//
-//	if (*listHeadPtr == NULL) {
-//		*listHeadPtr = newNode;
-//		return;
-//	}
-//
-//	while ((*listHeadPtr)->next != NULL) {
-//		*listHeadPtr = (*listHeadPtr)->next;
-//	}
-//
-//	(*listHeadPtr)->next = newNode;
-//
-//}
-
 void pushTail(Node *newNode, Node **headPtr ) {
 
 	Node *last = *headPtr;
