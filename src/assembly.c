@@ -29,12 +29,14 @@ void assembler(char *srcFile) {
 	RESULT_TYPE resType;
 	HashTable *symbolTable = createDefualtHashTable();
 	Node *instructionBinarysList = NULL;
+	Node **instructionBinarysListPtr = &instructionBinarysList;
 	Node *dataBinarysList = NULL;
+	Node **dataBinarysListPtr = &dataBinarysList;
 	Node *entryList = NULL;
 	Node **entryListPtr = &entryList;
 
-	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysList,
-			dataBinarysList, entryListPtr);
+	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysListPtr,
+			dataBinarysListPtr, entryListPtr);
 
 	printTable(symbolTable, labelToString);
 	/*	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data */
@@ -119,7 +121,7 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 }
 
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
@@ -132,8 +134,8 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 	}
 
 	/*firstPassAssembler actualy doing the passing*/
-	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysList,
-			dataBinarysList, entryListPtr);
+	resType = firstPassAssembler(amFile, symbolTable, instructionBinarysListPtr,
+			dataBinarysListPtr, entryListPtr);
 
 	fclose(amFile);
 
@@ -142,7 +144,7 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 }
 
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr) {
 
 	int IC = 0, DC = 0;
@@ -158,7 +160,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 		setStringValue(lineString, line);
 		lineProcesingResult = lineFirstPass(lineString, symbolTable,
-				instructionBinarysList, dataBinarysList, entryListPtr, &IC,
+				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, &IC,
 				&DC);
 
 		if (lineProcesingResult) {
@@ -183,7 +185,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 }
 
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
@@ -193,12 +195,12 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 	if (isLabel(firstWord)) {
 
 		resType = handleLabel(firstWord->value, labelTable, lineString,
-				instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 				DCPtr);
 	} else {
 
 		resType = handleNonLabel(firstWord->value, lineString, labelTable,
-				instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 				DCPtr);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
 			resType = SUCCESS;
@@ -212,7 +214,7 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 }
 
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
@@ -237,7 +239,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 	firstWord = popWord(line);
 
 	resType = handleNonLabel(firstWord->value, line, labelsTable,
-			instructionBinarysList, dataBinarysList, entryListPtr, ICPtr,
+			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 			DCPtr);
 
 	if (resType == SUCCESS) {
@@ -260,17 +262,17 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 }
 
 RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
 	if (isData(word)) {
-		resType = handleData(line, dataBinarysList, DCPtr);
+		resType = handleData(line, dataBinarysListPtr, DCPtr);
 
 	} else if (isStringData(word)) {
 
-		resType = handleString(line, dataBinarysList, DCPtr);
+		resType = handleString(line, dataBinarysListPtr, DCPtr);
 
 	} else if (isExtern(word)) {
 
@@ -281,7 +283,7 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 
 	} else {
 
-		resType = handleInstructions(word, line, instructionBinarysList, ICPtr);
+		resType = handleInstructions(word, line, instructionBinarysListPtr, ICPtr);
 
 	}
 
@@ -289,7 +291,7 @@ RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
 }
 
 RESULT_TYPE handleInstructions(char *word, String *line,
-		Node *instructionBinarysList, int *ICPtr) {
+		Node **instructionBinarysListPtr, int *ICPtr) {
 
 	static HashTable *opCodeTable = NULL;
 	RESULT_TYPE resType = SUCCESS;
@@ -311,7 +313,8 @@ RESULT_TYPE handleInstructions(char *word, String *line,
 //TODO change name of function
 //		handleComplexOpcode();
 	} else {
-		resType = handleSimpleOpcode(line, opCode, instructionBinarysList,
+
+		resType = handleSimpleOpcode(line, opCode, instructionBinarysListPtr,
 				ICPtr);
 
 	}
@@ -321,9 +324,9 @@ RESULT_TYPE handleInstructions(char *word, String *line,
 
 //TODO change name of function
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
-		Node *instructionBinarysList, int *ICPtr) {
+		Node **instructionBinarysListPtr, int *ICPtr) {
 
-	int i = 0, j = 0, isAddresingTypeValid = -1, isSrcParam = -1,
+	int i = 0, j = 0, isAddresingTypeValid = -1, isSrcParam = -1, numOfWords = 0,
 			isSrcRegister = -1;
 	RESULT_TYPE resType = SUCCESS;
 	int addresingType = -1;
@@ -377,12 +380,13 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 			isSrcRegister = addresingType == 3;
 			parambinaryWord = createParamBinaryWord(currParam, addresingType);
 			paramArr[i] = parambinaryWord;
+			numOfWords++;
 			writeSrcToBinaryWord(opCodebinaryWord, addresingType);
 
 		} else {
 			if (isSrcRegister && addresingType == 3) {
 
-				writeDestRegiserToBinaryWord(paramArr[i],
+				writeDestRegiserToBinaryWord(paramArr[0],
 						atoi(currParam->value + 1));
 
 			} else {
@@ -391,6 +395,8 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 						addresingType);
 
 				paramArr[i] = parambinaryWord;
+				numOfWords++;
+
 			}
 
 			writeDestToBinaryWord(opCodebinaryWord, addresingType);
@@ -407,17 +413,16 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 	}
 
 	newNode = createNode(opCodebinaryWord, NULL);
-	pushTail(newNode, &instructionBinarysList);
+	pushTail(newNode, instructionBinarysListPtr);
 
-	for (j = 0; j < i; ++j) {
+	for (j = 0; j < numOfWords; ++j) {
 		//TODO push tail doesnot push to tail
 		newNode = createNode(paramArr[j], NULL);
-		pushTail(newNode, &instructionBinarysList);
+		pushTail(newNode, instructionBinarysListPtr);
 	}
 
-//	(*ICPtr) += 1 + i;
-
-//	free(paramArr);
+	(*ICPtr) += 1 + i;
+	free(paramArr);
 
 	return resType;
 
@@ -480,7 +485,7 @@ int isInstructionParamValid(String *param) {
 	return 0;
 }
 
-RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
+RESULT_TYPE handleData(String *line, Node **dataBinarysListPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 	Set *binaryWord;
@@ -502,7 +507,7 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 		currInt = intArr[i];
 		binaryWord = intToBinaryWord(currInt);
 		node = createNode(binaryWord, NULL);
-		pushTail(node, &dataBinarysList);
+		pushTail(node, dataBinarysListPtr);
 
 	}
 
@@ -513,7 +518,7 @@ RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr) {
 
 }
 
-RESULT_TYPE handleString(String *line, Node *dataBinarysList, int *DCPtr) {
+RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 	int i = 1;
@@ -535,14 +540,14 @@ RESULT_TYPE handleString(String *line, Node *dataBinarysList, int *DCPtr) {
 
 		binaryWord = intToBinaryWord(str[i]);
 		node = createNode(binaryWord, NULL);
-		pushTail(node, &dataBinarysList);
+		pushTail(node, dataBinarysListPtr);
 		(*DCPtr)++;
 
 	}
 
 	binaryWord = intToBinaryWord('\0');
 	node = createNode(binaryWord, NULL);
-	pushTail(node, &dataBinarysList);
+	pushTail(node, dataBinarysListPtr);
 	(*DCPtr)++;
 
 	deleteString(quote);

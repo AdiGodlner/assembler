@@ -40,20 +40,20 @@ void assembler(char *srcFile);
  */
 
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr);
 
 /*
  *
  */
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr);
 /*
  *
  */
 RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
  *
@@ -68,29 +68,29 @@ int isLabel(String *str);
  *
  */
 RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
  *
  */
 RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
-		Node *instructionBinarysList, Node *dataBinarysList,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
  *
  */
 RESULT_TYPE handleInstructions(char *word, String *line,
-		Node *instructionBinarysList, int *ICPtr);
+		Node **instructionBinarysListPtr, int *ICPtr);
 /*
  *
  */
-RESULT_TYPE handleData(String *line, Node *dataBinarysList, int *DCPtr);
+RESULT_TYPE handleData(String *line, Node **dataBinarysListPtr, int *DCPtr);
 /*
  *
  */
-RESULT_TYPE handleString(String *line, Node *dataBinarysList, int *DCPtr);
+RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr);
 /*
  *
  */
@@ -111,7 +111,7 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 RESULT_TYPE checkLabelLegality(char *labelName);
 
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
-		Node *instructionBinarysList, int *ICPtr);
+		Node **instructionBinarysListPtr, int *ICPtr);
 
 /*
  *
