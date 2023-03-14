@@ -340,7 +340,7 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 	opCodebinaryWord = createNewSet();
 	writeCodeToBinaryWord(opCodebinaryWord, opCode->code);
 
-	paramArr = malloc(sizeof(String*) * opCode->numOfParameters);
+	paramArr = malloc(sizeof(Set*) * opCode->numOfParameters);
 
 	for (i = 0; i < opCode->numOfParameters; i++) {
 
