@@ -312,6 +312,7 @@ RESULT_TYPE handleInstructions(char *word, String *line,
 	if (isValueInSet(opCode->destAddressing, 2)) {
 		//TODO handle jsr jmp and bne
 //TODO change name of function
+		resType = handleAdvancedOpcode(line , opCode, instructionBinarysListPtr, ICPtr);
 //		handleComplexOpcode();
 	} else {
 
@@ -319,6 +320,22 @@ RESULT_TYPE handleInstructions(char *word, String *line,
 				ICPtr);
 
 	}
+
+	return resType;
+}
+
+RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
+		Node **instructionBinarysListPtr, int *ICPtr){
+
+	RESULT_TYPE resType = SUCCESS;
+	Set *opCodebinaryWord = NULL;
+
+	opCodebinaryWord = createNewSet();
+	writeCodeToBinaryWord(opCodebinaryWord, opCode->code);
+
+
+
+
 
 	return resType;
 }
