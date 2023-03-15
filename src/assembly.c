@@ -61,7 +61,9 @@ void assembler(char *srcFile) {
 	/* free heap meomory */
 	deleteList(instructionBinarysList);
 	deleteList(dataBinarysList);
-	deleteTable(symbolTable, deleteString);
+	/*deleteTable(symbolTable, deleteString); */
+	deleteTable( symbolTable, deleteLabel );
+
 }
 
 void deleteByType(void *set) {
@@ -455,12 +457,13 @@ RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
 		Node *srcNode = opCodeNode->next;
 		Set *srcBinary = (Set*) srcNode->data;
 		writeDestRegiserToBinaryWord(srcBinary, atoi(currParamPtr->value + 1));
-		(*numOfWords) += 1;
 
 	} else {
 
 		parambinaryNode = createParamBinaryWord(currParamPtr, addresingType);
 		pushTail(parambinaryNode, &opCodeNode);
+		(*numOfWords) += 1;
+
 	}
 
 	return resType;
@@ -476,6 +479,7 @@ int isAddresingTypeValid(Set *addresingSet, int addresingType) {
 Node* createParamBinaryWord(String *param, int addresingType) {
 
 	Node *node = NULL;
+	String * paramDup = NULL;
 	Set *parambinaryWord;
 	int num;
 
@@ -497,7 +501,8 @@ Node* createParamBinaryWord(String *param, int addresingType) {
 
 	} else {
 		/* addresingType == 1 */
-		node = createNode(param, STRING, NULL);
+		paramDup = duplicateString(param);
+		node = createNode(paramDup, STRING, NULL);
 		node->TYPE = STRING;
 
 	}

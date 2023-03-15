@@ -21,15 +21,16 @@ void preAssembly(int argc, char **argv);
 int main(int argc, char **argv) {
 
 	preAssembly(argc, argv);
-/*	assembler("C:/Users/Adi/Desktop/foo.am"); */
 	assembler(argv[1]);
+	/*
+	 assembler("C:/Users/Adi/Desktop/foo.am");
+	 */
 
 	printf("\nend :-)");
 
 	return EXIT_SUCCESS;
 
 }
-
 
 void preAssembly(int argc, char **argv) {
 
@@ -40,7 +41,7 @@ void preAssembly(int argc, char **argv) {
 		for (i = 1; i < argc; i++) {
 
 			fileName = argv[i];
-			macroParse(argv[i]);
+			macroParse(fileName);
 
 		}
 	}

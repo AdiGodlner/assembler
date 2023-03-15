@@ -63,11 +63,15 @@ void deleteList(Node *head) {
 }
 
 void deleteNode(Node *node) {
+
 	if (node->TYPE == SET) {
 		deleteSet(node->data);
-	}else{
+	}else if(node->TYPE == STRING) {
 		deleteString(node->data);
+	}else{
+		printf("\n\n\noooooopssss\n\n\n");
 	}
+
 	free(node);
 
 }

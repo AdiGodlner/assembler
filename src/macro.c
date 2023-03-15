@@ -52,7 +52,6 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 			}
 
-
 			insertToTable(table, macroName->value, macroBody);
 			deleteString(macroName);
 
@@ -67,7 +66,6 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 }
 
-
 RESULT_TYPE macroParse(char *srcFile) {
 
 	char *amSuffix = ".am";
@@ -75,20 +73,26 @@ RESULT_TYPE macroParse(char *srcFile) {
 	void *macroBody;
 	HashTable *table = createDefualtHashTable();
 	String *destFile = filenameChange(srcFile, amSuffix);
-	String *firstWord, *lineString ;
-	FILE *amFile ;
+	String *firstWord, *lineString;
+	FILE *amFile;
 
 	/*Open scr file .as*/
 	FILE *asFile = fopen(srcFile, "r");/*read from file*/
 
 	if (!asFile) {
+		deleteTable(table, deleteString);
+		deleteString(destFile);
 		printFileError(srcFile);
 		return FILE_OPEN_FAILURE;
 	}
 
 	/*Open dest file .am*/
 	amFile = fopen(destFile->value, "w");/*read and write to the file*/
+
 	if (!amFile) {
+
+		deleteTable(table, deleteString);
+		deleteString(destFile);
 		printFileError(destFile->value);
 		return FILE_OPEN_FAILURE;
 
@@ -101,11 +105,11 @@ RESULT_TYPE macroParse(char *srcFile) {
 	lineString = createEmptyString();
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
-		if(isblankLine(line)){
+
+		if (isblankLine(line)) {
 			continue;
 		}
 		textCorrecter(line);
-
 
 		setStringValue(lineString, line);
 		firstWord = popWord(lineString);
@@ -141,6 +145,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 	deleteString(destFile);
 	deleteString(lineString);
 	deleteTable(table, deleteString);
+
 	return SUCCESS;
 
 }
@@ -195,9 +200,6 @@ void textCorrecter(char *line) {
 
 	len = strlen(line);
 
-
-
-
 	/*Remove extra whitespace*/
 	for (i = j = 0; i < len; i++) {
 		if (!isspace(line[i])) {
@@ -205,14 +207,13 @@ void textCorrecter(char *line) {
 			j++;
 
 		} else {
-			k = i+1;
-			while(isspace(line[k])){
+			k = i + 1;
+			while (isspace(line[k])) {
 				k++;
 			}
-			i = k-1;
+			i = k - 1;
 			line[j] = ' ';
 			j++;
-
 
 		}
 	}
@@ -222,21 +223,19 @@ void textCorrecter(char *line) {
 	line[j] = '\0';
 }
 
-
-int isblankLine(char *line){
-
+int isblankLine(char *line) {
 
 	int i;
 	int len = strlen(line);
 
 	/*Removes blank lines*/
-	for(i= 0; i< len; i++){
-		if (isspace(line[i])){
-			if(line[i] =='\n'){
-			return 1;
+	for (i = 0; i < len; i++) {
+		if (isspace(line[i])) {
+			if (line[i] == '\n') {
+				return 1;
 			}
 
-		}else{
+		} else {
 			return 0;
 		}
 
@@ -244,7 +243,6 @@ int isblankLine(char *line){
 	return 0;
 
 }
-
 
 /*Print if an error uccured with opening file */
 void printFileError(char *fileName) {
