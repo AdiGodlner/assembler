@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "LinkedList.h"
 #include "String.h"
+#include "set.h"
 
 #define MEM_ERR "failed to allocate memory"
 
@@ -37,38 +38,36 @@ void pushTail(Node *newNode, Node **headPtr ) {
 	return;
 }
 
-Node* createNode(void *data, Node *next) {
+Node* createNode(void *data,DATA_TYPE TYPE, Node *next) {
 
 	Node *node = malloc(sizeof(Node));
-
-	if (node == NULL) {
-		printf(MEM_ERR);
-		return NULL;
-	}
-
 	node->data = data;
+	node->TYPE = TYPE;
 	node->next = next;
 
 	return node;
 
 }
 
-void deleteList(Node *head, void (*deleteDataFunc)(void*)) {
+void deleteList(Node *head) {
 
 	Node *nextNode;
 	while (head) {
 
 		nextNode = head->next;
-		deleteNode(head, deleteDataFunc);
+		deleteNode(head);
 		head = nextNode;
 
 	}
 
 }
 
-void deleteNode(Node *node, void (*deleteDataFunc)(void*)) {
-
-	deleteDataFunc(node->data);
+void deleteNode(Node *node) {
+	if (node->TYPE == SET) {
+		deleteSet(node->data);
+	}else{
+		deleteString(node->data);
+	}
 	free(node);
 
 }

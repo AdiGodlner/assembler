@@ -39,7 +39,7 @@ void setStringValue(String *str, char *charArr) {
 	char *temp;
 
 	str->size = strlen(charArr);
-	temp = realloc(str->value, sizeof(char) * (str->size + 1));
+	temp = (char *)realloc(str->value, sizeof(char) * (str->size + 1));
 
 	if (temp != NULL) {
 		str->value = temp;

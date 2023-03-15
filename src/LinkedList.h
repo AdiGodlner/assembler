@@ -12,44 +12,40 @@
 
 typedef enum {
 
-	SET, STRING
+	SET, STRING, ENTRY
 
 } DATA_TYPE;
 
-typedef struct Node{
+typedef struct Node {
 
-	void * data;
+	void *data;
 	DATA_TYPE TYPE;
-	struct Node * next;
+	struct Node *next;
 
 } Node;
 
 /*
  *
  */
-void pushHead(Node * newNode, Node ** listHeadPtr );
+void pushHead(Node *newNode, Node **listHeadPtr);
 
 /*
  *
  */
-void pushTail(Node * newNode, Node ** listHeadPtr );
+void pushTail(Node *newNode, Node **listHeadPtr);
 
 /*
  *
  */
-
-Node * createNode(void * data, Node * next);
+Node* createNode(void *data, DATA_TYPE TYPE, Node *next);
 
 /*
  *
  */
-void deleteList(Node * head,void (*deleteDataFunc)(void*));
+void deleteList(Node *head);
 /*
  *
  */
-void deleteNode(Node * node, void (*deleteDataFunc)(void*));
-
-
-
+void deleteNode(Node *node);
 
 #endif /* LINKEDLIST_H_ */

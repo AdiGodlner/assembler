@@ -10,6 +10,7 @@
 
 #include "Result.h"
 #include "LinkedList.h"
+#include<stdio.h>
 /*
  * TODO check description
  * this method pops the next argument in a the given String 'arguments' and stores
@@ -59,5 +60,7 @@ RESULT_TYPE checkStringIllegal(char *line);
  * This function ckecks for illegal commas in the text, and return 1, if is legal.
  */
 int isCommaLegal(char *line);
+
+
 
 #endif /* SRC_UTILS_H_ */

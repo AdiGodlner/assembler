@@ -14,7 +14,6 @@ typedef struct {
 
 	String *name;
 	int code;
-//	Set *binaryWord;
 	int numOfParameters;
 	Set *srcAddressing;
 	Set *destAddressing;

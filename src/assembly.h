@@ -114,11 +114,28 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 
 
+
+
 /*
  *
  */
-RESULT_TYPE spam(String *line, Opcode *opCode, Node ***paramArrPtr,
-		Set *opCodebinaryWord, int *size) ;
+RESULT_TYPE handleParameters(String *line, Opcode *opCode, Node *opCodeNode,
+		int *numOfWords);
+/*
+ *
+ */
+RESULT_TYPE handleSrcParam(String *line, Opcode *opCode, Node *opCodeNode,
+		int *isSrcRegisterPtr);
+/*
+ *
+ */
+RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
+		int isSrcRegister, int * numOfWords);
+
+/*
+ *
+ */
+int isAddresingTypeValid(Set *addresingSet, int addresingType);
 /*
  *
  */

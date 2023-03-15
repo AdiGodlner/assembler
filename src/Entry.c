@@ -16,11 +16,6 @@ Entry * createEntry(int hash, String *key, void *value) {
 
 	Entry * entry = malloc(sizeof(Entry));
 
-	if (entry == NULL) {
-		printf(MEM_ERR);
-		return NULL;
-	}
-
 	/*TODO maybe duplicate value not sure if its needed yet*/
 	entry->value = value;
 	entry->hash = hash;

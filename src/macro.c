@@ -68,7 +68,6 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 }
 
 
-//TODO return RESULT_TYPE
 RESULT_TYPE macroParse(char *srcFile) {
 
 	char *amSuffix = ".am";
