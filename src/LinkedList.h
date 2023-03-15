@@ -10,40 +10,42 @@
 #ifndef LINKEDLIST_H_
 #define LINKEDLIST_H_
 
+typedef enum {
 
-typedef struct Node{
+	SET, STRING, ENTRY
 
-	void * data;
-	struct Node * next;
+} DATA_TYPE;
+
+typedef struct Node {
+
+	void *data;
+	DATA_TYPE TYPE;
+	struct Node *next;
 
 } Node;
 
 /*
  *
  */
-void pushHead(Node * newNode, Node ** listHeadPtr );
+void pushHead(Node *newNode, Node **listHeadPtr);
 
 /*
  *
  */
-void pushTail(Node * newNode, Node ** listHeadPtr );
+void pushTail(Node *newNode, Node **listHeadPtr);
 
 /*
  *
  */
-
-Node * createNode(void * data, Node * next);
+Node* createNode(void *data, DATA_TYPE TYPE, Node *next);
 
 /*
  *
  */
-void deleteList(Node * head,void (*deleteDataFunc)(void*));
+void deleteList(Node *head);
 /*
  *
  */
-void deleteNode(Node * node, void (*deleteDataFunc)(void*));
-
-
-
+void deleteNode(Node *node);
 
 #endif /* LINKEDLIST_H_ */

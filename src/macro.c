@@ -68,7 +68,6 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 }
 
 
-//TODO return RESULT_TYPE
 RESULT_TYPE macroParse(char *srcFile) {
 
 	char *amSuffix = ".am";
@@ -112,7 +111,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 		firstWord = popWord(lineString);
 
 		if (strncmp(firstWord->value, "mcr", 3) == 0) {
-			readMacro(asFile, table, line);
+			readMacro(asFile, table, lineString->value);
 
 		} else {
 

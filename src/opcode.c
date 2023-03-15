@@ -26,18 +26,12 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 
 	opcode = malloc(sizeof(Opcode));
 
-	if (opcode == NULL) {
-		//TODO FIX MEMORY PRINTS
-		printf("memm prob create opcode TODO fix later");
-	}
-
 	populateAddressingSet(srcAddressingPtr, srcAddressingStr);
 	populateAddressingSet(destAddressingPtr, destAddressingStr);
 
 	opcode->name = createNewString(name);
 	opcode->code = code; /* is the code variable really usefull? */
 	opcode->numOfParameters = numOfParameters;
-//	opcode->binaryWord = binaryWord;
 	opcode->srcAddressing = srcAddressing;
 	opcode->destAddressing = destAddressing;
 
@@ -45,7 +39,7 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 
 }
 
-//TODO #define macros / numbers
+/*TODO #define macros / numbers */
 
 void writeAREToBinaryWord(Set *binaryWord, int are){
 

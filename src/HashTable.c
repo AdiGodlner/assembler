@@ -29,15 +29,10 @@ HashTable* createHashTable(int tableSize) {
 	int i = 0;
 	HashTable *hashTable = malloc(sizeof(HashTable));
 
-	if (hashTable == NULL) {
-		printf(MEM_ERR);
-		return NULL;
-	}
-
 	hashTable->bucketArr = malloc(sizeof(Node*) * tableSize);
 
 	if (hashTable->bucketArr == NULL) {
-		printf(MEM_ERR);
+		/*TODO add on exit method to malloc */
 		free(hashTable);
 		return NULL;
 	}
@@ -115,7 +110,8 @@ void insertToTable(HashTable *table, char *key, void *data) {
 	/* if we got here it means there is no entry in the hashtable with the given key*/
 
 	newEntry = createEntry(hash, keyString, data);
-	newNode = createNode((void*) newEntry, NULL);
+	newNode = createNode(newEntry, ENTRY, NULL);
+
 
 	if (prevNode) {
 		prevNode->next = newNode;
@@ -140,11 +136,6 @@ void resizeTable(HashTable *table) {
 	Entry *entry = NULL;
 
 	newBucketArr = malloc(sizeof(Node*) * table->size * 2);
-
-	if (newBucketArr == NULL) {
-		printf(MEM_ERR);
-		return;
-	}
 
 	oldSize = table->size;
 	table->size *= 2;
@@ -268,6 +259,7 @@ int hashcode(String *str) {
 void deleteTable(HashTable *table, void (*deleteDataFunc)(void*)) {
 
 	cleanTable(table, deleteDataFunc);
+	free(table->bucketArr);
 	free(table);
 
 }

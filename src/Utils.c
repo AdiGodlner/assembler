@@ -41,7 +41,7 @@ RESULT_TYPE getIntArrfromStringArgs(String *argumernts, int **intArrPtr,
 						} else {
 							resType = INPUT_IS_EMPTRY;
 						}
-					}else {
+					} else {
 						resType = CONSECUTIVE_COMMAS;
 					}
 
@@ -53,13 +53,6 @@ RESULT_TYPE getIntArrfromStringArgs(String *argumernts, int **intArrPtr,
 
 			elementIndex++;
 			temp = realloc(intArr, sizeof(int) * elementIndex);
-
-			if (temp == NULL) {
-				/*TODO write memory allocation function that exists on failed meomer allocation */
-				resType = MEMMORY_ALLOCATION_FAILURE;
-				break;
-
-			}
 
 			intArr = temp;
 			intArr[elementIndex - 1] = num;
@@ -139,33 +132,52 @@ int isbracketLegal(char *line) {
 
 	int i, len;
 	int bracketCount = 0;
-
+	String *label, *param1, *param2;
 	len = strlen(line);
+	label = createEmptyString();
 
 	for (i = 0; i < len; i++) {
 
-		if ((line[i] == ')') || (line[i] == '(')) {
-
-			bracketCount++;
-			if ((i == 0 || isspace(line[i - 1]))
-					|| (i + 1 < len && isspace(line[i + 1]))) {
-				/*Printing proper error message if an illegal comma is found*/
-				printf("ERROR: Illegal bracket position %d\n", i);
-			}
-			/*Checking that both brackets appear*/
+		if (isspace(line[i])) {
+			return 0;
+		} else if (i == 0 && !isalpha(line[i])) {
+			return 0;
+		} else if (!isalnum(line[i])) {
+			return 0;
 		} else if (line[i] == '(') {
 			bracketCount++;
-
-		} else if (line[i] == ')') {
-			bracketCount--;
-
+			break;
+		} else {
+			appendCharToString(label, line[i]);
 		}
 	}
-	if (bracketCount != 0) {
-		/*if one of the brackes is missing or there are too many brackes, we print an proper error message*/
-		printf("ERROR: Missing brackets\n");
-		return 0;
+
+	param1 = createEmptyString();
+	for (; i < len; i++) {
+
+		if (isspace(line[i])) {
+			return 0;
+		} else if (line[i] == ',') {
+			break;
+		} else {
+			appendCharToString(param1, line[i]);
+		}
+
 	}
+
+	param2 = createEmptyString();
+	for (; i < len; i++) {
+
+		if (isspace(line[i])) {
+			return 0;
+		} else if (line[i] == ')') {
+			break;
+		} else {
+			appendCharToString(param2, line[i]);
+		}
+
+	}
+
 	return 1;
 
 }
@@ -181,7 +193,7 @@ RESULT_TYPE checkStringIllegal(char *line) {
 			/*if we fint quote we increment the count*/
 			quoteCount++;
 			if (quoteCount == 2) {
-				i++; //TODO does this work????
+				i++; /*TODO does this work????*/
 				break;
 			}
 		}
@@ -203,56 +215,33 @@ RESULT_TYPE checkStringIllegal(char *line) {
 
 }
 
-int isCommaLegal(char *line) {
-
-	int i, len;
-	int commaCount = 0;
-
-	len = strlen(line);
-
-	for (i = 0; i < len; i++) {
-
-		if (line[i] == ',') {
-
-			commaCount++;
-			if ((i == 0 || isspace(line[i - 1]))
-					|| (i + 1 < len && isspace(line[i + 1]))) {
-				/*Printing proper error message if an illegal comma is found*/
-				printf("ERROR: Illegal comma position %d\n", i);
-				return 0;
-			}
-		}
-	}
-	return 1;
-}
-
-
-RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
+/*TODO fix pop argument for missing comma */
+RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 
 	RESULT_TYPE resType = SUCCESS;
 	int i = 0;
 	char currChar;
 	String *newStr = createEmptyString();
-	String * temp;
+	String *temp;
 
 	for (i = 0; i <= argumernts->size; ++i) {
 
 		currChar = charAt(argumernts, i);
 		if (isspace(currChar)) {
-			//TODO check for missing comma
+			/*TODO check for missing comma */
 			continue;
 		}
 
 		else if (currChar == ',' || currChar == '\n' || currChar == '\0') {
 
 			if (isLastArgument && currChar == ',') {
-				resType =  UNEXPECTED_COMMA;//TODO maybe change this resType
+				resType = UNEXPECTED_COMMA; /*TODO maybe change this resType */
 
-			} else if (newStr->size  == 0 && currChar == ',') {
+			} else if (newStr->size == 0 && currChar == ',') {
 				resType = CONSECUTIVE_COMMAS;
 
-			} else if (newStr->size  == 0 &&  i == argumernts->size) {
-					resType = INPUT_IS_EMPTRY;
+			} else if (newStr->size == 0 && i == argumernts->size) {
+				resType = INPUT_IS_EMPTRY;
 
 			}
 
@@ -269,9 +258,9 @@ RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
 		deleteString(newStr);
 
 	}
-	//new str is the argument
-//	we need to pop it froom arguments
-	temp = createNewString(argumernts->value + i +1);
+	/*new str is the argument
+	we need to pop it froom arguments*/
+	temp = createNewString(argumernts->value + i + 1);
 	setStringValue(argumernts, temp->value);
 	*dest = *newStr;
 	deleteString(temp);
@@ -279,6 +268,5 @@ RESULT_TYPE popArgument(String *argumernts,String * dest, int isLastArgument) {
 	return resType;
 
 }
-
 
 
