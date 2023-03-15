@@ -17,11 +17,16 @@
 #include "opcode.h"
 #include "macro.h"
 
-void preAssembly(int argc, char **argv);
+//void preAssembly(int argc, char **argv);
 int main(int argc, char **argv) {
 
 	preAssembly(argc, argv);
-	assembler("C:/Users/Adi/Desktop/foo.am");
+<<<<<<< HEAD
+	assembler("C:/Users/buyan/Desktop/foo.txt");
+=======
+/*	assembler("C:/Users/Adi/Desktop/foo.am"); */
+	assembler(argv[1]);
+>>>>>>> 113e513c2b6efa6966cb7e5b51da417dfe191417
 
 	printf("\nend :-)");
 
@@ -39,7 +44,7 @@ void preAssembly(int argc, char **argv) {
 		for (i = 1; i < argc; i++) {
 
 			fileName = argv[i];
-			macroParse(fileName);
+			macroParse(argv[i]);
 
 		}
 	}
