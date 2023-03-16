@@ -11,25 +11,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Label * createLabel(char* name){
+Label* createLabel(char *name) {
 
- Label * label = malloc(sizeof (Label));
- label->name = createNewString(name);
- label->size = 0;
+	Label *label = malloc(sizeof(Label));
+	label->name = createNewString(name);
+	label->size = 0;
 
- return label;
+	return label;
 
 }
 
-String* labelToString(void * label){
+String* labelToString(void *label) {
 
-	String * str = createNewString(((Label*) label)->name->value);
+	String *str = createNewString(((Label*) label)->name->value);
 	return str;
 }
 
-void deleteLabel(Label *label){
+void deleteLabel(void *label) {
 
-	deleteString(label->name);
+	Label * labelCast = (Label*) label;
+	deleteString(labelCast->name);
 	free(label);
 
 }

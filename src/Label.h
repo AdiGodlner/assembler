@@ -34,7 +34,7 @@ String* labelToString(void * label);
 /*
  *
  */
-void deleteLabel(Label *label);
+void deleteLabel(void *label);
 /*
  *
  */

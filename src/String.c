@@ -39,7 +39,7 @@ void setStringValue(String *str, char *charArr) {
 	char *temp;
 
 	str->size = strlen(charArr);
-	temp = (char *)realloc(str->value, sizeof(char) * (str->size + 1));
+	temp = (char*) realloc(str->value, sizeof(char) * (str->size + 1));
 
 	if (temp != NULL) {
 		str->value = temp;
@@ -104,8 +104,11 @@ void appendCharToString(String *str, char c) {
 }
 
 void deleteString(void *str) {
+	String *foo;
 	if (str != NULL) {
-		free(((String*) str)->value);
+
+		foo = (String*) str;
+		free(foo->value);
 		free(str);
 
 	}

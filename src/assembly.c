@@ -38,10 +38,6 @@ void assembler(char *srcFile) {
 	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysListPtr,
 			dataBinarysListPtr, entryListPtr);
 
-<<<<<<< HEAD
-//	printTable(symbolTable, labelToString);
-=======
->>>>>>> 113e513c2b6efa6966cb7e5b51da417dfe191417
 	/*	TODO iterate over keys of symbol table add IC TO LABEL->ADRESS for labels of TYPE data */
 
 	if (entryList != NULL) {
@@ -63,17 +59,11 @@ void assembler(char *srcFile) {
 	/*	TODO secoundPassAssembler(); */
 
 	/* free heap meomory */
-<<<<<<< HEAD
-	deleteList(instructionBinarysList, deleteSet);
-	deleteList(dataBinarysList, deleteSet);
-	deleteList(*entryListPtr, deleteSet);
-	*entryListPtr = NULL;
-
-=======
 	deleteList(instructionBinarysList);
 	deleteList(dataBinarysList);
->>>>>>> 113e513c2b6efa6966cb7e5b51da417dfe191417
-	deleteTable(symbolTable, deleteString);
+	/*deleteTable(symbolTable, deleteString); */
+	deleteTable( symbolTable, deleteLabel );
+
 }
 
 void deleteByType(void *set) {
@@ -130,7 +120,6 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 	}
 
 	deleteString(destFile);
-
 
 	return resType;
 
@@ -195,7 +184,6 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 	}
 
 	deleteString(lineString);
-
 
 	return lineProcesingResult;
 }
@@ -374,19 +362,7 @@ RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 
 	pushTail(opCodeNode, instructionBinarysListPtr);
 
-<<<<<<< HEAD
-	for (j = 0; j < i; ++j) {
-
-		newNode = createNode(paramArr[j], NULL);
-		pushTail(newNode, &instructionBinarysList);
-	}
-
-	(*ICPtr) += 1 + i;
-
-//	free(paramArr);
-=======
 	(*ICPtr) += numOfWords;
->>>>>>> 113e513c2b6efa6966cb7e5b51da417dfe191417
 
 	return resType;
 
@@ -481,12 +457,13 @@ RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
 		Node *srcNode = opCodeNode->next;
 		Set *srcBinary = (Set*) srcNode->data;
 		writeDestRegiserToBinaryWord(srcBinary, atoi(currParamPtr->value + 1));
-		(*numOfWords) += 1;
 
 	} else {
 
 		parambinaryNode = createParamBinaryWord(currParamPtr, addresingType);
 		pushTail(parambinaryNode, &opCodeNode);
+		(*numOfWords) += 1;
+
 	}
 
 	return resType;
@@ -502,6 +479,7 @@ int isAddresingTypeValid(Set *addresingSet, int addresingType) {
 Node* createParamBinaryWord(String *param, int addresingType) {
 
 	Node *node = NULL;
+	String * paramDup = NULL;
 	Set *parambinaryWord;
 	int num;
 
@@ -523,7 +501,8 @@ Node* createParamBinaryWord(String *param, int addresingType) {
 
 	} else {
 		/* addresingType == 1 */
-		node = createNode(param, STRING, NULL);
+		paramDup = duplicateString(param);
+		node = createNode(paramDup, STRING, NULL);
 		node->TYPE = STRING;
 
 	}
