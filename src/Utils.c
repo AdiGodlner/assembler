@@ -127,8 +127,8 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
 
 }
 
-int isbracketLegal(char *line) {
-	/*Check for illegal commas and missing brackets*/
+int isPramsLegalforRealativeMode(char *line) {
+	/*Check for illegal comma and missing brackets*/
 
 	int i, len;
 	int bracketCount = 0;
