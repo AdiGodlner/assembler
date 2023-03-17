@@ -74,7 +74,7 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
 
 	if ((*ICPtr) + (*DCPtr) > 156) {
 		resType = EXCEDING_MACHINE_MEMMORY;
-		printf("IC + DC > 150 \n");
+		printf("IC + DC > 156 \n");
 	}
 	if (resType) {
 
@@ -229,7 +229,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 			/* TODO custom error messages for every resType
 			 TODO print all errors here */
 			printf("ERROR:   at line %d | resType %d \n", lineNumber,
-					lineProcesingResult);
+					getResultMsg());
 
 			if (resType == SUCCESS) {
 				resType = lineProcesingResult;
@@ -978,8 +978,8 @@ RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
 
 	str = malloc(sizeof(char) * 10);
 
-	fputs("Base 10 address Base 2 code\n", obFile);
-	sprintf(str, "\t%d\t%d \n", IC, DC);
+
+	sprintf(str, "\t%d %d \n", IC, DC);
 	fputs(str, obFile);
 	free(str);
 	resType = secoundPassAssembly(obFile, externFile, symbolTable, binarysList);
@@ -987,7 +987,7 @@ RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
 	fclose(obFile);
 	fclose(externFile);
 	if (resType) {
-		/*TODO remove O file and extern File */
+		/*TODO remove Ob file and extern File */
 	}
 
 	deleteString(obFileName);
