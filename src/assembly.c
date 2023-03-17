@@ -258,7 +258,7 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 				ICPtr, DCPtr);
 	} else {
 
-		resType = handleNonLabel(firstWord->value, lineString, labelTable,
+		resType = handleNonLabel(firstWord->value, labelTable,lineString,
 				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
 				ICPtr, DCPtr);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
@@ -297,7 +297,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 	firstWord = popWord(line);
 
-	resType = handleNonLabel(firstWord->value, line, labelsTable,
+	resType = handleNonLabel(firstWord->value, labelsTable, line,
 			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 			DCPtr);
 
@@ -900,10 +900,9 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 RESULT_TYPE checkLabelLegality(char *labelName) {
 
 	/*TODO check that label is not a reserved words like jmp or bne like we did in macro */
-	isLableNamevalid(*labelName);
+	isLableNamevalid(labelName);
 
 	int i = 0;
-
 
 	if (!isalpha(*labelName)) {
 		return LABEL_ILLEGAL_DEFENITION;
@@ -1085,6 +1084,9 @@ void writeToExternFile(FILE *externFile, String *labelName, int index) {
 
 	deleteString(labelNameCopy);
 	free(buffer);
+
+}
+
 int isLableNamevalid(char *name) {
 
 	/*List of commands and label names to check against*/
