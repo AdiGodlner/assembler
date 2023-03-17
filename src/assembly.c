@@ -320,7 +320,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 }
 
-RESULT_TYPE handleNonLabel(char *word, String *line, HashTable *labelsTable,
+RESULT_TYPE handleNonLabel(char *word, HashTable *labelsTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
@@ -900,7 +900,10 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
 RESULT_TYPE checkLabelLegality(char *labelName) {
 
 	/*TODO check that label is not a reserved words like jmp or bne like we did in macro */
+	isLableNamevalid(*labelName);
+
 	int i = 0;
+
 
 	if (!isalpha(*labelName)) {
 		return LABEL_ILLEGAL_DEFENITION;
@@ -1082,5 +1085,22 @@ void writeToExternFile(FILE *externFile, String *labelName, int index) {
 
 	deleteString(labelNameCopy);
 	free(buffer);
+int isLableNamevalid(char *name) {
+
+	/*List of commands and label names to check against*/
+	char *names[] = { "move", "cmp", "add", "sub", "not", "clr", "lea", "inc",
+			"dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop", ".string",
+			".data", ".extrn", ".entry", "string", "data", "extrn", "entry",
+			"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7" };
+	int i;
+	/*Check if the name matches any command or labels*/
+	for (i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
+		if (strcmp(name, names[i]) == 0) {
+			/*Name matches, so it's not a valid  macro name*/
+
+			return 0;
+		}
+	}
+	return 1;
 
 }
