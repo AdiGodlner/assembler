@@ -20,14 +20,12 @@
 void preAssembly(int argc, char **argv);
 int main(int argc, char **argv) {
 
+	int i = 100, j = 0;
+	for (; i < 256; ++i) {
+		j++;
 
-	 assembler(argv[1]);
-	/*
-	assembler("C:/Users/Adi/Desktop/foo.am");
-	 preAssembly(argc, argv);
-	 */
-
-	printf("\nend :-)");
+	}
+	printf("%d", j);
 
 	return EXIT_SUCCESS;
 

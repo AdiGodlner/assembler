@@ -158,41 +158,6 @@ void union_set(Set *s1, Set *s2, Set *s3) {
 
 }
 
-void intersect_set(Set *s1, Set *s2, Set *s3) {
-
-	int i = 0;
-
-	for (i = 0; i < getLength(s3); ++i) {
-
-		s3->bits[i] = s1->bits[i] & s2->bits[i];
-
-	}
-
-}
-
-void sub_set(Set *s1, Set *s2, Set *s3) {
-
-	int i = 0;
-
-	for (i = 0; i < getLength(s3); ++i) {
-
-		s3->bits[i] = s1->bits[i] & ~(s2->bits[i]);
-
-	}
-
-}
-
-void symdiff_set(Set *s1, Set *s2, Set *s3) {
-
-	int i = 0;
-
-	for (i = 0; i < getLength(s3); ++i) {
-
-		s3->bits[i] = s1->bits[i] ^ (s2->bits[i]);
-
-	}
-
-}
 
 void clearSet(Set *s1) {
 

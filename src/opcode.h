@@ -34,6 +34,7 @@ void writeSecondOperandToBinaryWord(Set *binaryWord, int operand);
 void writeFirstOperandToBinaryWord(Set *binaryWord, int operand);
 void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg);
 void writeDestRegiserToBinaryWord(Set *binaryWord, int reg);
+
 /*
  *
  */

@@ -54,6 +54,7 @@ void assembler(char *srcFile) {
 		printf("\n Second PASS - Was passed successfully.\n");
 
 	}
+
 	/* TODO bug in free heap meomory */
 	deleteList(instructionBinarysList);
 	deleteTable(symbolTable, deleteLabel);
@@ -71,7 +72,7 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
 	resType = firstPassFileOpen(srcFile, symbolTable, instructionBinarysListPtr,
 			dataBinarysListPtr, entryListPtr, ICPtr, DCPtr);
 
-	if ((*ICPtr) + (*DCPtr) > 150) {
+	if ((*ICPtr) + (*DCPtr) > 156) {
 		resType = EXCEDING_MACHINE_MEMMORY;
 		printf("IC + DC > 150 \n");
 	}
@@ -243,7 +244,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 	return lineProcesingResult;
 }
 
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
@@ -253,12 +254,12 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 
 	if (isLabel(firstWord)) {
 
-		resType = handleLabel(firstWord->value, labelTable, lineString,
+		resType = handleLabel(firstWord->value, symbolTable, lineString,
 				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
 				ICPtr, DCPtr);
 	} else {
 
-		resType = handleNonLabel(firstWord->value, labelTable,lineString,
+		resType = handleNonLabel(firstWord->value, symbolTable, lineString,
 				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
 				ICPtr, DCPtr);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
@@ -272,7 +273,7 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 
 }
 
-RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
@@ -282,7 +283,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 	String *firstWord;
 
 	labelName[strlen(labelName) - 1] = '\0';
-	if (isKeyInTable(labelsTable, labelName)) {
+	if (isKeyInTable(symbolTable, labelName)) {
 		return LABEL_ALLREADY_EXISTS;
 	}
 
@@ -297,15 +298,15 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 	firstWord = popWord(line);
 
-	resType = handleNonLabel(firstWord->value, labelsTable, line,
+	resType = handleNonLabel(firstWord->value, symbolTable, line,
 			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 			DCPtr);
 
 	if (resType == SUCCESS) {
 		if (currDCAddres != *DCPtr) {
-			insertLabel(labelName, labelsTable, DATA, currDCAddres);
+			insertLabel(labelName, symbolTable, DATA, currDCAddres);
 		} else {
-			insertLabel(labelName, labelsTable, INSTRUCTION, currICAddres);
+			insertLabel(labelName, symbolTable, INSTRUCTION, currICAddres);
 		}
 
 	}
@@ -320,7 +321,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
 
 }
 
-RESULT_TYPE handleNonLabel(char *word, HashTable *labelsTable, String *line,
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
@@ -335,10 +336,10 @@ RESULT_TYPE handleNonLabel(char *word, HashTable *labelsTable, String *line,
 
 	} else if (isExtern(word)) {
 
-		resType = handleExtern(labelsTable, line);
+		resType = handleExtern(symbolTable, line);
 
 	} else if (isEntry(word)) {
-		resType = handleEntry(labelsTable, line, entryListPtr);
+		resType = handleEntry(symbolTable, line, entryListPtr);
 
 	} else {
 
@@ -721,6 +722,7 @@ int isInstructionParamValid(String *param) {
 	}
 
 	return 0;
+
 }
 
 RESULT_TYPE handleData(String *line, Node **dataBinarysListPtr, int *DCPtr) {
@@ -795,7 +797,7 @@ RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr) {
 
 }
 
-RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
+RESULT_TYPE handleExtern(HashTable *symbolTable, String *line) {
 
 	RESULT_TYPE resType = EXTERN_CREATED;
 	String *labelName = popWord(line);
@@ -809,8 +811,8 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 	}
 
 	/* check if w is in table AND w that is in table is not extern */
-	if (isKeyInTable(labelsTable, labelName->value)) {
-		label = (Label*) getValueByKey(labelsTable, labelName->value);
+	if (isKeyInTable(symbolTable, labelName->value)) {
+		label = (Label*) getValueByKey(symbolTable, labelName->value);
 
 		if (label->type != EXTERNAL) {
 
@@ -830,7 +832,7 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 		label = createLabel(labelName->value);
 		label->type = EXTERNAL;
 		label->address = -1;
-		insertToTable(labelsTable, labelName->value, label);
+		insertToTable(symbolTable, labelName->value, label);
 
 	}
 
@@ -841,7 +843,7 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line) {
 
 }
 
-RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
+RESULT_TYPE handleEntry(HashTable *symbolTable, String *line,
 		Node **entryListPtr) {
 
 	RESULT_TYPE resType = ENTRY_CREATED;
@@ -857,8 +859,8 @@ RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
 	}
 
 	/* check if w is in table AND w that is in table is not extern */
-	if (isKeyInTable(labelsTable, labelName->value)) {
-		label = (Label*) getValueByKey(labelsTable, labelName->value);
+	if (isKeyInTable(symbolTable, labelName->value)) {
+		label = (Label*) getValueByKey(symbolTable, labelName->value);
 
 		if (label->type == EXTERNAL) {
 
@@ -886,14 +888,14 @@ RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
 	return resType;
 }
 
-void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
+void insertLabel(char *labelName, HashTable *symbolTable, LABEL_TYPE type,
 		int addres) {
 
 	Label *label;
 	label = createLabel(labelName);
 	label->type = type;
 	label->address = addres;
-	insertToTable(labelsTable, labelName, label);
+	insertToTable(symbolTable, labelName, label);
 
 }
 
@@ -949,16 +951,16 @@ RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
 		Node *binarysList, int IC, int DC) {
 
 	RESULT_TYPE resType = SUCCESS;
-	char *str, *oSuffix = ".o", *externSuffix = ".ext";
+	char *str, *obSuffix = ".ob", *externSuffix = ".ext";
 	String *externFileName;
-	String *oFileName;
-	FILE *externFile, *oFile;
+	String *obFileName;
+	FILE *externFile, *obFile;
 
-	oFileName = filenameChange(srcFile, oSuffix);
-	oFile = fopen(oFileName->value, "w");
+	obFileName = filenameChange(srcFile, obSuffix);
+	obFile = fopen(obFileName->value, "w");
 
-	if (!oFile) {
-		deleteString(oFileName);
+	if (!obFile) {
+		deleteString(obFileName);
 		printFileError(srcFile);
 		return FILE_NOT_FOUND;
 	}
@@ -967,35 +969,35 @@ RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
 	externFile = fopen(externFileName->value, "w");
 
 	if (!externFile) {
-		deleteString(oFileName);
+		deleteString(obFileName);
 		deleteString(externFileName);
-		fclose(oFile);
+		fclose(obFile);
 		printFileError(srcFile);
 		return FILE_NOT_FOUND;
 	}
 
 	str = malloc(sizeof(char) * 10);
 
-	fputs("Base 10 address Base 2 code\n", oFile);
-	sprintf(str, " %d %d \n", IC, DC);
-	fputs(str, oFile);
+	fputs("Base 10 address Base 2 code\n", obFile);
+	sprintf(str, "\t%d\t%d \n", IC, DC);
+	fputs(str, obFile);
 	free(str);
-	resType = secoundPassAssembly(oFile, externFile, symbolTable, binarysList);
+	resType = secoundPassAssembly(obFile, externFile, symbolTable, binarysList);
 
-	fclose(oFile);
+	fclose(obFile);
 	fclose(externFile);
 	if (resType) {
 		/*TODO remove O file and extern File */
 	}
 
-	deleteString(oFileName);
+	deleteString(obFileName);
 	deleteString(externFileName);
 
 	return resType;
 
 }
 
-RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
+RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
 		HashTable *symbolTable, Node *binarysList) {
 
 	RESULT_TYPE resType = SUCCESS;
@@ -1023,20 +1025,20 @@ RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
 
 			} else if (label->type == EXTERNAL) {
 				/* write 01 binary to oFile AND write to extern FILE */
-				writeToOFile(oFile, externBinaryWord, index);
+				writeToObFile(obFile, externBinaryWord, index);
 				writeToExternFile(externFile, labelName, index);
 
 			} else {
 				/* TODO fix not int to binary set bunary with offset and relocatable A,R,E*/
 				binaryWord = intToBinaryWord(label->address);
-				writeToOFile(oFile, binaryWord, index);
+				writeToObFile(obFile, binaryWord, index);
 				deleteSet(binaryWord);
 
 			}
 		} else {
 
 			binaryWord = (Set*) currNode->data;
-			writeToOFile(oFile, binaryWord, index);
+			writeToObFile(obFile, binaryWord, index);
 
 		}
 
@@ -1050,7 +1052,7 @@ RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
 	return resType;
 }
 
-void writeToOFile(FILE *oFile, Set *binaryWord, int index) {
+void writeToObFile(FILE *oFile, Set *binaryWord, int index) {
 
 	String *outPut, *binaryStr;
 	char *buffer = malloc(4);

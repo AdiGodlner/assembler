@@ -117,12 +117,12 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
  * @param DCPtr - the data counter is passed to handleLabel().
  * @return - returns resType SUCCESS
  */
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
- * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
- * This extrListPtr as parameters, wich are passed by the secondPassFileOpen() method to it.
+ * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr,
+ * This extrListPtr as parameters, which are passed by the secondPassFileOpen() method to it.
  * It prints the number of line where an error has accurued. ???TODO
  * All parameters are passed to lineSecondPass() method.
  * @param amFile - the given source file after macro parse.
@@ -157,7 +157,7 @@ RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
 /*
  *
  */
-void writeToOFile(FILE *oFile, Set *binaryWord, int index);
+void writeToObFile(FILE *oFile, Set *binaryWord, int index);
 /*
  *
  */
@@ -188,7 +188,7 @@ int isRegister(String *str);
 /*
  *
  */
-RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
@@ -206,7 +206,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
  * @param DCPtr - the data counter.
  * @return - returns resType SUCCESS
  */
-RESULT_TYPE handleNonLabel(char *word, HashTable *labelsTable, String *line,
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
@@ -238,11 +238,11 @@ RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr);
 /*
  *
  */
-RESULT_TYPE handleExtern(HashTable *labelsTable, String *line);
+RESULT_TYPE handleExtern(HashTable *symbolTable, String *line);
 /*
  *
  */
-RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
+RESULT_TYPE handleEntry(HashTable *symbolTable, String *line,
 		Node **entryListPtr);
 
 /*
@@ -253,7 +253,7 @@ int isLableNamevalid(char *name);
 /*
  *
  */
-void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
+void insertLabel(char *labelName, HashTable *symbolTable, LABEL_TYPE type,
 		int addres);
 /*
  *
