@@ -9,6 +9,7 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
+/*Errors RESULT_TYPE defination*/
 typedef enum {
 	SUCCESS = 0, CATSTROPIC_FAILURE = 1,
 	ENTRY_CREATED,
@@ -52,7 +53,9 @@ typedef enum {
 
 
 /*
- * this method returns the string message  associated  to each a given RESULT_TYPE 'resType'
+ * This method return the errType message.
+ * @param errType - the given errType message.
+ * @return - returns the String message according to each a given RESULT_TYPE 'resType'
  */
 char* getResultMsg(RESULT_TYPE errType );
 
