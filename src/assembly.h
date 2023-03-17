@@ -27,6 +27,15 @@
  * @param entryList - the list that the entry labels will be stored in.
  * @param symbolTable - the symbol table that the labels are stored in by there name and address value.
  *
+ */
+void fixLabelCounters(HashTable *symbolTable, int IC);
+/*
+ * This function gets a srcFile, and check if there wer any entry lables in the text file,
+ * If so it stores the entry lables in the entry lable list, to check that an entry lable has
+ * a definition in our text, if the entry lable is undefined, we throw a proper error,
+ * else if a lable with definition is found we store it in the lableTable with it's address.
+ * After it we put the entry lable name and address in an .ent file in a format as: LABLE     100.
+ * If no entry lables were found were not deleting the .ent file if already it has been created.
  * After we ensure that the entry lable was defined in the text,
  * we put the entry lable name and address in an .ent file.
  * The .ent file is opened in a writing mode and we print to it
@@ -54,6 +63,13 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
  */
 void assembler(char *srcFile);
 
+
+/*
+ *
+ */
+RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr, int *ICPtr,
+		int *DCPtr);
 /*
  * This method receives a scrFile, which is changed to be an .am file.
  * It receives symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
@@ -67,10 +83,9 @@ void assembler(char *srcFile);
  * @return - returns resType of SUCCESS if the first pass was passed succesfully
  * or a proper error message that First Pass has failed.
  */
-
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr);
+		Node **entryListPtr, int *ICPTR, int *DCPtr);
 
 /*
  * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
@@ -87,7 +102,7 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
  */
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr);
+		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
  * This method receives String lineString, symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
  * This entryListPtr, ICPtr and DCPtr as parameters.
@@ -105,12 +120,12 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
- * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
- * This extrListPtr as parameters, wich are passed by the secondPassFileOpen() method to it.
+ * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr,
+ * This extrListPtr as parameters, which are passed by the secondPassFileOpen() method to it.
  * It prints the number of line where an error has accurued. ???TODO
  * All parameters are passed to lineSecondPass() method.
  * @param amFile - the given source file after macro parse.
@@ -129,12 +144,27 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
  * we'll stop reading the current file and move to the next one if exists.
  *
  */
-void secoundPassAssembler();
+RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
+		Node *binarysList, int IC, int DC);
 
 /*
  * This method receives a String, and check if a label is defined corectly,
  * @param str - the given String that we search for label in it.
  * @return - returns the index of the placeholder after ':' , if the method has failed returns -1.
+ */
+RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
+		HashTable *symbolTable, Node *binarysList);
+
+/*
+ *
+ */
+void writeToObFile(FILE *oFile, Set *binaryWord, int index);
+/*
+ *
+ */
+void writeToExternFile(FILE *externFile, String *labelName, int index) ;
+/*
+ *
  */
 int isLabel(String *str);
 
@@ -156,7 +186,11 @@ int isLabel(String *str);
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
+int isRegister(String *str);
+/*
+ *
+ */
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
@@ -175,7 +209,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *labelsTable, String *line,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleNonLabel(char *word, HashTable *labelsTable, String *line,
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 
@@ -230,8 +264,7 @@ RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr);
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleExtern(HashTable *labelsTable, String *line, Node **externListPtr );
-
+RESULT_TYPE handleExtern(HashTable *symbolTable, String *line);
 /*
  * This method takes the lable name from the lable entry list if exists,
  * and searches for the  entry lable address in the Simbol table.
@@ -246,7 +279,7 @@ RESULT_TYPE handleExtern(HashTable *labelsTable, String *line, Node **externList
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleEntry(HashTable *labelsTable, String *line,
+RESULT_TYPE handleEntry(HashTable *symbolTable, String *line,
 		Node **entryListPtr);
 
 /*
@@ -264,8 +297,8 @@ int isLableNamevalid(char *name);
  * @address - the specific line address the lable was stored in the text file,
  * the lable is insert by it to the Simbol table.
  */
-void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
-		int address);
+void insertLabel(char *labelName, HashTable *symbolTable, LABEL_TYPE type,
+		int addres);
 /*
  * This method check if the lable name is legal.
  * if the lable name starts with a lower or capital letter and only leters
@@ -292,10 +325,23 @@ RESULT_TYPE checkLabelLegality(char *labelName);
 
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
+		Node **instructionBinarysListPtr, int *ICPtr);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcodeWIthOutBackets(String *line, Opcode *opCode,
+		Node *opCodeNode);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcodeWIthBackets(String *line, Opcode *opCode,
+		Node *opCodeNode, int *numOfWordsPtr);
 
-
-
-
+RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
 /*
  * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
  * This method receives 'line', 'opcode', 'opCodeNode', 'numOfWords'.
@@ -338,7 +384,7 @@ RESULT_TYPE handleSrcParam(String *line, Opcode *opCode, Node *opCodeNode,
  * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
-		int isSrcRegister, int * numOfWords);
+		int isSrcRegister, int *numOfWords);
 
 /*
  * This method receives 'addresingSet', 'addresingType'.

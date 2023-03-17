@@ -23,6 +23,10 @@ typedef struct {
 void read_set(Set **s, int intArr[], int size);
 
 /*
+ *
+ */
+void insertArrToSet(Set *s, int intArr[], int size);
+/*
  *TODO description
  */
 String* setToBinaryString(Set * s);
@@ -80,6 +84,11 @@ void clearSet(Set* s1 );
  *
  */
 int isValueInSet(Set * set, int value);
+
+/*
+ *
+ */
+String* setToString(Set *set);
 /*
  * this method returns the length of the array used to store the members of the set
  */
