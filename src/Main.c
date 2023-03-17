@@ -20,10 +20,11 @@
 void preAssembly(int argc, char **argv);
 int main(int argc, char **argv) {
 
-	preAssembly(argc, argv);
-	assembler(argv[1]);
+
+	 assembler(argv[1]);
 	/*
-	 assembler("C:/Users/Adi/Desktop/foo.am");
+	assembler("C:/Users/Adi/Desktop/foo.am");
+	 preAssembly(argc, argv);
 	 */
 
 	printf("\nend :-)");

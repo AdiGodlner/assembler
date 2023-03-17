@@ -6,6 +6,7 @@
  */
 #include "Result.h"
 #include "Utils.h"
+#include "set.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -128,7 +129,6 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
 }
 
 int isbracketLegal(char *line) {
-	/*Check for illegal commas and missing brackets*/
 
 	int i, len;
 	int bracketCount = 0;
@@ -186,10 +186,11 @@ RESULT_TYPE checkStringIllegal(char *line) {
 
 	int i = 0;
 	int quoteCount = 0;
-
+	char currChar;
 	for (i = 0; i < strlen(line); i++) {
 
-		if (line[i] == '"') {
+		currChar = line[i];
+		if (currChar == '"') {
 			/*if we fint quote we increment the count*/
 			quoteCount++;
 			if (quoteCount == 2) {
@@ -198,7 +199,7 @@ RESULT_TYPE checkStringIllegal(char *line) {
 			}
 		}
 
-		if (!isalnum(line[i]) && !ispunct(line[i])) {
+		if (!isalnum(currChar) && !ispunct(currChar)) {
 
 			return STRING_ILlEGAL_DEFENITION;
 
@@ -206,7 +207,8 @@ RESULT_TYPE checkStringIllegal(char *line) {
 	}
 
 	for (; i < strlen(line); i++) {
-		if (!isspace(line[i])) {
+		currChar = line[i];
+		if (!isspace(currChar)) {
 			return EXTRANEOUS_TEXT;
 		}
 	}
@@ -259,7 +261,7 @@ RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 
 	}
 	/*new str is the argument
-	we need to pop it froom arguments*/
+	 we need to pop it froom arguments*/
 	temp = createNewString(argumernts->value + i + 1);
 	setStringValue(argumernts, temp->value);
 	*dest = *newStr;
@@ -269,4 +271,44 @@ RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 
 }
 
+String* binaryWOrdToString(Set *set) {
+
+	int i = 0;
+	String *str = createEmptyString();
+	char byte;
+	int bit, temp;
+
+	byte = set->bits[1];
+	for (i = 5; i >= 0; i--) {
+
+		temp = (1 << i);
+		bit = byte & temp;
+		if (bit) {
+
+			appendCharToString(str, '/');
+
+		} else {
+			appendCharToString(str, '.');
+		}
+
+	}
+
+	byte = set->bits[0];
+
+	for (i = 7; i >= 0; i--) {
+		temp = (1 << i);
+		bit = byte & temp;
+		if (bit) {
+
+			appendCharToString(str, '/');
+
+		} else {
+			appendCharToString(str, '.');
+		}
+
+	}
+
+	return str;
+
+}
 

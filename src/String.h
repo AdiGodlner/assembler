@@ -86,6 +86,17 @@ void printString(String *str);
  * if the method reached the end of the string without finding a blank space it returns -1
  */
 int findNextNonBlankCharLocation(String *str, int offset);
+
+/*
+ *
+ */
+int containsChar(String * str, char c);
+
+/*
+ *
+ */
+String* popByDeliminator(String *str, char delim);
+
 /*
  * this method returns a String representation of the next
  * word in the string 'str'

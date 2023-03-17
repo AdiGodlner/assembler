@@ -146,6 +146,47 @@ int findNextNonBlankCharLocation(String *str, int offset) {
 
 }
 
+String* popByDeliminator(String *str, char delim) {
+
+	int i = 0;
+	String *newStr ;
+	char currChar;
+
+	if (!containsChar(str, delim)) {
+		return NULL;
+	}
+	newStr = createEmptyString();
+
+	for (i = 0; i < str->size; ++i) {
+
+		currChar = charAt(str, i);
+		if (currChar == delim) {
+			break;
+		}
+
+		appendCharToString(newStr, currChar);
+
+	}
+
+	return newStr;
+
+}
+
+int containsChar(String *str, char c) {
+
+	int i = 0;
+	for (i = 0; i < str->size; ++i) {
+
+		if (str->value[i] == c) {
+			return 1;
+		}
+
+	}
+
+	return 0;
+
+}
+
 String* popWord(String *str) {
 
 	String *newStr = createEmptyString();
@@ -182,7 +223,7 @@ String* popWord(String *str) {
 
 	}
 
-	appendCharToString(temp, str->value[startSubStr + i]);
+/*	appendCharToString(temp, str->value[startSubStr + i]); */
 	setStringValue(str, temp->value);
 	deleteString(temp);
 

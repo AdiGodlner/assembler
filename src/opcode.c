@@ -41,46 +41,46 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 
 /*TODO #define macros / numbers */
 
-void writeAREToBinaryWord(Set *binaryWord, int are){
+void writeAREToBinaryWord(Set *binaryWord, int are) {
 
 	writeToBinaryWord(binaryWord, are, 0, 2);
 
 }
-void writeDestToBinaryWord(Set *binaryWord, int dest){
+void writeDestToBinaryWord(Set *binaryWord, int dest) {
 
 	writeToBinaryWord(binaryWord, dest, 2, 2);
 
 }
-void writeSrcToBinaryWord(Set *binaryWord, int src){
+void writeSrcToBinaryWord(Set *binaryWord, int src) {
 
 	writeToBinaryWord(binaryWord, src, 4, 2);
 
 }
-void writeCodeToBinaryWord(Set *binaryWord, int code){
+void writeCodeToBinaryWord(Set *binaryWord, int code) {
 
 	writeToBinaryWord(binaryWord, code, OPCODE_START_INDEX, OPCODE_LENGTH);
 
 }
-void writeSecondOperandToBinaryWord(Set *binaryWord, int operand){
+void writeSecondOperandToBinaryWord(Set *binaryWord, int operand) {
 
 	writeToBinaryWord(binaryWord, operand, 10, 2);
 
 }
-void writeFirstOperandToBinaryWord(Set *binaryWord, int operand){
+void writeFirstOperandToBinaryWord(Set *binaryWord, int operand) {
 
 	writeToBinaryWord(binaryWord, operand, 12, 2);
 
 }
-void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg){
+void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 2, 6);
 
 }
-void writeDestRegiserToBinaryWord(Set *binaryWord, int reg){
+void writeDestRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 8, 6);
 
 }
 
-void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length){
+void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length) {
 
 	int i = 0;
 	int temp;
@@ -94,18 +94,16 @@ void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length){
 
 	}
 
-	read_set(&binaryWord, opcodeBinary, length);
+	insertArrToSet(binaryWord, opcodeBinary, length);
 
 }
 
-
-void populateAddressingSet(Set ** addressingPtr, char *addressingStr) {
+void populateAddressingSet(Set **addressingPtr, char *addressingStr) {
 
 	char *tok;
-	int addressingArr[MAX_ADDRESSING_LENGTH ], i = 0;
+	int addressingArr[MAX_ADDRESSING_LENGTH], i = 0;
 
-
-	String * addressingStrCopy = createNewString(addressingStr);
+	String *addressingStrCopy = createNewString(addressingStr);
 	tok = strtok(addressingStrCopy->value, " ,");
 
 	while (tok != NULL) {
@@ -122,30 +120,29 @@ void populateAddressingSet(Set ** addressingPtr, char *addressingStr) {
 }
 
 /*TODO is this even needed */
-Set * charToBinaryWord(char c){
+Set* charToBinaryWord(char c) {
 
 	return intToBinaryWord(c);
 
 }
 
-Set* intToBinaryWord(int num){
+Set* intToBinaryWord(int num) {
 	return intToBinaryWordWithOffset(num, 0);
 }
 
-Set* intToBinaryWordWithOffset(int num, int offset){
+Set* intToBinaryWordWithOffset(int num, int offset) {
 
-	int i =0;
-	Set * set = createNewSet();
+	int i = 0;
+	Set *set = createNewSet();
 	/*TODO define 14 as a macro */
-	for (i= 0; i < 14; ++i) {
-		if (num & (1<<i)) {
-			insertToSet(set, i +offset);
+	for (i = 0; i < 14; ++i) {
+		if (num & (1 << i)) {
+			insertToSet(set, i + offset);
 		}
 	}
 
 	return set;
 }
-
 
 void initOpcode(HashTable *table) {
 

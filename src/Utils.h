@@ -9,6 +9,7 @@
 #define SRC_UTILS_H_
 
 #include "Result.h"
+#include "set.h"
 #include "LinkedList.h"
 #include<stdio.h>
 /*
@@ -61,6 +62,9 @@ RESULT_TYPE checkStringIllegal(char *line);
  */
 int isCommaLegal(char *line);
 
-
+/*
+ *
+ */
+String* binaryWOrdToString(Set *set) ;
 
 #endif /* SRC_UTILS_H_ */

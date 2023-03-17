@@ -15,26 +15,26 @@ Set* createNewSet() {
 
 }
 
-Set* duplicateSet(Set * src){
+Set* duplicateSet(Set *src) {
 
-	Set * newSet = createNewSet();
+	Set *newSet = createNewSet();
 	union_set(src, src, newSet);
 
 	return newSet;
 
 }
 
-void deleteSet(void *set){
+void deleteSet(void *set) {
 
 	free(set);
 }
 
 void insertToSet(Set *s, int num) {
 
-	int location ;
-	unsigned int bit , byte;
-	if (num < 0 ) {
-		return ;
+	int location;
+	unsigned int bit, byte;
+	if (num < 0) {
+		return;
 	}
 	location = num / 8;
 	bit = 1 << (num % 8);
@@ -62,12 +62,24 @@ void read_set(Set **s, int intArr[], int size) {
 
 }
 
-String * setToBinaryString(Set * s) {
+void insertArrToSet(Set *s, int intArr[], int size){
+
+	int i =0;
+	for (i = 0; i < size; ++i) {
+
+		insertToSet(s, intArr[i]);
+
+	}
+
+}
+
+
+String* setToBinaryString(Set *s) {
 
 	int i = 0, j = 0, temp;
 	char currChar;
-	char * bits;
-	String * binStr = createEmptyString();
+	char *bits;
+	String *binStr = createEmptyString();
 
 	for (i = 0; i < 2; ++i) {
 		bits = s->bits;
@@ -84,7 +96,7 @@ String * setToBinaryString(Set * s) {
 	return binStr;
 }
 
-String * print_set(Set *s) {
+String* print_set(Set *s) {
 
 	int i, j, original = 0, count = 0;
 	unsigned int byte, bit;
@@ -188,19 +200,18 @@ void clearSet(Set *s1) {
 
 }
 
+int isValueInSet(Set *set, int value) {
 
-int isValueInSet(Set * set, int value){
+	int location;
+	unsigned int bit;
 
-	int location ;
-	unsigned int bit ;
-
-	if (value < 0 ) {
+	if (value < 0) {
 		return 0;
 	}
 
 	location = value / 8;
 	bit = 1 << (value % 8);
-	return  set->bits[location] & bit;
+	return set->bits[location] & bit;
 
 }
 

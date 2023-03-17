@@ -20,6 +20,7 @@
 /*
  *
  */
+void fixLabelCounters(HashTable *symbolTable, int IC);
 /*
  * This function gets a srcFile, and check if there wer any entry lables in the text file,
  * If so it stores the entry lables in the entry lable list, to check that an entry lable has
@@ -35,20 +36,26 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
  */
 void assembler(char *srcFile);
 
+
 /*
  *
  */
-
+RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
+		Node **instructionBinarysListPtr, Node **dataBinarysListPtr, int *ICPtr,
+		int *DCPtr);
+/*
+ *
+ */
 RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr);
+		Node **entryListPtr, int *ICPTR, int *DCPtr);
 
 /*
  *
  */
 RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr);
+		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
  *
  */
@@ -58,12 +65,31 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *labelTable,
 /*
  *
  */
-void secoundPassAssembly();
+RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
+		Node *binarysList, int IC, int DC);
 
 /*
  *
  */
+RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
+		HashTable *symbolTable, Node *binarysList);
+
+/*
+ *
+ */
+void writeToOFile(FILE *oFile, Set *binaryWord, int index);
+/*
+ *
+ */
+void writeToExternFile(FILE *externFile, String *labelName, int index) ;
+/*
+ *
+ */
 int isLabel(String *str);
+/*
+ *
+ */
+int isRegister(String *str);
 /*
  *
  */
@@ -110,12 +136,28 @@ void insertLabel(char *labelName, HashTable *labelsTable, LABEL_TYPE type,
  */
 RESULT_TYPE checkLabelLegality(char *labelName);
 
+/*
+ *
+ */
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
+		Node **instructionBinarysListPtr, int *ICPtr);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcodeWIthOutBackets(String *line, Opcode *opCode,
+		Node *opCodeNode);
+/*
+ *
+ */
+RESULT_TYPE handleAdvancedOpcodeWIthBackets(String *line, Opcode *opCode,
+		Node *opCodeNode, int *numOfWordsPtr);
 
-
-
-
+RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
 /*
  *
  */
@@ -130,7 +172,7 @@ RESULT_TYPE handleSrcParam(String *line, Opcode *opCode, Node *opCodeNode,
  *
  */
 RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
-		int isSrcRegister, int * numOfWords);
+		int isSrcRegister, int *numOfWords);
 
 /*
  *
@@ -139,7 +181,7 @@ int isAddresingTypeValid(Set *addresingSet, int addresingType);
 /*
  *
  */
-Node * createParamBinaryWord(String *param, int addresingType);
+Node* createParamBinaryWord(String *param, int addresingType);
 int isInstructionParamValid(String *param);
 
 int getParamAddresingType(String *param);

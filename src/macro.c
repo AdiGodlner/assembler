@@ -72,6 +72,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 	char line[MAX_LINE_LEN];
 	void *macroBody;
 	HashTable *table = createDefualtHashTable();
+	/*TODO check destFile !=NULL */
 	String *destFile = filenameChange(srcFile, amSuffix);
 	String *firstWord, *lineString;
 	FILE *amFile;
