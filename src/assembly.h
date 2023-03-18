@@ -18,9 +18,12 @@
 #include "String.h"
 
 /*
- *
+ * This method iterate over keys in symbol table, and add's IC
+ * To LABEL->ADRESS for labels of TYPE data.
+ * It receives 'symboltable' and 'IC' as parameters.
+ * @param symbolTable - the symbol table, that IC is added to lables of type DATA in it.
+ * @param IC - the counter that set all decimal address in RAM to start from 0100.
  */
-
 void fixLabelCounters(HashTable *symbolTable, int IC);
 /*
  * This method receives 'srcFile','entryListand','symbolTable' as parameters.
@@ -128,19 +131,12 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
- *
- * This method creates an extern file and an object file and opens them in writing mode.
- * After all .extern lable, (if they exist) from simbolTable are printed to the .extern file,
- * in second pass we're completing all the missing labels address,
- * that we didn't insert to RAM in the first pass,
- * they get insert and get writen to an .ob file in a special binary symbols code
- * which are represanted by:[ '0' = '.' & '1' = '/'].
-
+ * This method receives a sorce file, and creates an extern file and an object file and opens them in writing mode.
  * It  receives 'srcFile', 'symbolTable', 'binarysList',
  * 'IC', 'DC' as parameters.
  * @param scrFile - the given source file after macro parse.
- * @param symbolTable - the symbol table that all labels will get stored in.
- * @param binarysList - pointes to all instruction commands as 'mov',
+ * @param symbolTable - the symbol table that all labels name and address will be taken from.
+ * @param binarysList - the list that the binary data is stored in. TODO??
  * @param IC - the number of the instraction values represented in RAM.
  * @param DC - the number of the data values represented in RAM.
  * @return - returns resType SUCCESS if every thing was hendeled with success,
@@ -150,18 +146,27 @@ RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
 		Node *binarysList, int IC, int DC);
 
 /*
- *
+ * This method receives an extern file and an object file.
+ * After what all .extern lable,from simbolTable are writen to the .extern file,(if they exist).
+ * All  missing labels address get complited, the "words" of 14-bits get insert to RAM.
+ * The "words" in RAM get writen to an .ob file in a special binary symbols code
+ * which are represanted by: 0 = '.' & 1 = '/'.
+ * @param obFile - the given object file that the "words" in RAM are writen to.
+ * @param externFile - the given extern file that all .extern lables are writen to.
+ * @param symbolTable - the symbol table that all labels name and address will be taken from.
+ * @param binarysList - pointes to all instruction commands as 'mov',
+ * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
+RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
 		HashTable *symbolTable, Node *binarysList);
 
 /*
  * This method receives 'obFile','binaryWord','index' as parameters.
- * It create an object file and open it in writing mode.
- * After what we the RAM 14- bits "words" are writen to the
- * .ob file in a special binary simbol code as: 1 = '/' & 0 = '.'.
+ * After what the RAM 14- bits "words" are writen to the
+ * .ob file in a special binary symbol code as: 1 = '/' & 0 = '.'.
  * @param obFile - the given file we write in.
- * @param binaryWord - the special binary simbol code. TODO??
+ * @param binaryWord - the special binary symbol code.
  * @param index - the given index value.
  */
 void writeToObFile(FILE *obFile, Set *binaryWord, int index);
@@ -169,7 +174,7 @@ void writeToObFile(FILE *obFile, Set *binaryWord, int index);
 /*
  * This method receives 'externFile','lableName','index' as parameters.
  * It check if there where any extern lables in the text file,
- * If so it pulls them from the simbolTable.
+ * If so it pulls them from the symbolTable.
  * After what we create an extern file and open it in writing mode.
  * the extern lable name and address is writen into the .extern file in a format as: LABLE     100.
  * If no extern lables were found we're deleting the .ext file if it has been already created.
@@ -187,9 +192,11 @@ void writeToExternFile(FILE *externFile, String *labelName, int index) ;
 int isLabel(String *str);
 
 /*
- *
+ * This method receives 'str' parameter and checks is the given 'str' is a corect definition of a register.
+ * The registers can be only r0-r7, if so return true, else false value.
+ * @param str - the given str, to be checked.
+ * @return - returns the true or false value.
  */
-
 int isRegister(String *str);
 
 /*
@@ -332,22 +339,57 @@ RESULT_TYPE checkLabelLegality(char *labelName);
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 /*
- *
+ * This method convert the line with the opcode to a 14- bits "word" and insert it to the right place in RAM.
+ * This method receives 'line', 'opcode', 'instructionBinarysListPtr', 'ICPtr'.
+ * It check
+ * @param line - the given line that needs to be transformt in to a binary code.
+ * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
+ * @param instructionBinarysListPtr - helps insert the instruction commands to the right place of the list.
+ * @param ICPtr - the instruction counter.
+ * gets increased when an instruction is found and shows where the next instruction will get placed.
+ * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 /*
- *
+ * This method take care of case when the opcode comands as: jmp,jsr,bne
+ * have only one operand with no parameters. Example: bne END
+ * It check that the operend is a destanation operand, and that it's a label.
+ * All the parameters are passed to handleAdvancedOpcodeLabel() to be converted
+ * and insert  to the right place in RAM.
+ * @param line - the given line that needs to be transformt in to a binary code.
+ * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
+ * @param opCodeNode - the binary code node. TODO ??
+ * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleAdvancedOpcodeWIthOutBackets(String *line, Opcode *opCode,
 		Node *opCodeNode);
 /*
- *
+ * This method take care of case when the opcode comands as: jmp,jsr,bne
+ * have  one operand with two parameters. Example: jmp L1(#-1,r6)
+ * It check that the operend is a destanation operand,
+ * and that the operand and the parameters are valid.
+ * comand name (jmp,jsr,bne) space the lable then an opening bracket first param
+ * then comma then second param and closing brackets.
+ * All the parameters are passed to handleAdvancedOpcode() to be converted
+ * and insert to the right place in RAM.
+ * @param line - the given line that needs to be transformt in to a binary code.
+ * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
+ * @param opCodeNode - the binary code node gets placed  in 2-3 bits and 10-11, 12-13 bits. TODO ??
+ * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleAdvancedOpcodeWIthBackets(String *line, Opcode *opCode,
 		Node *opCodeNode, int *numOfWordsPtr);
 /*
- *
+ * This method check if the lable definition is legal convert it to binary and places it to right place in RAM.
+ * It receives 'lable', 'opCodeNode'.
+ * @param lable - the given lable that need to be checked.
+ * @param opCodeNode - the binary representation of lable. TODO??
+ * @raturn - returns resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
 /*

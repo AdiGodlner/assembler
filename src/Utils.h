@@ -17,11 +17,10 @@
  *
  * This method pops the next argument in the given String 'arguments' and stores
  * it in the String 'dest'.
- * @param argumernts -
- * @param dest -
- * @isLastArgument -
- * @return - RESULT_TYPE
- * This method returns 'SUCCESS'  only if it found a valid argument
+ * @param argumernts - the String array to pop arguments from.
+ * @param dest - the String to put the poped argument in.
+ * @isLastArgument - checks if the last argument is an ilegal param.
+ * @return - returns 'SUCCESS'  only if it found a valid argument
  * a valid argument is a string of non blank chars that can have a prefix of blank chars
  * and and a suffix of blank chars that is terminated by a ',' or '\n'
  * otherwise this method returns a MISSING_COMMA
@@ -34,12 +33,12 @@ RESULT_TYPE popArgument(String *argumernts, String * dest, int isLastArgument);
 /*
  * this method pops all arguments from String arguments checks if they are integers,
  * and populates an integerArr pointer to be 'intArrPtr' with their integer representation.
- * @param arguments  -
- * @param intArrPtr  -
- * @param size -
- * @return -
- * this method returns LIST_NOT_TERMINATED_CORRECTLY if the last argument is not -1
- * VALUE_OUT_OF_RANGE if the int represented in the argument is not between 0 and 127 or -1 the terminator integer
+ * @param arguments  - the String array to pop arguments from.
+ * @param intArrPtr  - the integer array pointer.
+ * @param size - the size to check that no out of bounds.
+ * @return -returns LIST_NOT_TERMINATED_CORRECTLY if the last argument is not -1
+ * VALUE_OUT_OF_RANGE if the int represented in the argument is not between 0
+ * and 127 or -1 the terminator integer
  * EXTRANEOUS_TEXT if there is extraneous text after the -1 argument
  * CONSECUTIVE_COMMAS if there are consecutive commas
  * MISSING_COMMA if there is a missing comma
@@ -49,37 +48,39 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 
 /*
  * This method takes an int represented in the string 'str' and puts it in 'numDest'
- * @param str -
- * @param numDest -
- * @return -
- * the method returns SUCCESS if the it was able to convert the string to an int
- * and VALUE_NOT_AN_INTEGER if it couldn't
+ * @param str - the given str that needs to bee checked
+ * @param numDest - the digit represantation with '+' for positeve value and '-' for negative.
+ * @return - returns SUCCESS if  was able to convert the string to an int
+ * and VALUE_NOT_AN_INTEGER if it couldn't.
  */
 RESULT_TYPE getIntFromName(char *str, int *numDest);
 
 
-/* This method receives a line and ckecks for illegal position of spaces, commas or missing brackets.
- * @param line -
- * @return -
- * if both of the parameters for RELATIVE_MODE (jmp, bne, jsr) are in valid position, as example: "jmp L1(#5,L)"
- * command name then space, then a lable,
+/*
+ * This method receives a line and ckecks for illegal position of spaces, commas or missing brackets.
+ * @param line - the given line.
+ * @return - returns if both of the parameters for RELATIVE_MODE (jmp, bne, jsr)
+ * are in valid position, as example: "jmp L1(#5,L)" command name then space, then a lable,
  * close to it without any spaces we have an opening bracket then param1 comma and param2 closing bracket,
  * if the representation in the line is like shown above returns 1, else returns 0 and a proper error message.
- *
  */
 int isPramsLegalforRealativeMode(char *line);
 
 /*
  * This method receives a line as a param, and ckecks for illegal string representation in the text.
- * @param line -
- * @return - RESULT_TYPE and a proper error message.
+ * @param line - the given line.
+ * @return - returns the resType SUCCESS if every thing was hendeled with success,
+ * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE checkStringIllegal(char *line);
 
 
 
 /*
- *
+ * This method receives a set parameter that need to be transformed into a special binary symbol code
+ * We use this method for writing the .ob file.
+ * @param set - the set that needs to be transformed into special binary symbol code.
+ * @return - returns the new String in special binary symbol code format.
  */
 String* binaryWOrdToString(Set *set) ;
 

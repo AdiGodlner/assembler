@@ -9,7 +9,7 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
-/*Errors RESULT_TYPE defination*/
+/*Errors RESULT_TYPE definition*/
 typedef enum {
 	SUCCESS = 0, CATSTROPIC_FAILURE = 1,
 	ENTRY_CREATED,

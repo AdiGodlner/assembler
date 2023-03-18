@@ -415,7 +415,7 @@ RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
 		numOfWords++;
 	}
 
-	/* check for EXtra test */
+	/* check for EXtra text */
 	if (line->size > 0) {
 
 		extraText = popWord(line);
@@ -1052,7 +1052,7 @@ RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
 	return resType;
 }
 
-void writeToObFile(FILE *oFile, Set *binaryWord, int index) {
+void writeToObFile(FILE *obFile, Set *binaryWord, int index) {
 
 	String *outPut, *binaryStr;
 	char *buffer = malloc(4);
@@ -1066,7 +1066,7 @@ void writeToObFile(FILE *oFile, Set *binaryWord, int index) {
 	concatStrings(outPut, binaryStr);
 	appendCharToString(outPut, '\n');
 
-	fputs(outPut->value, oFile);
+	fputs(outPut->value, obFile);
 
 	free(buffer);
 	deleteString(binaryStr);

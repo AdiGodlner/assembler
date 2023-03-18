@@ -10,7 +10,7 @@
 #include "set.h"
 #include "HashTable.h"
 
-/*Definition of an Opcode*/
+/*Definition of Opcode*/
 typedef struct {
 
 	String *name;
@@ -99,27 +99,42 @@ void writeDestRegiserToBinaryWord(Set *binaryWord, int reg);
  * It receives 'binaryWord', 'decimal', 'offset', 'length' as parameters.
  * @param binaryWord - the transformed binary code.
  * @param decimal - the given decimal value.
- * @param offset - the given offset.
+ * @param offset - the given offset where to start from in set.
  * @param length - the given length. TODO??
  */
 void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length);
+
 /*
- *
+ * This method checkes if the sorce and the dest operand
+ * addressing has legal values, depending on the given comand as 'mov'...'stop'
+ * For example only jmp,bne,jsr  all three have no sorce operand addressing and
+ * only all three can have as a dest operand addressins a Relative mode.
+ * @param addressingPtr - the poiner is passed to read_set() method.
+ * @param addressingStr - the given operand addressing mode.
  */
 void populateAddressingSet(Set **addressingPtr, char *addressingStr);
 
 /*
- *
+ * this method receive a number that is passed to intToBinaryWordWithOffset() method for further handeling.
+ * @param num - the given number that needs to be converted into binary code.
+ * @return - returns a new set.
  */
 Set* intToBinaryWord(int num);
 
 /*
- *
+ * This method receive a decimal number that needs to be converted and placed to set.
+ * @param num - the given nember that need to be converted.
+ * @param offset - the given offset where to start from in set.
+ * @return - returns a new set.
  */
 Set* intToBinaryWordWithOffset(int num, int offset);
 
 /*
- *
+ * This method receive a table where all opcode comand get in, and it defines what exact rules need to be folowed
+ * so all comands are insert into the right place where they belong
+ * depending of how much parameters a certain comand need to get
+ * and on the addressing mode of every parameter they have.
+ * @param table - the created table that all opcode comands go in.
  */
 void initOpcode(HashTable *table);
 

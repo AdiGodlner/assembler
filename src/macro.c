@@ -194,7 +194,7 @@ int ismcrNamevalid(char *name) {
 
 }
 
-/*Check that there aren't any illegal commas, brackets and if there is a blank line removes it same for extra spaces*/
+
 void textCorrecter(char *line) {
 
 	int i, j, k, len;
@@ -218,7 +218,7 @@ void textCorrecter(char *line) {
 
 		}
 	}
-	/* we remove extra whitespace*/
+
 	line[j] = '\n';
 	j++;
 	line[j] = '\0';
@@ -248,8 +248,8 @@ int isblankLine(char *line) {
 /*Print if an error uccured with opening file */
 void printFileError(char *fileName) {
 
-	fprintf(stderr, "\n************************************\n");
+	fprintf(stderr, "\n**************************************************\n");
 	fprintf(stderr, "   Error: Failed to open file %s\n", fileName);
-	fprintf(stderr, "\n************************************\n");
+	fprintf(stderr, "\n**************************************************\n");
 
 }

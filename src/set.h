@@ -8,6 +8,7 @@
 #ifndef SET_
 #define SET_
 
+/*Definition of set*/
 typedef struct {
 
 	char bits[2];
