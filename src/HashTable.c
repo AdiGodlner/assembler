@@ -16,8 +16,6 @@
 #define DEFAULT_TABLE_SIZE 16
 #define DEFAULT_LOAD_FACTOR 0.75
 
-#define MEM_ERR "failed to allocate memory"
-
 HashTable* createDefualtHashTable() {
 
 	return createHashTable(DEFAULT_TABLE_SIZE);
@@ -32,7 +30,6 @@ HashTable* createHashTable(int tableSize) {
 	hashTable->bucketArr = malloc(sizeof(Node*) * tableSize);
 
 	if (hashTable->bucketArr == NULL) {
-		/*TODO add on exit method to malloc */
 		free(hashTable);
 		return NULL;
 	}
@@ -41,7 +38,7 @@ HashTable* createHashTable(int tableSize) {
 	hashTable->loadFactor = DEFAULT_LOAD_FACTOR;
 	hashTable->numEntrys = 0;
 
-	/* Initialise all pointers to NULL TODO clarify this */
+	/* Initialise all pointers to linked lists in the bucketArr to NULL */
 	for (i = 0; i < tableSize; ++i) {
 
 		hashTable->bucketArr[i] = NULL;
@@ -88,10 +85,7 @@ void insertToTable(HashTable *table, char *key, void *data) {
 			if (compareString(keyString, currEntry->key) == 0) {
 				/* we found a table entry with the existing key
 				 * so we override the existing pointer this may cause floating pointers
-				 * but the responsibility should be on the caller ?
-				 * TODO: decide what to do with this
-				 * maybe copy maybe free
-				 * free the old and
+				 * but the responsibility should be on the caller
 				 * */
 				currEntry->value = data;
 				printf("override %s = , %s \n", keyString->value,
@@ -174,7 +168,6 @@ void* getValueByKey(HashTable *table, char *key) {
 	return value;
 }
 
-/*TODO maybe switch this with getValueByKey */
 void* getValueByKeyString(HashTable *table, String *key) {
 
 	int hash, index;
@@ -188,7 +181,7 @@ void* getValueByKeyString(HashTable *table, String *key) {
 	while (currNode != NULL) {
 
 		currEntry = (Entry*) currNode->data;
-		/*it is faster to compare hashcodes of the entries instead of
+		/*it is faster to compare hash codes of the entries instead of
 		 * comparing the key values only of the hash is the same we check the key
 		 */
 		if (currEntry->hash == hash) {

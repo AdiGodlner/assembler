@@ -195,7 +195,7 @@ RESULT_TYPE checkStringIllegal(char *line) {
 			/*if we fint quote we increment the count*/
 			quoteCount++;
 			if (quoteCount == 2) {
-				i++; /*TODO does this work????*/
+				i++;
 				break;
 			}
 		}
@@ -218,11 +218,10 @@ RESULT_TYPE checkStringIllegal(char *line) {
 
 }
 
-/*TODO fix pop argument for missing comma */
 RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 
 	RESULT_TYPE resType = SUCCESS;
-	int i = 0;
+	int i = 0, foundArgumentStart = 0, foundArgumentEnd = 0 ;
 	char currChar;
 	String *newStr = createEmptyString();
 	String *temp;
@@ -231,14 +230,16 @@ RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 
 		currChar = charAt(argumernts, i);
 		if (isspace(currChar)) {
-			/*TODO check for missing comma */
+			if (foundArgumentStart) {
+				foundArgumentEnd =1;
+			}
 			continue;
 		}
 
 		else if (currChar == ',' || currChar == '\n' || currChar == '\0') {
 
 			if (isLastArgument && currChar == ',') {
-				resType = UNEXPECTED_COMMA; /*TODO maybe change this resType */
+				resType = UNEXPECTED_COMMA;
 
 			} else if (newStr->size == 0 && currChar == ',') {
 				resType = CONSECUTIVE_COMMAS;
@@ -251,6 +252,15 @@ RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 			break;
 
 		} else {
+
+			if (foundArgumentStart == 0) {
+				foundArgumentStart = 1;
+			}
+			if (foundArgumentEnd) {
+				resType = MISSING_COMMA;
+				break;
+			}
+
 			appendCharToString(newStr, currChar);
 		}
 
@@ -259,14 +269,16 @@ RESULT_TYPE popArgument(String *argumernts, String *dest, int isLastArgument) {
 	if (resType) {
 		/* in case there is an error we free the space we allocated on the heap */
 		deleteString(newStr);
-
+		return resType;
 	}
+
 	/*new str is the argument
-	 we need to pop it froom arguments*/
+	 we need to pop it from arguments*/
 	temp = createNewString(argumernts->value + i + 1);
 	setStringValue(argumernts, temp->value);
-	*dest = *newStr;
+	setStringValue(dest, newStr->value);
 	deleteString(temp);
+	deleteString(newStr);
 
 	return resType;
 

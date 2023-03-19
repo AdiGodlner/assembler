@@ -37,6 +37,11 @@ typedef struct {
  */
 Opcode* createOpcode(char *name, int code, int numOfParameters,
 		char *srcAddressingStr, char *destAddressingStr);
+
+/*
+ *
+ */
+void deleteOpcode(void* opCode);
 /*
  * This method transforms the given parameter 'are' to a 14- bits "word" and insert it to the right place in RAM.
  * @param binaryWord - the transformed binary code.
@@ -49,14 +54,14 @@ void writeAREToBinaryWord(Set *binaryWord, int are);
  * @param binaryWord - the transformed binary code.
  * @param dest - the destanation operand of opCode command will get stored in 2-3 bits in 14-bits "word" in RAM.
  */
-void writeDestToBinaryWord(Set *binaryWord, int dest);
+void writeDestOperandToBinaryWord(Set *binaryWord, int destOperand);
 
 /*
  * This method transforms the given parameter 'src' to a 14- bits "word" and insert it to the right place in RAM.
  * @param binaryWord - the transformed binary code.
  * @param src - the sorce operand of opCode command will get stored in 4-5 bits in 14-bits "word" in RAM.
  */
-void writeSrcToBinaryWord(Set *binaryWord, int src);
+void writeSrcOperandToBinaryWord(Set *binaryWord, int srcOperand);
 
 /*
  * This method transforms the given parameter 'code' to a 14- bits "word" and insert it to the right place in RAM.
@@ -71,14 +76,14 @@ void writeCodeToBinaryWord(Set *binaryWord, int code);
  * @param binaryWord - the transformed binary code.
  * @param operand - the second operand will get stored in 10-11 bits in 14-bits "word" in RAM.
  */
-void writeSecondOperandToBinaryWord(Set *binaryWord, int operand);
+void writeSecondParameterToBinaryWord(Set *binaryWord, int operand);
 
 /*
  * This method transforms the given parameter 'operand' to a 14- bits "word" and insert it to the right place in RAM.
  * @param binaryWord - the transformed binary code.
  * @param operand - the first operand will get stored in 12-13 bits in 14-bits "word" in RAM.
  */
-void writeFirstOperandToBinaryWord(Set *binaryWord, int operand);
+void writeFirstParameterToBinaryWord(Set *binaryWord, int operand);
 
 /*
  * This method transforms the given parameter 'reg' to a 14- bits "word" and insert it to the right place in RAM.
