@@ -8,7 +8,7 @@
 #ifndef STRING_H_
 #define STRING_H_
 
-/* String represantation in struct of value and size.*/
+/* String definition*/
 typedef struct {
 
 	char *value;
@@ -117,12 +117,19 @@ void printString(String *str);
 int findNextNonBlankCharLocation(String *str, int offset);
 
 /*
- *
+ * This method check if 'c' is present in 'str'.
+ * @param str - the given String we look in for certain char.
+ * @param c - the charecter we looking for in String.
+ * @return - returns 1 if found else 0.
  */
 int containsChar(String * str, char c);
 
 /*
- *
+ * This method receives 'str', 'delim' as parameters.
+ * It looks for the given delimeter in given String.
+ * @param str - the given String we look in for a certain delimeter as comma, space, bracket e.t.c
+ * @param delim - the delimeter we're looking for in the String.
+ * @return - returns the new String.
  */
 String* popByDeliminator(String *str, char delim);
 

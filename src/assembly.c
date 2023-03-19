@@ -74,7 +74,7 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable, HashTable *opCodeTa
 
 	if ((*ICPtr) + (*DCPtr) > 156) {
 		resType = EXCEDING_MACHINE_MEMMORY;
-		printf("IC + DC > 150 \n");
+		printf("IC + DC > 156 \n");
 	}
 	if (resType) {
 
@@ -230,7 +230,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *o
 			/* TODO custom error messages for every resType
 			 TODO print all errors here */
 			printf("ERROR:   at line %d | resType %d \n", lineNumber,
-					lineProcesingResult);
+					getResultMsg());
 
 			if (resType == SUCCESS) {
 				resType = lineProcesingResult;
@@ -1139,7 +1139,7 @@ RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
 	return resType;
 }
 
-void writeToObFile(FILE *oFile, Set *binaryWord, int index) {
+void writeToObFile(FILE *obFile, Set *binaryWord, int index) {
 
 	String *outPut, *binaryStr;
 	char *buffer = malloc(4);
@@ -1153,7 +1153,7 @@ void writeToObFile(FILE *oFile, Set *binaryWord, int index) {
 	concatStrings(outPut, binaryStr);
 	appendCharToString(outPut, '\n');
 
-	fputs(outPut->value, oFile);
+	fputs(outPut->value, obFile);
 
 	free(buffer);
 	deleteString(binaryStr);

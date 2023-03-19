@@ -251,7 +251,6 @@ void textCorrecter(char *line) {
 		}
 	}
 
-	/* we remove extra whitespace*/
 	line[j] = '\n';
 	j++;
 	line[j] = '\0';
@@ -281,8 +280,8 @@ int isblankLine(char *line) {
 /*Print if an error occurred when trying to open file */
 void printFileError(char *fileName) {
 
-	fprintf(stderr, "\n************************************\n");
+	fprintf(stderr, "\n**************************************************\n");
 	fprintf(stderr, "   Error: Failed to open file %s\n", fileName);
-	fprintf(stderr, "\n************************************\n");
+	fprintf(stderr, "\n**************************************************\n");
 
 }

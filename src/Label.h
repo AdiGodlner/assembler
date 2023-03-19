@@ -11,6 +11,7 @@
 #include "LinkedList.h"
 #include "set.h"
 
+/*Definition of Label and of Label Type*/
 typedef enum {
 
 	DATA, INSTRUCTION,EXTERNAL
@@ -31,18 +32,23 @@ typedef struct {
  *
  */
 String* labelToString(void * label);
+
 /*
- *
+ * This method frees the allocated memory fro heap
+ * @param label - the given label that need to be freed.
  */
 void deleteLabel(void *label);
 /*
- *
+ * This method allocates dynamic memory from heap to create a lable.
+ * @param name - the label given name.
+ * @return  - returns new Label.
  */
 Label * createLabel(char* name);
 /*
- *
+ *TODO ?? DO WE USE THIS FUNC
  */
 void insertBinaryWord(Label *label, Set * binaryWord);
+
 
 
 #endif /* LABEL_H_ */
