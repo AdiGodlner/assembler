@@ -17,7 +17,6 @@
 #include "Result.h"
 #include "String.h"
 
-
 /*
  * This method receives a srcFile, an entryListand a symbolTable as parameters.
  * It check if there where any entry lables in the text file,
@@ -61,13 +60,12 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
  * If an error appears in the pass, we'll print aproper error message,
  * then stop reading the current file and move to the next one if exists.
  */
-void assembler(char *srcFile);
-
+void assembler(char *srcFile, HashTable *opCodeTable );
 
 /*
  *
  */
-RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
+RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable ,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr, int *ICPtr,
 		int *DCPtr);
 /*
@@ -83,9 +81,9 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
  * @return - returns resType of SUCCESS if the first pass was passed succesfully
  * or a proper error message that First Pass has failed.
  */
-RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
+RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPTR, int *DCPtr);
+		Node **entryListPtr, int *ICPTR, int *DCPtr) ;
 
 /*
  * This method opens an amFile, it receives amFile, symbolTable, instructionBinarysListPtr, dataBinarysListPtr,
@@ -100,7 +98,7 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
+RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *opCodeTable ,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
@@ -120,7 +118,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,HashTable *opCodeTable,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
 		Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
@@ -162,14 +160,11 @@ void writeToObFile(FILE *oFile, Set *binaryWord, int index);
 /*
  *
  */
-void writeToExternFile(FILE *externFile, String *labelName, int index) ;
+void writeToExternFile(FILE *externFile, String *labelName, int index);
 /*
  *
  */
 int isLabel(String *str);
-
-
-
 
 /*
  * This method receives a labelName, symbolTable, line instructionBinarysListPtr, dataBinarysListPtr,
@@ -190,9 +185,9 @@ int isRegister(String *str);
 /*
  *
  */
-RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable, String *line,
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,HashTable *opCodeTable , String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr);
+		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
 
 /*
  * This method receives a word, symbolTable, line instructionBinarysListPtr, dataBinarysListPtr,
@@ -209,9 +204,9 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable, String *line,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, String *line,
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, HashTable *opCodeTable , String *line,
 		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr);
+		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
 
 /*
  * This method places the 'word' in the given line in binary code to the RAM 14-bits "word".
@@ -223,8 +218,8 @@ RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, String *line,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleInstructions(char *word, String *line,
-		Node **instructionBinarysListPtr, int *ICPtr);
+RESULT_TYPE handleInstructions(char *word,HashTable *opCodeTable , String *line,
+		Node **instructionBinarysListPtr, int *ICPtr) ;
 /*
  * This method places the found data to the end of list so at the end we receive
  * a list of instruction and then the data as we were ask in the project.
@@ -333,15 +328,31 @@ RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
 /*
  *
  */
-RESULT_TYPE handleAdvancedOpcodeWIthOutBackets(String *line, Opcode *opCode,
+RESULT_TYPE handleAdvancedOpcodeWIthOutParameters(String *line, Opcode *opCode,
 		Node *opCodeNode);
 /*
  *
  */
-RESULT_TYPE handleAdvancedOpcodeWIthBackets(String *line, Opcode *opCode,
+RESULT_TYPE handleAdvancedOpcodeWIthParameters(String *line, Opcode *opCode,
 		Node *opCodeNode, int *numOfWordsPtr);
 
+/*
+ *
+ */
 RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
+
+/*
+ *
+ */
+RESULT_TYPE handleFirstParameter(String *currParamPtr, Node *opCodeNode,
+		int *isSrcRegisterPtr);
+
+/*
+ *
+ */
+RESULT_TYPE handleSecondParameter(String *currParamPtr, Node *opCodeNode,
+		int isSrcRegister, int *numOfWords);
+
 /*
  * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
  * This method receives 'line', 'opcode', 'opCodeNode', 'numOfWords'.
@@ -355,20 +366,20 @@ RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleParameters(String *line, Opcode *opCode, Node *opCodeNode,
+RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 		int *numOfWords);
 /*
  * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
  * This method receives 'line', 'opcode', 'opCodeNode', 'numOfWords'.
  * @param line - the given line that needs to be transformt in to a binary code.
  * @param opcode - the given opcode command as: mov, cmp...stop gets placed  in 6-9 bits.
- * and the opcode operrands if it's a src register 2-7
+ * and the opcode operands if it's a src register 2-7
  * @param opCodeNode - are passed from handleParameters() to be checked.
  * @param isSrcRegisterPtr - check if the source operand is a register.
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleSrcParam(String *line, Opcode *opCode, Node *opCodeNode,
+RESULT_TYPE handleSrcOperand(String *line, Set *addressing, Node *opCodeNode,
 		int *isSrcRegisterPtr);
 /*
  * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
@@ -383,7 +394,7 @@ RESULT_TYPE handleSrcParam(String *line, Opcode *opCode, Node *opCodeNode,
  * @return - returns resType SUCCESS if every thing was hendeled with success,
  * or a proper error RESULT_TYPE message.
  */
-RESULT_TYPE handleDestParam(String *line, Opcode *opCode, Node *opCodeNode,
+RESULT_TYPE handleDestOperand(String *line, Set *addressing, Node *opCodeNode,
 		int isSrcRegister, int *numOfWords);
 
 /*
@@ -404,8 +415,7 @@ int isAddresingTypeValid(Set *addresingSet, int addresingType);
  * addresingType == 2 is a Relative mode,addresingType == 3 Direct Register mode.
  * @return - returns the node.
  */
-Node * createParamBinaryWord(String *param, int addresingType);
-
+Node* createParamBinaryWord(String *param, int addresingType, int isSrc);
 
 /*
  * This method checks is the 'param' has valid number definition,

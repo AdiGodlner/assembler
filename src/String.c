@@ -104,11 +104,13 @@ void appendCharToString(String *str, char c) {
 }
 
 void deleteString(void *str) {
-	String *foo;
+
+	String *strString;
+
 	if (str != NULL) {
 
-		foo = (String*) str;
-		free(foo->value);
+		strString = (String*) str;
+		free(strString->value);
 		free(str);
 
 	}
@@ -149,7 +151,7 @@ int findNextNonBlankCharLocation(String *str, int offset) {
 String* popByDeliminator(String *str, char delim) {
 
 	int i = 0;
-	String *newStr ;
+	String *newStr, *temp ;
 	char currChar;
 
 	if (!containsChar(str, delim)) {
@@ -167,6 +169,10 @@ String* popByDeliminator(String *str, char delim) {
 		appendCharToString(newStr, currChar);
 
 	}
+
+	temp = createNewString(str->value + i + 1);
+	setStringValue(str, temp->value);
+	deleteString(temp);
 
 	return newStr;
 

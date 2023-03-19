@@ -39,6 +39,23 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 
 }
 
+void deleteOpcode(void* opCode){
+
+	Opcode *currOpCode;
+
+	if (opCode != NULL) {
+
+		currOpCode = (Opcode*) opCode;
+		deleteString(currOpCode->name);
+		deleteSet(currOpCode->srcAddressing);
+		deleteSet(currOpCode->destAddressing);
+
+	}
+
+	free(currOpCode);
+
+}
+
 /*TODO #define macros / numbers */
 
 void writeAREToBinaryWord(Set *binaryWord, int are) {
@@ -46,14 +63,14 @@ void writeAREToBinaryWord(Set *binaryWord, int are) {
 	writeToBinaryWord(binaryWord, are, 0, 2);
 
 }
-void writeDestToBinaryWord(Set *binaryWord, int dest) {
+void writeDestOperandToBinaryWord(Set *binaryWord, int destOperand) {
 
-	writeToBinaryWord(binaryWord, dest, 2, 2);
+	writeToBinaryWord(binaryWord, destOperand, 2, 2);
 
 }
-void writeSrcToBinaryWord(Set *binaryWord, int src) {
+void writeSrcOperandToBinaryWord(Set *binaryWord, int srcOperand) {
 
-	writeToBinaryWord(binaryWord, src, 4, 2);
+	writeToBinaryWord(binaryWord, srcOperand, 4, 2);
 
 }
 void writeCodeToBinaryWord(Set *binaryWord, int code) {
@@ -61,21 +78,22 @@ void writeCodeToBinaryWord(Set *binaryWord, int code) {
 	writeToBinaryWord(binaryWord, code, OPCODE_START_INDEX, OPCODE_LENGTH);
 
 }
-void writeSecondOperandToBinaryWord(Set *binaryWord, int operand) {
+void writeSecondParameterToBinaryWord(Set *binaryWord, int parameter) {
 
-	writeToBinaryWord(binaryWord, operand, 10, 2);
-
-}
-void writeFirstOperandToBinaryWord(Set *binaryWord, int operand) {
-
-	writeToBinaryWord(binaryWord, operand, 12, 2);
+	writeToBinaryWord(binaryWord, parameter, 10, 2);
 
 }
-void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg) {
+void writeFirstParameterToBinaryWord(Set *binaryWord, int parameter) {
+
+	writeToBinaryWord(binaryWord, parameter, 12, 2);
+
+}
+
+void writeDestRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 2, 6);
 
 }
-void writeDestRegiserToBinaryWord(Set *binaryWord, int reg) {
+void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 8, 6);
 
 }
@@ -116,13 +134,6 @@ void populateAddressingSet(Set **addressingPtr, char *addressingStr) {
 
 	read_set(addressingPtr, addressingArr, i);
 	deleteString(addressingStrCopy);
-
-}
-
-/*TODO is this even needed */
-Set* charToBinaryWord(char c) {
-
-	return intToBinaryWord(c);
 
 }
 

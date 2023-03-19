@@ -13,8 +13,6 @@
 #include "HashTable.h"
 #include "Result.h"
 
-/*TODO change to int and return correct value depending of what we want to do */
-
 RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 	String *macroBody = createNewString("");
@@ -25,14 +23,24 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 	if (getValueByKeyString(table, macroName) != NULL) {
 
 		printf("error macro with %s is already defined", macroName->value);
+
+		deleteString(nameWarp);
+		deleteString(macroName);
+
 		return MACRO_NAME_ALREADY_EXIST;
 
 	}
+
 	deleteString(nameWarp);
 
 	if (!ismcrNamevalid(macroName->value)) {
+
+		deleteString(macroName);
 		printf("Invalid macro name %s, It matches a command or lable name.\n",
 				macroName->value);
+
+		return MACRO_NAME_IS_RESERVED;
+
 	}
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
@@ -47,6 +55,8 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 				if (!isspace(macroEnd[i])) {
 
 					printf("\n ERROR: Illegal parametrs after end of macro.\n");
+					deleteString(macroName);
+					deleteString(macroBody);
 					return EXTRANEOUS_TEXT;
 				}
 
@@ -58,7 +68,17 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 			return SUCCESS;
 
 		} else {
+			if (line[0] == ';') {
+				/* this line is a comment and we do not copy it to the am file */
+				continue;
+			}
+			if (isblankLine(line)) {
+				continue;
+			}
+
+			textCorrecter(line);
 			appendToString(macroBody, line);
+
 		}
 
 	}
@@ -68,56 +88,65 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]) {
 
 RESULT_TYPE macroParse(char *srcFile) {
 
+	RESULT_TYPE resType = SUCCESS;
 	char *amSuffix = ".am";
 	char line[MAX_LINE_LEN];
 	void *macroBody;
 	HashTable *table = createDefualtHashTable();
-	/*TODO check destFile !=NULL */
-	String *destFile = filenameChange(srcFile, amSuffix);
+	String *amFileName = filenameChange(srcFile, amSuffix);
 	String *firstWord, *lineString;
 	FILE *amFile;
 
-	/*Open scr file .as*/
-	FILE *asFile = fopen(srcFile, "r");/*read from file*/
+	/*Open .as src file to read from */
+	FILE *asFile = fopen(srcFile, "r");
 
 	if (!asFile) {
 		deleteTable(table, deleteString);
-		deleteString(destFile);
+		deleteString(amFileName);
 		printFileError(srcFile);
 		return FILE_OPEN_FAILURE;
 	}
 
-	/*Open dest file .am*/
-	amFile = fopen(destFile->value, "w");/*read and write to the file*/
+	/*Open .am file to write to */
+	amFile = fopen(amFileName->value, "w");
 
 	if (!amFile) {
 
 		deleteTable(table, deleteString);
-		deleteString(destFile);
-		printFileError(destFile->value);
+		deleteString(amFileName);
+		printFileError(amFileName->value);
 		return FILE_OPEN_FAILURE;
 
 	}
 
 	/* Read input line by line till we see a macro,
-	 * and copy the scr file into the dest file without the macro name wrap we found,
+	 * and copy the src file into the dest file without the macro name wrap we found,
 	 *  only macro body will be passed to .am file*/
 
 	lineString = createEmptyString();
 
 	while (fgets(line, MAX_LINE_LEN, asFile) != NULL) {
 
+		if (line[0] == ';') {
+			/* this line is a comment and we do not copy it to the am file */
+			continue;
+		}
 		if (isblankLine(line)) {
 			continue;
 		}
+
 		textCorrecter(line);
 
 		setStringValue(lineString, line);
 		firstWord = popWord(lineString);
 
 		if (strncmp(firstWord->value, "mcr", 3) == 0) {
-			readMacro(asFile, table, lineString->value);
 
+			resType = readMacro(asFile, table, lineString->value);
+			if (resType) {
+				deleteString(firstWord);
+				break;
+			}
 		} else {
 
 			macroBody = getValueByKeyString(table, firstWord);
@@ -136,18 +165,27 @@ RESULT_TYPE macroParse(char *srcFile) {
 
 	}
 
-	printf("\nmacro where parsed successfully!\n");
-
 	/*Close input and output files*/
 	fclose(asFile);
 	fclose(amFile);
 
+	if (resType) {
+		/* Encountered an error while preprocessing so we delete the .am file */
+		remove(amFileName->value);
+
+	} else {
+
+		printf("\n %s was preprocessed successfully !\n", srcFile);
+		printf(" and written to %s \n", amFileName->value);
+
+	}
+
 	/*free space on the heap*/
-	deleteString(destFile);
+	deleteString(amFileName);
 	deleteString(lineString);
 	deleteTable(table, deleteString);
 
-	return SUCCESS;
+	return resType;
 
 }
 
@@ -158,12 +196,6 @@ String* filenameChange(char *fileName, char *suffix) {
 
 	/*check the position of the last dot in the file name*/
 	dotPos = strrchr(fileName, '.');
-	if (!dotPos) {
-		/*Wrong filename input file name does not contain a legal suffix*/
-		/*TODO: check if dotpos = allowed suffix ".am" ".as" "/foo" */
-		printf("Error: Illegal file name.\n");
-		return NULL;
-	}
 
 	/*Copy filename up to dot position */
 	newFileName = stringNCopy(fileName, dotPos - fileName);
@@ -194,7 +226,7 @@ int ismcrNamevalid(char *name) {
 
 }
 
-/*Check that there aren't any illegal commas, brackets and if there is a blank line removes it same for extra spaces*/
+/* removes extra blank spaces*/
 void textCorrecter(char *line) {
 
 	int i, j, k, len;
@@ -218,6 +250,7 @@ void textCorrecter(char *line) {
 
 		}
 	}
+
 	/* we remove extra whitespace*/
 	line[j] = '\n';
 	j++;
@@ -229,7 +262,7 @@ int isblankLine(char *line) {
 	int i;
 	int len = strlen(line);
 
-	/*Removes blank lines*/
+	/*check if line contains only blank spaces */
 	for (i = 0; i < len; i++) {
 		if (isspace(line[i])) {
 			if (line[i] == '\n') {
@@ -245,7 +278,7 @@ int isblankLine(char *line) {
 
 }
 
-/*Print if an error uccured with opening file */
+/*Print if an error occurred when trying to open file */
 void printFileError(char *fileName) {
 
 	fprintf(stderr, "\n************************************\n");

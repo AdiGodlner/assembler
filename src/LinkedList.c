@@ -68,8 +68,6 @@ void deleteNode(Node *node) {
 		deleteSet(node->data);
 	}else if(node->TYPE == STRING) {
 		deleteString(node->data);
-	}else{
-		printf("\n\n\noooooopssss\n\n\n");
 	}
 
 	free(node);
