@@ -22,126 +22,132 @@ typedef struct {
 } Opcode;
 
 /*
- * This method dynamicly allocates memmory for future storing of opcode.
- * it checkes if the opcode and the received operands are valid.
-
- * This method receives 'name', 'code', 'numOfParameters', 'srcAddressingStr', 'destAddressingStr'.
- * @param name - the given line that needs to be transformt in to a binary code.
- * @param code - the given opcode command as: mov, cmp...stop gets placed  in 6-9 bits.
+ * This method allocates memory for opcode and creates Opcode.
+ * @param name - the name of the opCode
+ * @param code - the number of the opCode
  * @param numOfParameters - the number of given parameters
- * example: mov, cmp, add, sub, lea - need to receive exactly two parametrs, srcParam and destParam. TODO ??
- * @param srcAddressingStr - the source operand get stored in 4-5 bits.
- * @param destAddressingStr - the dest operand  get stored in 2-3 bits.
- *
+ * example: mov, cmp, add, sub, lea - need to receive exactly two parameters
+ * @param srcAddressingStr - a string of numbers separated by a ',' representing
+ *  the allowed addressing types for the src operands
+ * @param destAddressingStr -a string of numbers separated by a ',' representing
+ *  the allowed addressing types for the dest operands
  * @return - returns an opcode.
  */
 Opcode* createOpcode(char *name, int code, int numOfParameters,
 		char *srcAddressingStr, char *destAddressingStr);
 
 /*
- *
+ * This method frees the space allocated on the heap to a given opCOde
+ * @param opCode - given opCode to free.
  */
-void deleteOpcode(void* opCode);
+void deleteOpcode(void *opCode);
 /*
- * This method transforms the given parameter 'are' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param are - the 0-1 bits in 14-bits "word" in RAM.
+ * This method populates the ARE bits in given binaryWord with the binary representation
+ * of 'are'.
+ * @param binaryWord - a set representing a binary word.
+ * @param 'are' - a decimal number to write it binary representation to place in the relevant ARE bits
+ * of the given word binaryWord.
  */
 void writeAREToBinaryWord(Set *binaryWord, int are);
 
 /*
- * This method transforms the given parameter 'dest' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param dest - the destanation operand of opCode command will get stored in 2-3 bits in 14-bits "word" in RAM.
+ *  This method populates the destination operand addressing type bits in given binaryWord
+ *  with the binary representation of destOperand.
+ * @param binaryWord - a set representing a binary word.
+ * @param destOperand -  a decimal number to write it binary representation the destination operand bits
+ * of the given word binaryWord.
  */
 void writeDestOperandToBinaryWord(Set *binaryWord, int destOperand);
 
 /*
- * This method transforms the given parameter 'src' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param src - the sorce operand of opCode command will get stored in 4-5 bits in 14-bits "word" in RAM.
+ * This method populates the source operand addressing type bits in given binaryWord
+ * with the binary representation of srcOperand.
+ * @param binaryWord - a set representing a binary word.
+ * @param srcOperand -  a decimal number to write it binary representation the source operand bits
+ * of the given word binaryWord.
  */
 void writeSrcOperandToBinaryWord(Set *binaryWord, int srcOperand);
 
 /*
- * This method transforms the given parameter 'code' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param code - the command code as'mov'...'stop'
- * will get stored in 6-9 bits in 14-bits "word" in RAM.
+ * This method populates the operation code bits in given binaryWord
+ * with the binary representation of code.
+ * @param binaryWord - a set representing a binary word.
+ * @param code -  a decimal number to write it binary representation the operation code bits
+ * of the given word binaryWord.
  */
 void writeCodeToBinaryWord(Set *binaryWord, int code);
 
 /*
- * This method transforms the given parameter 'operand' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param operand - the second operand will get stored in 10-11 bits in 14-bits "word" in RAM.
+ * This method populates the second Parameter addressing type bits in given binaryWord
+ * with the binary representation of secondParameter.
+ * @param binaryWord - a set representing a binary word.
+ * @param secondParameter -  a decimal number to write it binary representation the secondParameter bits
+ * of the given word binaryWord.
  */
-void writeSecondParameterToBinaryWord(Set *binaryWord, int operand);
+void writeSecondParameterToBinaryWord(Set *binaryWord, int secondParameter);
 
 /*
- * This method transforms the given parameter 'operand' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param operand - the first operand will get stored in 12-13 bits in 14-bits "word" in RAM.
+ * This method populates the first Parameter addressing type bits in given binaryWord
+ * with the binary representation of firstParameter.
+ * @param binaryWord - a set representing a binary word.
+ * @param firstParameter -  a decimal number to write it binary representation the firstParameter bits
+ * of the given word binaryWord.
  */
-void writeFirstParameterToBinaryWord(Set *binaryWord, int operand);
+void writeFirstParameterToBinaryWord(Set *binaryWord, int firstParameter);
 
 /*
- * This method transforms the given parameter 'reg' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param reg - the sorce register in 8-13 bits in 14-bits "word" in RAM.
+ * This method converts the given source srcReg to binary and writes it to its source register.
+ * @param binaryWord - a set representing a binary word.
+ * @param srcReg - the source register
  */
-void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg);
+void writeSrcRegiserToBinaryWord(Set *binaryWord, int srcReg);
 
 /*
- * This method transforms the given parameter 'reg' to a 14- bits "word" and insert it to the right place in RAM.
- * @param binaryWord - the transformed binary code.
- * @param reg - the destanation register in 2-7 bits in 14-bits "word" in RAM.
+ * This method converts the given destination destReg to binary and writes it to its destination register.
+ * @param binaryWord - a set representing a binary word.
+ * @param destReg - the destination register.
  */
-void writeDestRegiserToBinaryWord(Set *binaryWord, int reg);
+void writeDestRegiserToBinaryWord(Set *binaryWord, int destReg);
 
 /*
- * This method convert the decimal value into binary code value.
- * It receives 'binaryWord', 'decimal', 'offset', 'length' as parameters.
- * @param binaryWord - the transformed binary code.
+ * This method convert the decimal value into binary code represented by length number of bits
+ * and writes it to the binary word starting from position offset .
+ * @param binaryWord - a set representing a binary word.
  * @param decimal - the given decimal value.
  * @param offset - the given offset where to start from in set.
- * @param length - the given length. TODO??
+ * @param length - the given length.
  */
 void writeToBinaryWord(Set *binaryWord, int decimal, int offset, int length);
 
 /*
- * This method checkes if the sorce and the dest operand
- * addressing has legal values, depending on the given comand as 'mov'...'stop'
- * For example only jmp,bne,jsr  all three have no sorce operand addressing and
- * only all three can have as a dest operand addressins a Relative mode.
- * @param addressingPtr - the poiner is passed to read_set() method.
- * @param addressingStr - the given operand addressing mode.
+ * This method takes a string of numbers separated by a ',' and populates
+ * the given set with it's numbers.
+ * @param addressingPtr - a pointer to a pointer to a set
+ * @param addressingStr -a string of numbers separated by a ','.
  */
 void populateAddressingSet(Set **addressingPtr, char *addressingStr);
 
 /*
- * this method receive a number that is passed to intToBinaryWordWithOffset() method for further handeling.
+ * This method receive a number and converts it to a binary word represented by a Set .
  * @param num - the given number that needs to be converted into binary code.
- * @return - returns a new set.
+ * @return - binary word represented by a new Set.
  */
 Set* intToBinaryWord(int num);
 
 /*
- * This method receive a decimal number that needs to be converted and placed to set.
+ * This method receive a number and converts it to a binary word represented by a Set .
+ * starting from offset.
  * @param num - the given nember that need to be converted.
  * @param offset - the given offset where to start from in set.
- * @return - returns a new set.
+ * @return - binary word represented by a new Set.
  */
 Set* intToBinaryWordWithOffset(int num, int offset);
 
 /*
- * This method receive a table where all opcode comand get in, and it defines what exact rules need to be folowed
- * so all comands are insert into the right place where they belong
- * depending of how much parameters a certain comand need to get
- * and on the addressing mode of every parameter they have.
- * @param table - the created table that all opcode comands go in.
+ * This method initialises a given table by populating it with
+ * Opcodes as they where defined in the white paper.
+ * @param table - a created table that all opcode commands go in.
  */
 void initOpcode(HashTable *table);
-
 
 #endif /* OPCODE_H_ */

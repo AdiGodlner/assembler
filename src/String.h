@@ -72,20 +72,20 @@ String* createNewString(char *charArr);
 void appendToString(String *str1, char *charArr);
 /*
  * This method appends one char at a time to the end of String 'str'.
- * @param str - the given String that a given charecter
+ * @param str - the given String that a given character
  * that is going to be added to the end of it.
- * @param c - the given char that need to be apend to end of given String.
+ * @param c - the given char that need to be append to end of given String.
  */
 void appendCharToString(String *str, char c);
 /*
- * This method recieve two Strings str1, str2 as parameters and concat them,
+ * This method receive two Strings str1, str2 as parameters and concat them,
  * then stores them in the first received String.
- * @param str1 - the given String that both concated String are going to be stored in.
+ * @param str1 - the given String that both connected String are going to be stored in.
  * @param str2 - the second String that going to be concat to the end of the first one.
  */
 void concatStrings(String *str1, String *str2);
 /*
- * This method recieve a String that needs to be freed to avoid memory leak,
+ * This method receives a String that needs to be freed to avoid memory leak,
  * that can be caused if a memory is allocated dynamically on the heap and isn't freed.
  * @param str - the given String that need to be freed.
  */
@@ -93,49 +93,30 @@ void deleteString(void *str);
 /*
  * This method sets the Strings 'str' value to the given char array 'charArr'
  * and reallocates the Strings 'str' memory to the new size of 'charArr'.
- * this method recieves two parameters, 'str' and 'chaArr'.
  * @param str - the given String to be set to the given char array 'charArr'.
  * @param charArr - the given character array.
  */
 void setStringValue(String *str, char *charArr);
-/*
- * This method receives a 'str' parameter and prints the given value of it as a String.
- * @param str - the String that need to be printed.
- */
-void printString(String *str);
 
 /*
- * This method receives two parameters 'str' and 'offset' and find the first
- * none blanck char location in a String 'str' starting from given 'offset'.
- * a blank char is defined as a space or a tab or any whitechar that exist in isspace function.
- * @param str - the given String.
- * @param offset - the given offset that we need to start loking from it in the given String.
- * @raturn -
- * this method returns an integer location of that char in the Strings-> value of char array
- * if the method reached the end of the string without finding a blank space it returns -1.
- */
-int findNextNonBlankCharLocation(String *str, int offset);
-
-/*
- * This method check if 'c' is present in 'str'.
+ * This method check if a given char 'c' is present in the String 'str'.
  * @param str - the given String we look in for certain char.
- * @param c - the charecter we looking for in String.
+ * @param c - the character we looking for in String.
  * @return - returns 1 if found else 0.
  */
 int containsChar(String * str, char c);
 
 /*
- * This method receives 'str', 'delim' as parameters.
- * It looks for the given delimeter in given String.
- * @param str - the given String we look in for a certain delimeter as comma, space, bracket e.t.c
+ * this method looks for the given delimiter in given String.
+ * @param str - the given String we look in for a certain delimiter as comma, space, bracket e.t.c
  * @param delim - the delimeter we're looking for in the String.
  * @return - returns the new String.
  */
 String* popByDeliminator(String *str, char delim);
 
 /*
- * This method receive a String 'str' as a parameter, that includes words and blanck spaces.
- * it pops out the first word that opears in the String.
+ * This method receive a String 'str' as a parameter, that includes words and blank spaces.
+ * it pops out the first word that appears in the String.
  * this method considers a word to be any number of blank chars followed by any number of non blank chars
  * followed by a single blank space.
  * @param str - the given String we pop from.

@@ -11,8 +11,6 @@
 #include "String.h"
 #include "set.h"
 
-#define MEM_ERR "failed to allocate memory"
-
 void pushHead(Node *newNode, Node **listHeadPtr) {
 
 	newNode->next = *listHeadPtr;

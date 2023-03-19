@@ -10,13 +10,9 @@
 #include "String.h"
 #include "Entry.h"
 
-#define MEM_ERR "failed to allocate memory"
-
 Entry * createEntry(int hash, String *key, void *value) {
 
 	Entry * entry = malloc(sizeof(Entry));
-
-	/*TODO maybe duplicate value not sure if its needed yet*/
 	entry->value = value;
 	entry->hash = hash;
 	entry->key = duplicateString(key);

@@ -21,12 +21,6 @@ Label* createLabel(char *name) {
 
 }
 
-String* labelToString(void *label) {
-
-	String *str = createNewString(((Label*) label)->name->value);
-	return str;
-}
-
 void deleteLabel(void *label) {
 
 	Label * labelCast = (Label*) label;

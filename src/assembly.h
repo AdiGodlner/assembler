@@ -18,460 +18,589 @@
 #include "String.h"
 
 /*
- * This method iterate over keys in symbol table, and add's IC
+ * This method iterate over keys in symbol table, and add's IC + RAM stating index
  * To LABEL->ADRESS for labels of TYPE data.
- * It receives 'symboltable' and 'IC' as parameters.
- * @param symbolTable - the symbol table, that IC is added to lables of type DATA in it.
- * @param IC - the counter that set all decimal address in RAM to start from 0100.
+ * and TO labels of TYPE INSTRUCTION adds RAM stating index
+ * It receives 'symbolTable' and 'IC' as parameters.
+ * @param symbolTable - the table containing all the labels in the file,
+ * @param IC - last number of the instruction counter (IC).
  */
 void fixLabelCounters(HashTable *symbolTable, int IC);
 /*
- * This method receives 'srcFile','entryListand','symbolTable' as parameters.
- * It check if there where any entry lables in the text file,
- * If so it stores the entry lables in the entry lable list, to check later that an entry lable is
- * defined in the text,
- * if the entry lable is undefined, we throw a proper error message,
- * After what we create an entry file and open it in writing mode.
- * the entry lable name and address is writen into an .ent file in a format as: LABLE     100.
- * If no entry lables were found we're deleting the .ent file if it has been already created.
+ * This method checks that every label in entryList list was defined in the srcFile
+ * and was not also defined as an .extern label
+ * the entry label name and address is written into an .ent file in a format as: label     100.
  * @param srcFile - the source file we look in for labels.
- * @param entryList - the list that the entry labels will be stored in.
- * @param symbolTable - the symbol table that the labels are stored in by there name and address value.
- * @return - returns the resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param entryList - a list of all entry labels found in src file.
+ * @param symbolTable - the table containing all the labels in the file.
+ * @return - returns the resType SUCCESS if all entry labels in the list were found in symbol table
+ * and where not also defined as .extern
+ * returns FILE_NOT_FOUND if the method could not open a .ent file,
+ * returns UNDEFINED_ENTRY_LABLE if a labels in enteryList was not defined,
+ * returns LABEL_IS_EXTERN_AND_ENTRY if a label was defined both as entry and as extern.
  */
 RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 		HashTable *symbolTable);
 /*
- * This method receives a sorce file(.am).
- * @param src - The received sorce file.
- * build the Simbol table, build a ICList, a DCList, and a EntryList,
- * and poineters to each one of them.
- * It check for all labels that apeares in the .am file content.
- * If an .entry label is found,
- * it gets printed in to a separated .ent file with the writeEntryToFile() method.
- * and buildes the 14- bits "words" line in RAM ,excluding the Labels address,
- * that are going to be stored in only in second pass.
- * If an error appears in the pass, we'll print a proper error message,
- * then stop reading the current file and move to the next one if exists.
+ * This method translated the simplified assembly code after preprocessing given in srcFile
+ * to binary machine code and writes it to a 'srcFile'.ob file
+ * if external or entry labels exists it writes them to
+ * 'srcFile'.ext and 'srcFile'.ent respectively  (as specified in the white paper )
+ * @param srcFile - the file name of the given src file.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * If an error appears in the pass, we'll print a proper error message.
  */
-void assembler(char *srcFile, HashTable *opCodeTable );
+void assembler(char *srcFile, HashTable *opCodeTable);
 
 /*
- * This method receives 'scrFile', 'symbolTable', 'instructionBinarysListPtr',
- * 'dataBinarysListPtr',,'ICPtr', 'DCPtr' as parameters.
- * @param srcFile - the given sorce file.
- * @param symbolTable - the symbol table that all labels are stored in.
- * @param instructionBinarysListPtr - pointes to all instruction commands as 'mov'...'stop'
- * @param dataBinarysListPtr - pointes to all data type as '.string' , '.data,
- * @param entryListPtr - pointes to  empty place in list that the next .entry label will get stored in.
- * @param ICPtr - the instruction counter is passed to handleLabel().
- * @param DCPtr - the data counter is passed to handleLabel().
- * @return - returns resType of SUCCESS if the first pass was passed succesfully
- * or a proper error message that First Pass has failed.
- */
-RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable ,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr, int *ICPtr,
-		int *DCPtr);
-/*
+ * This method does the first pass of the assembly process
+ *	if entry labels where found it creates the .ent file
  *
+ * @param srcFile - the given source file.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
+ * or a proper error message that First Pass has failed.
+ * otherwise it will print an error message and
+ *  returns a different RESULT_TYPE based on the error it encountered.
+ */
+RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, int *ICPtr, int *DCPtr);
+/*
  * This method open the srcFile (.am file) in reading mode.
- * It receives 'scrFile', 'symbolTable', 'instructionBinarysListPtr','dataBinarysListPtr',
- * 'entryListPtr','ICPtr', 'DCPtr' as parameters and passes
- * them to firstPassAssembler() method for further handeling.
- * @param srcFile - the given sorce file.
- * @param symbolTable - the symbol table that all labels are stored in.
- * @param instructionBinarysListPtr - pointes to all instruction commands as 'mov',
- * @param dataBinarysListPtr - pointes to all data type as '.string' , '.data,
- * @param entryListPtr - pointes to  empty place in list that the next .entry label will get stored in.
- * @param ICPtr - the instruction counter is passed to handleLabel().
- * @param DCPtr - the data counter is passed to handleLabel().
- * @return - returns resType of SUCCESS if the first pass was passed succesfully
+ * and continues the first pass of the assembly process
+ * @param srcFile - the given source file.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
  * or a proper error message that First Pass has failed.
+ * otherwise it returns a different RESULT_TYPE based on the error it encountered.
  */
-RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPTR, int *DCPtr) ;
+RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPTR, int *DCPtr);
 
-/*
- * This method  receives 'amFile', 'symbolTable', 'instructionBinarysListPtr', 'dataBinarysListPtr',
- * 'entryListPtr','ICPtr', 'DCPtr'  as parameters.
- * It prints the number of line where an error has accurued.
- * All parameters are passed to lineFirstPass() method for further handeling.
+/* This method continues the first pass of the assembly process,
+ * If an error appears in the pass, we'll print a proper error message
+ * with number of line where the error has occurred.
  * @param amFile - the given .am file.
- * @param symbolTable - the symbol table that all labels are stored in.
- * @param instructionBinarysListPtr - pointes to all instruction commands as 'mov'..'stop'.
- * @param dataBinarysListPtr - pointes to all data type as '.string' , '.data',
- * @param entryListPtr - pointes to the next empty place in list that the .entry label will get stored in.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
+ * otherwise it returns a different RESULT_TYPE based on the error it encountered.
  */
-RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *opCodeTable ,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr);
+RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr);
 /*
- * This method receives String 'lineString', 'symbolTable', 'instructionBinarysListPtr', 'dataBinarysListPtr',
- * 'entryListPtr', 'ICPtr', 'DCPtr' as parameters.
- * It take the text of a currerent line and divide the text into two "cases"
- * handleLabel(), handleNonLabel().
- * The first take care only of the label that is found in the line and check if is legal.
- * The second take care of rest of the line from the label part and till the ent of line.
+ * This method excepts a line String form .am file and continues the first pass of the assembly process
+ * on that given line
  * @param lineString - the given line represented as String.
- * @param symbolTable - the symbol table that all labels will get stored in.
- * @param instructionBinarysListPtr - pointes to all instruction commands as 'mov'...'stop'.
- * @param dataBinarysListPtr - pointes to all data type as '.string' , '.data.
- * @param entryListPtr - pointes to the next empty place in list that the .entry label will get stored in.
- * @param ICPtr - the instruction counter is passed to handleLabel().
- * @param DCPtr - the data counter is passed to handleLabel().
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
+ * otherwise it returns a different RESULT_TYPE based on the error it encountered.
  */
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,HashTable *opCodeTable,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr);
-/*
- * This method receives a sorce file, and creates an extern file and an object file and opens them in writing mode.
- * It  receives 'srcFile', 'symbolTable', 'binarysList',
- * 'IC', 'DC' as parameters.
- * @param scrFile - the given source file after macro parse.
- * @param symbolTable - the symbol table that all labels name and address will be taken from.
- * @param binarysList - the list that the binary data is stored in. TODO??
- * @param IC - the number of the instraction values represented in RAM.
- * @param DC - the number of the data values represented in RAM.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
- */
-RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
-		Node *binarysList, int IC, int DC);
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
- * This method receives an extern file and an object file.
- * After what all .extern lable,from simbolTable are writen to the .extern file,(if they exist).
- * All  missing labels address get complited, the "words" of 14-bits get insert to RAM.
- * The "words" in RAM get writen to an .ob file in a special binary symbols code
- * which are represanted by: 0 = '.' & 1 = '/'.
- * @param obFile - the given object file that the "words" in RAM are writen to.
- * @param externFile - the given extern file that all .extern lables are writen to.
- * @param symbolTable - the symbol table that all labels name and address will be taken from.
- * @param binarysList - pointes to all instruction commands as 'mov',
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
- */
-RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
-		HashTable *symbolTable, Node *binarysList);
-
-/*
- * This method receives 'obFile','binaryWord','index' as parameters.
- * After what the RAM 14- bits "words" are writen to the
- * .ob file in a special binary symbol code as: 1 = '/' & 0 = '.'.
- * @param obFile - the given file we write in.
- * @param binaryWord - the special binary symbol code.
- * @param index - the given index value.
- */
-void writeToObFile(FILE *obFile, Set *binaryWord, int index);
-
-/*
- * This method receives 'externFile','lableName','index' as parameters.
- * It check if there where any extern lables in the text file,
- * If so it pulls them from the symbolTable.
- * After what we create an extern file and open it in writing mode.
- * the extern lable name and address is writen into the .extern file in a format as: LABLE     100.
- * If no extern lables were found we're deleting the .ext file if it has been already created.
- * @param externFile - the source file we look in for labels.
- * @param labelName - the given label name.
- * @param index - the given index value.
- */
-void writeToExternFile(FILE *externFile, String *labelName, int index) ;
-
-/*
- * This method receives a String, and check if a label is defined corectly,
- * @param str - the given String that we search for label in it.
- * @return - returns the index of the placeholder after ':' , if the method has failed returns -1.
- */
-RESULT_TYPE secoundPassAssembly(FILE *oFile, FILE *externFile,
-		HashTable *symbolTable, Node *binarysList);
-
-/*
+ * This method  continues the first pass of the assembly process
+ * of lines containing a label deceleration.
  *
- */
-void writeToObFile(FILE *oFile, Set *binaryWord, int index);
-/*
- *
- */
-void writeToExternFile(FILE *externFile, String *labelName, int index);
-/*
- *
- */
-int isLabel(String *str);
-
-/*
- * This method receives 'str' parameter and checks is the given 'str' is a corect definition of a register.
- * The registers can be only r0-r7, if so return true, else false value.
- * @param str - the given str, to be checked.
- * @return - returns the true or false value.
- */ 
-int isRegister(String *str);
-/*
- *
- */
-RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,HashTable *opCodeTable , String *line,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
-
-/*
- * This method receives  'word', 'symbolTable', 'line', 'instructionBinarysListPtr', 'dataBinarysListPtr',
- * 'entryListPtr', 'ICPtr', 'DCPtr' as parameters.
- * It take care of rest of the line from the "after label part" and till the ent of line.
- * @param word - the given curent word that we're on in the line String.
- * @param symbolTable - the symbol table that all labels will get stored in.
+ * @param labelName - first word of the line or the first.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
  * @param line - the current line.
- * @param instructionBinarysListPtr - pointes to all instruction commands as 'mov',
- * @param dataBinarysListPtr - pointes to all data type as '.string' , '.data,
- * @param entryListPtr - pointes to the next empty place in list that the .entry label are stored in.
- * @param ICPtr - the instraction counter.
- * @param DCPtr - the data counter.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
+ * otherwise it returns a different RESULT_TYPE based on the error it encountered.
  */
-RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, HashTable *opCodeTable , String *line,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) ;
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,
+		HashTable *opCodeTable, String *line, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr);
 
 /*
- * This method places the 'word' in the given line in binary code to the RAM 14-bits "word".
- * This method receives  'word',  'line',  'instructionBinarysListPtr',  'ICPtr'.
+ * This method  continues the first pass of the assembly process
+ * of lines which do not contain a label or
+ * if a line contians a label this method processes the part after the label name
+ *
+ * @param word - first word of the line or the first word of the line after the label deceleration
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
+ * @param line - the current line.
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @param ICPtr - a pointer to the instruction counter.
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType of SUCCESS if the first pass was passed successfully
+ * otherwise it returns a different RESULT_TYPE based on the error it encountered.
+ */
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable,
+		HashTable *opCodeTable, String *line, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr);
+
+/*
+ * This method continues the first pass of the assembly process
+ * for instructions if an instruction line is valid
+ * this method creates the known binary words and pushes them to the end 'instructionBinarysList' list
+ * and if a labelName is used a node containing the label name is pushed to 'instructionBinarysList'
+ * in its relevant position
+ *
  * @param word - the current word we're pointing at.
+ * @param opCodeTable  - a table containing all of the Opcode commands (as specified in the white paper )
  * @param line - the current line.
- * @param instructionBinarysListPtr -  helps insert the  instruction
- * commands as 'mov'...'stop' to the right place of the list.
- * @param ICPtr - the instraction counter.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param ICPtr - a pointer to the instruction counter.
+ * @return - returns resType SUCCESS if instruction line is valid
+ * and the function was able to create the binary words described above
+ * or RESULT_TYPE depending on the error.
  */
-RESULT_TYPE handleInstructions(char *word,HashTable *opCodeTable , String *line,
-		Node **instructionBinarysListPtr, int *ICPtr) ;
+RESULT_TYPE handleInstructions(char *word, HashTable *opCodeTable, String *line,
+		Node **instructionBinarysListPtr, int *ICPtr);
+
 /*
- * This method places the found data to the end of list so at the end we receive
- * a list of instruction and then the data as we were ask in the project.
- * This method receives  'line', 'dataBinarysListPtr','DCPtr'.
+ * This method continues the first pass of the assembly process
+ * for data if the .data line is valid
+ * This method creates binary words representing the integers
+ * given in the .data line and places them to the end of 'dataBinarysList' list.
+ *
  * @param line - the current line.
- * @param dataBinarysListPtr - pointes to all data  as: .data 1,2,-3,
- * @param DCPtr - the data counter.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType SUCCESS if data line is valid
+ * and the function was able to create the binary words described above
+ * or RESULT_TYPE depending on the error.
  */
 RESULT_TYPE handleData(String *line, Node **dataBinarysListPtr, int *DCPtr);
 
 /*
- * This method places the found data to the end of list so at the end we receive
- * a list of instruction and then the data as we were ask in the project.
- * This method receives  'line', 'dataBinarysListPtr','DCPtr'.
+ * This method continues the first pass of the assembly process
+ * for data of type .string  if the .string line is valid
+ * This method creates binary words each binary word represents
+ * ASCII value of a char in the string.
+ * and pushes them to the end of 'dataBinarysList' list.
+ *
  * @param line - the current line.
- * @param dataBinarysListPtr - helps insert all the String's
- * data in ASCII value  as: .string "abc" to data binary list.
- * @param DCPtr - the data counter.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param dataBinarysListPtr -  a linked list to all data type such as '.string' , '.data,
+ * @param DCPtr - a pointer to the data counter.
+ * @return - returns resType SUCCESS if data line is valid
+ * and the function was able to create the binary words described above
+ * or RESULT_TYPE depending on the error.
  */
 RESULT_TYPE handleString(String *line, Node **dataBinarysListPtr, int *DCPtr);
 
 /*
- * This method searches for the  extern lable name and address in the Simbol table.
- * This method receives  'SimbolTable', 'line'.
- * @param SimbolTable - the simbol table that we take the extern lable address from if exists.
+ * This method checks if a line that started with .extern is valid
+ * if it is it inserts the label into the symbolTable.
+ *
+ * if the label name is already
+ * defined and the label has a LABEL_TYPE the is not EXTERNAL
+ * then this method returns an error
+ *
+ * @param symbolTable - the symbol table that all labels will be stored in.
  * @param line - the current line..
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @return - returns resType SUCCESS if the current .extern line is valid
+ * or a proper error per the description above RESULT_TYPE.
  */
 RESULT_TYPE handleExtern(HashTable *symbolTable, String *line);
+
 /*
- * This method takes the lable name from the lable entry list if exists,
- * and searches for the  entry lable address in the Simbol table.
- * This method receives  'SimbolTable', 'line','entryListPtr'.
- * @param SimbolTable - the simbol table that we take the entry lable address from,
- * if such lable exist in the entryList.
+ * This method searches for the entry label in the Symbol table
+ * if it finds a label of type EXTERNAL it returns an error otherwise it adds the .entry label to
+ * the entryList
+ *
+ * @param symbolTable - the symbol table that all labels will be stored in.
  * @param line - the current line.
- * @param EntryListPtr - helps insert the entry lable to the entry list.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param entryListPtr - a linked list to store all entry labels.
+ * @return - returns resType SUCCESS if the entry label was added successfully to the list ,
+ * proper error per the description above RESULT_TYPE.
  */
 RESULT_TYPE handleEntry(HashTable *symbolTable, String *line,
 		Node **entryListPtr);
 
 /*
- * This method check if a lable name is valid and isn't one of the reserved words.
- * @param name - the given lable name.
- * @return - returns 0 - if lable name maches one of the reserved words, else 1.
+ * This method check if a label name is valid and isn't one of the reserved words.
+ * @param name - the given label name.
+ * @return - returns 0 if label name matches one of the reserved words or is not a valid label name
+ * (as specified in the white paper )
+ * , else 1.
  */
 int isLableNamevalid(char *name);
+
 /*
- * This method receives 'labelName', 'SimbolTable', 'type', 'address'.
+ * This method inserts the label  into the symbolTable.
  * @param labelName - the given name.
- * @param SimbolTable - the simbol table that we insert lable to it by type and address.
- * @type - the given lable type entry/extern.
- * @address - the specific line address the lable was stored in the text file,
- * the lable is insert by it to the Simbol table.
+ * @param symbolTable - the symbol table that all labels will be stored in.
+ * @param type - the given label type DATA/INSTRUCTION/EXTERNAL.
+ * @param address - the specific line address ( IC / DC ) of the label.
  */
 void insertLabel(char *labelName, HashTable *symbolTable, LABEL_TYPE type,
 		int addres);
 /*
- * This method check if the lable name is legal.
- * if the lable name starts with a lower or capital letter and only leters
- * or numbers apears after it as: "LABLE:".
- * if the length of label name is not longer than 30.
- * @param lable name  - the given lable name tha needs to be checked.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * This method check if the label name is legal. a label name is legal
+ * if the label name starts with a lower or capital letter and only contains
+ * alphanumeric chars after,
+ * and the length of label name is not longer than 30.
+ * and if the label name is not a reserved name such as 'r3' or 'mov'
+ *
+ * @param label name  - the given label name that needs to be checked.
+ * @return - returns resType SUCCESS if the given label name is legal as described above
+ * or  RESULT_TYPE depending on the error encountered.
  */
 RESULT_TYPE checkLabelLegality(char *labelName);
 
 /*
- * This method convert the line with the opcode to a 14- bits "word" and insert it to the right place in RAM.
- * This method receives 'line', 'opcode', 'instructionBinarysListPtr', 'ICPtr'.
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: mov, cmp...stop gets placed  in 6-9 bits.
- * @param instructionBinarysListPtr - helps insert the instruction commands to the right place of the list.
- * @param ICPtr - the instraction counter.
- * gets increased when an instruction is found and shows where the next instruction will get placed.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * This method checks if a given line is a valid for simple Opcodes
+ * ( we consider simple opcode those who do not have
+ * Addressing mode of type 2 (jump addressing with parameters))
+ *
+ * if the line is valid then the method creates the relevant binary words and pushes them to the end of
+ * instructionBinarysList and advances IC by the number of binary words created
+ *
+ * a line will be considered valid if the given number of  operands  is equal to the allowed number of
+ *  operands for a given opCode
+ *  and the operands given to it are valid operands for the given opCode
+ * for example src operand of mov can be a label a register or a number
+ * but the dest operand of move can only be a register or a label
+ * if this method finds the dest operand in to be a label when the opCode represents move
+ * then the line will not be considered valid because a label dest operand is not allowed for an opCode of
+ * type move (as specified in the white paper )
+ *	and the line does not contain any extra text after the allowed  operands
+ *
+ * @param line - the given line that needs to be translated in to a binary code.
+ * @param opcode - the given opcode of the command (such as: mov, cmp...stop)
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param ICPtr - a pointer to the instruction counter.
+ * @return - returns resType SUCCESS if the given line is valid and all binary words were successfully created
+ * or different RESULT_TYPE depending on the error it encountered.
  */
 RESULT_TYPE handleSimpleOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 /*
- * This method convert the line with the opcode to a 14- bits "word" and insert it to the right place in RAM.
- * This method receives 'line', 'opcode', 'instructionBinarysListPtr', 'ICPtr'.
- * It check
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
- * @param instructionBinarysListPtr - helps insert the instruction commands to the right place of the list.
- * @param ICPtr - the instruction counter.
- * gets increased when an instruction is found and shows where the next instruction will get placed.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * This method checks if a given line is a valid for advanced Opcodes
+ * ( we consider an advanced opcode those who have
+ * Addressing mode of type 2 (jump addressing with parameters))
+ *
+ * if the line is valid then the method creates the relevant binary words and pushes them to the end of
+ * instructionBinarysList and advances IC by the number of binary words created
+ *
+ * a line will be considered valid if the line only contains a valid label name
+ * or if it contains a valid label name followed by parenthesis containing valid parameters
+ *  separated by a comma (as specified in the white paper )
+ without any extra text after the label in the former case or after the parenthesis after the latter
+
+ *
+ * @param line - the given line that needs to be translated in to a binary code.
+ * @param opcode - the given opcode of the command (such as: jmp, bne)
+ * @param instructionBinarysListPtr - a linked list to all instruction commands such as 'mov'...'stop'
+ * @param ICPtr - a pointer to the instruction counter.
+ * @return - returns resType SUCCESS if the given line is valid and all binary words were successfully created
+ * or different RESULT_TYPE depending on the error it encountered.
  */
 RESULT_TYPE handleAdvancedOpcode(String *line, Opcode *opCode,
 		Node **instructionBinarysListPtr, int *ICPtr);
 /*
  * This method take care of case when the opcode comands as: jmp,jsr,bne
  * have only one operand with no parameters. Example: bne END
- * It check that the operend is a destanation operand, and that it's a label.
- * All the parameters are passed to handleAdvancedOpcodeLabel() to be converted
- * and insert  to the right place in RAM.
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
- * @param opCodeNode - the binary code node. TODO ??
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * It check that the operend is a label.
+ * if it is a label and does not contain any extra text after it
+ * the method creates the relevent binary words and pushes them to the end of opCodeNode list
+ *
+ * @param line - the given line that needs to be transform in to a binary code.
+ * @param opcode - the given opcode of the command (such as: jmp, bne)
+ * @param opCodeNode - a list Node containing the binary word of the opCode
+ * @return - returns resType SUCCESS if the line is valid as per described above ,
+ * or different RESULT_TYPE depending on the error it encountered.
  */
 RESULT_TYPE handleAdvancedOpcodeWIthOutParameters(String *line, Opcode *opCode,
 		Node *opCodeNode);
 /*
- * This method take care of case when the opcode comands as: jmp,jsr,bne
- * have  one operand with two parameters. Example: jmp L1(#-1,r6)
- * It check that the operend is a destanation operand,
- * and that the operand and the parameters are valid.
- * comand name (jmp,jsr,bne) space the lable then an opening bracket first param
- * then comma then second param and closing brackets.
- * All the parameters are passed to handleAdvancedOpcode() to be converted
- * and insert to the right place in RAM.
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: jmp,jsr,bne gets placed  in 6-9 bits.
- * @param opCodeNode - the binary code node gets placed  in 2-3 bits and 10-11, 12-13 bits. TODO ??
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ This method take care of case when the opcode comands as: jmp,jsr,bne
+ *	this method checks that the line is a valid line
+ *  a line will be considered valid if the line only contains a valid label
+ *  name followed by parenthesis containing valid parameters
+ *  separated by a comma (as specified in the white paper )
+ *  without any extra text after the parenthesis after
+ *
+ *	if the line is valid it create the relvent binary words and pushes them to the end of opCodeNode
+ *	which is a list containing the binary word representing Opcode
+ *
+ *	then the method inserts the number of binary words it created to numOfWordsPtr\
+ *
+ * @param line - the given line that needs to be transform in to a binary code.
+ * @param opcode - the given opcode of the command (such as: jmp, bne)
+ * @param opCodeNode - a list Node containing the binary word of the opCode
+ * @param numOfWordsPtr -  a pointer to store the number of binary words this method created
+ * @return - returns resType SUCCESS if the line is valid as per described above ,
+ * or different RESULT_TYPE depending on the error it encountered.
  */
 RESULT_TYPE handleAdvancedOpcodeWIthParameters(String *line, Opcode *opCode,
 		Node *opCodeNode, int *numOfWordsPtr);
 /*
- * This method check if the lable definition is legal convert it to binary and places it to right place in RAM.
- * It receives 'lable', 'opCodeNode'.
- * @param lable - the given lable that need to be checked.
- * @param opCodeNode - the binary representation of lable. TODO??
- * @raturn - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * This method check if the label definition is legal convert it to binary word
+ * and pushes it to the end of opCodeNode list
+ * It receives 'label', 'opCodeNode'.
+ * @param label - the given label that need to be checked.
+ * @param opCodeNode - the binary representation of label. TODO??
+ * @raturn - returns resType SUCCESS the label is leagal as described above,
+ * or RESULT_TYPE describing the error that occurred.
  */
 RESULT_TYPE handleAdvancedOpcodeLabel(String *label, Node *opCodeNode);
 
 /*
+ * this method checks if the given currParamPtr is a valid( i.e either a number a label or a register )
+ * if it is create a binary word and pushes it to the tail of opCodeNode list
+ * if the parameter is of type register then the method sets the value pointed to by isSrcRegisterPtr to 1
+
+ this method also writes the first parameter addressing type to the relevant place in opCodebinary word stored in the
+ first node of opCodeNode
+
+ * @param currParamPtr - a string representing the given first parameter
+ * @param opCodeNode - a node containing the binary word of the opCode
+ * @param isSrcRegisterPtr - int to write to if the parameter is of type register
+ * @raturn - returns resType SUCCESS the label is legal as described above,
+ * or RESULT_TYPE describing the error that occurred.
  *
  */
 RESULT_TYPE handleFirstParameter(String *currParamPtr, Node *opCodeNode,
 		int *isSrcRegisterPtr);
 
 /*
+ * * this method checks if the given currParamPtr is a valid( i.e either a number a label or a register )
+ *
+ *
+ * if it is then the method checks if the current parameter is of type register
+ * if the previous parameter was also a register as indicated by the value of isSrcRegister
+ * then the method writes the binary representation of the register to the binary word
+ * created by the first parameter
+ * which is in the 3 node in the opCodeNode list
+ *
+ * if either this param is not a register or the first param was not a register then this method
+ * create a binary word and pushes it to the tail of opCodeNode list
+
+ this method adds the number of new binary words it created and pushed to the numOfWords pointer
+
+ * @param currParamPtr - a string representing the given first parameter
+ * @param opCodeNode - a node containing the binary word of the opCode
+ * @param isSrcRegisterPtr - int declaring if the previous param was of type register
+ * @param numOfWords - a pointer to write the number of words created by this method
+ * @raturn - returns resType SUCCESS the label is legal as described above,
+ * or RESULT_TYPE describing the error that occurred.
  *
  */
 RESULT_TYPE handleSecondParameter(String *currParamPtr, Node *opCodeNode,
 		int isSrcRegister, int *numOfWords);
 
 /*
- * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
- * This method receives 'line', 'opcode', 'opCodeNode', 'numOfWords'.
+ *
+ * this method handles the creation of binary words for operands for simple Opcodes
+ *  ( we consider simple opcode those who do not have
+ * Addressing mode of type 2 (jump addressing with parameters))
+ * if the given line is valid i.e operands are of a type allowed to the given type of opcode
+ * and the number of parameters is equal to the number of parameters expected b given opcode
+ * and opCode does not contain any extra text after the operand
+ *
+ * then this method creates the relevant binary words and pushes them to the end of opCodeNode list
+ *	and writes the number of words it created to numOfWords
+ *
+ *	the method also writes the addressing types of the operands to the binary word of opcode
+ *	which resides in the first node of opCodeNode list
+ *
  * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: mov, cmp...stop gets placed  in 6-9 bits.
- * and the opcode operrands get placed in 2-3 and 4-5 bits.
- * @param opCodeNode - gets passed to handlescrParam() and handledestParam().
- * @param numOfWords - the word counter - check if the number of operands are valid for current command opcode.
- * example: mov, cmp, add, sub, lea - need to receive exactly two operands, srcParam and destParam.
- * gets increased when an word opeares, it's added to the numOfWords count.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param opcode - the given opcode command as: mov, cmp...stop
+ * @param opCodeNode - a node containing the binary word of the opCode
+ * @param numOfWords - a pointer to write the number of words created by this method
+ * @return - returns resType SUCCESS if the operands are valid as described above,
+ * or RESULT_TYPE depending on the error.
  */
 RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 		int *numOfWords);
 /*
- * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
- * This method receives 'line', 'opcode', 'opCodeNode', 'numOfWords'.
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: mov, cmp...stop gets placed  in 6-9 bits.
- * and the opcode operands if it's a src register 2-7
- * @param opCodeNode - are passed from handleParameters() to be checked.
- * @param isSrcRegisterPtr - check if the source operand is a register.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * this method handles the src operand of simple opcode
+ * ( we consider simple opcode those who do not have
+ * Addressing mode of type 2 (jump addressing with parameters))
+ *
+ *	this method takes the first operand from the given line and checks if its valid
+ *	(as specified in the white paper )
+ *	if it is then this method creates the binary representation of that operand and pushes it
+ *	to the end of opCodeNode
+ *
+ *	the method also writes the addressing types of the operands to the binary word of opcode
+ *	which resides in the first node of opCodeNode list
+ *
+ * @param line - the given line that needs to be transformed in to a binary code.
+ * @param addressing - the set representing the allowed operand addressing types
+ *  e.g (operand->destAddressing or operand->srcAddressing)
+ *
+ * @param opCodeNode - a node containing the binary word of the opCode
+ * @param isSrcRegisterPtr - a parameter to set if the given operand is of type register
+ * @return - returns resType SUCCESS if every thing was handled with success,
  * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleSrcOperand(String *line, Set *addressing, Node *opCodeNode,
 		int *isSrcRegisterPtr);
 /*
- * This method switch the line with the parameters to a 14- bits "word" and insert it to the right place in RAM.
- * This method receives 'line', 'opcode', 'opCodeNode','isSrcRegister' ,'numOfWords'.
- * @param line - the given line that needs to be transformt in to a binary code.
- * @param opcode - the given opcode command as: 'mov''...'stop' gets placed  in 6-9 bits.
- * and the opcode operrands if it's a dest register gets placed  in 8-13 bits.
- * @param opCodeNode - the Node that was passed from handelParameters() to be checked.
- * @param isSrcRegister - check if the dest operand is a register.
- * @param numOfWords - check if both of the operands are registers- they will share
- * the same "word" in RAM srcRegister 2-7 bits and destRegister 8-13 bits.
- * @return - returns resType SUCCESS if every thing was hendeled with success,
+ * this method handles the dest operand of simple opcode
+ * ( we consider simple opcode those who do not have
+ * Addressing mode of type 2 (jump addressing with parameters))
+ *
+ *	this method takes the dest operand from the given line and checks if its valid
+ *	(as specified in the white paper )
+ *	 if it is then the method checks if the current operand is of type register
+ * if the previous operand was also a register as indicated by the value of isSrcRegister
+ * then the method writes the binary representation of the register to the binary word
+ * created by the first node
+ * which is in the 2 node in the opCodeNode list
+ *
+ * if either this operand is not a register or the first operand was not a register then this method
+ * create a binary word and pushes it to the tail of opCodeNode list
+ *
+ *	the method also writes the addressing types of the operands to the binary word of opcode
+ *	which resides in the first node of opCodeNode list
+ *
+ * @param line - the given line that needs to be transformed in to a binary code.
+ * @param addressing - the set representing the allowed operand addressing types
+ *  e.g (operand->destAddressing or operand->srcAddressing)
+ *
+ * @param opCodeNode - a node containing the binary word of the opCode
+ * @param isSrcRegisterPtr - a parameter to note if the src operand was of type register
+ * @param numOfWords - a pointer to the number of words created by this method
+ *
+ * @return - returns resType SUCCESS if every thing was handled with success,
  * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE handleDestOperand(String *line, Set *addressing, Node *opCodeNode,
 		int isSrcRegister, int *numOfWords);
 
 /*
- * This method receives 'addresingSet', 'addresingType'.
- * @param addresingSet - is passed to isValueinSet() method.
- * @param addresingType - is passed to isValueinSet() method.
- * @return - returns 0 if address type is Invalid or else the received value
- * from isValueinSet() method.
+ * this method checks if the addresing type represented by the number 'addresingType'
+ * exsists in the addressing Set 'addresingSet'
+ *
+ * @param addresingSet - the set representing the allowed addressing types
+ *  e.g (operand->destAddressing or operand->srcAddressing.
+ * @param addresingType - integer representing the addressing type.
+ * @return - returns 0 if address type is Invalid and 1 if it is valid
  */
 int isAddresingTypeValid(Set *addresingSet, int addresingType);
 
 /*
- * This method receives 'param', 'addresingType', and check is the param a number,
- * a register or a lable depending on the given addresingType
+ * This method creates a node containing a binaryWord of the given param
+ * or if the given param is of addresingType = 1 i.e is a label then the method creates a
+ * node containing a string with the name of the label
+ *
+ * a register or a label depending on the given addresingType
  * @param param - the given param.
- * @param addresingType - the given addresing type that the param will be insert to RAM based on it.
+ * @param addresingType - the given addressing type that the param will be insert to RAM based on it.
  * Example: addresingType == 0 Instant mode, addresingType == 1 means is a Direct mode,
  * addresingType == 2 is a Relative mode,addresingType == 3 Direct Register mode.
- * @return - returns the node.
+ * @return - returns a node containng either a binary word represented by a set
+ * or if the paramm is Label then the node contains a String containing the name of the label .
  */
 Node* createParamBinaryWord(String *param, int addresingType, int isSrc);
 
 /*
+ * This method receives a source file, and creates a .ob file
+ * containing the binary code and a .ext file (as specified in the white paper )
+
+ * @param srrcFile - the src file Name .
+ * @param symbolTable - the symbol table that all labels name and address .
+ * @param binarysList - the list that the binary data is stored in.
+ * @param IC - the number of the instruction binaryWords
+ * @param DC - the number of the data binaryWords.
+ * @return - returns resType SUCCESS if it successfully created the binary .ob file wrote to  it
+ * the binady code needed and if needed created the .ext file and wrote to it all the calls to labels
+ * that are stored in .ext file ,
+ * or RESULT_TYPE depending on the error.
+ */
+RESULT_TYPE secoundPassFileOpen(char *srcFile, HashTable *symbolTable,
+		Node *binarysList, int IC, int DC);
+
+/*
+ * This method receives a source file, and creates a .ob file
+ * containing the binary code and a .ext file (as specified in the white paper )
+ *
+ * @param obFile - the given object file to write the binary into s
+ * @param externFile - the given extern file that all .extern labels are written to.
+ * @param symbolTable - the symbol table that all labels name and address will be taken from.
+ * @param binarysList - pointes to all instruction commands as 'mov',
+ * @return - returns resType SUCCESS if every thing was handled with success,
+ * or a proper error RESULT_TYPE message.
+ */
+RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
+		HashTable *symbolTable, Node *binarysList);
+
+/*
+ * This method writes a binary word to the .ob file
+ *
+ *	in the following format
+ *	A\tB
+ *	where A is four letter number representing the place in RAM given by index
+ *	and B is the binary word written when insted of normal binary
+	 1 is replaced with '/'  is replaced with 0 = '.'.
+ *
+ * @param obFile - the given file we write in.
+ * @param binaryWord - a set representing the binary WOrd.
+ * @param index - the given index value in RAM.
+ */
+void writeToObFile(FILE *obFile, Set *binaryWord, int index);
+
+/*
+ * this method writes to externFile in the following format
+ * A\tB where
+ * A is the labelName
+ * and B is a three digit number representing the place in RAM given by index
+ * @param externFile - the .ext to write to .
+ * @param labelName - the given label name.
+ * @param index - the given index value in RAM.
+ */
+void writeToExternFile(FILE *externFile, String *labelName, int index);
+
+/*
+ * This method receives a String, and check if it ends with ':',
+ * @param str - the given String that we search for label in it.
+ * @return - returns 0 if the string does not end in ':' and 1 if it does
+ */
+int isLabel(String *str);
+
+/*
+ * This method receives 'str' parameter and checks is the given 'str' is a correct definition of a register.
+ * The registers can be only r0-r7, if so return true, else false value.
+ * @param str - the given str, to be checked.
+ * @return - returns the 1 if the string represnts a register or 0 if it does not .
+ */
+int isRegister(String *str);
+
+/*
  * This method checks is the 'param' has valid number definition,
- * Example: #-1, #2. if a hashh opeares before the number and the negetive number has a minus definer '-',
+ * Example: #-1, #2. if a hash operas before the number and the negetive number has a minus definer '-',
  * is considerate to be valide.
  * @param param - the given param.
  * @return - returns 1 if it's a valid number definition
@@ -480,7 +609,7 @@ Node* createParamBinaryWord(String *param, int addresingType, int isSrc);
 int isInstructionParamValid(String *param);
 
 /*
- * This method checks what type of addressing is the 'param'.
+ * This method returns what type of addressing is the 'param'.
  * @param param - the given param.
  * @return - returns 0 if it's anumber
  * returns 3 if it's a register(r0-r7) or else if it's a label returns 1.

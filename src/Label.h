@@ -27,12 +27,6 @@ typedef struct {
 
 } Label;
 
-
-/*
- *
- */
-String* labelToString(void * label);
-
 /*
  * This method frees the allocated memory fro heap
  * @param label - the given label that need to be freed.
@@ -44,11 +38,5 @@ void deleteLabel(void *label);
  * @return  - returns new Label.
  */
 Label * createLabel(char* name);
-/*
- *TODO ?? DO WE USE THIS FUNC
- */
-void insertBinaryWord(Label *label, Set * binaryWord);
-
-
 
 #endif /* LABEL_H_ */

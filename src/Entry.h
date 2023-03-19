@@ -30,9 +30,11 @@ typedef struct {
 Entry* createEntry(int hash, String *key, void *value);
 
 /*
- * This method receives 'entry', 'deleteDataFunc',and frees the  allocated memory from heap.
+ * This method  frees the space allocated on the heap for the given entrey .
+ * and uses the 'deleteDataFunc' given to it to free the space allocate to the
+ * value stored in the entry
  * @param entry - the given param that needs to be free.
- * @param deleteDataFunc- deletes data fro hashTable. TODO ??
+ * @param deleteDataFunc- a function to delete the value stored in the Entry
  */
 void deleteEntry(Entry *entry, void (*deleteDataFunc)(void*));
 

@@ -12,14 +12,14 @@
 #include "set.h"
 #include "LinkedList.h"
 #include<stdio.h>
+
 /*
- * TODO check description
  *
  * This method pops the next argument in the given String 'arguments' and stores
  * it in the String 'dest'.
  * @param argumernts - the String array to pop arguments from.
- * @param dest - the String to put the poped argument in.
- * @isLastArgument - checks if the last argument is an ilegal param.
+ * @param dest - the String to put the popped argument in.
+ * @isLastArgument - checks if the last argument is an illegal param.
  * @return - returns 'SUCCESS'  only if it found a valid argument
  * a valid argument is a string of non blank chars that can have a prefix of blank chars
  * and and a suffix of blank chars that is terminated by a ',' or '\n'
@@ -49,28 +49,17 @@ RESULT_TYPE getIntArrfromStringArgs(String *arguments, int **intArrPtr,
 /*
  * This method takes an int represented in the string 'str' and puts it in 'numDest'
  * @param str - the given str that needs to bee checked
- * @param numDest - the digit represantation with '+' for positeve value and '-' for negative.
+ * @param numDest - the digit representation with '+' for positive value and '-' for negative.
  * @return - returns SUCCESS if  was able to convert the string to an int
  * and VALUE_NOT_AN_INTEGER if it couldn't.
  */
 RESULT_TYPE getIntFromName(char *str, int *numDest);
 
-
 /*
- * This method receives a line and ckecks for illegal position of spaces, commas or missing brackets.
+ * This method receives a line as a param, and checks for illegal string representation in the text.
  * @param line - the given line.
- * @return - returns if both of the parameters for RELATIVE_MODE (jmp, bne, jsr)
- * are in valid position, as example: "jmp L1(#5,L)" command name then space, then a lable,
- * close to it without any spaces we have an opening bracket then param1 comma and param2 closing bracket,
- * if the representation in the line is like shown above returns 1, else returns 0 and a proper error message.
- */
-int isPramsLegalforRealativeMode(char *line);
-
-/*
- * This method receives a line as a param, and ckecks for illegal string representation in the text.
- * @param line - the given line.
- * @return - returns the resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @return - returns the resType SUCCESS if the string is leagal ,
+ * or RESULT_TYPE depending on the error.
  */
 RESULT_TYPE checkStringIllegal(char *line);
 
@@ -78,6 +67,7 @@ RESULT_TYPE checkStringIllegal(char *line);
 
 /*
  * This method receives a set parameter that need to be transformed into a special binary symbol code
+ * where insted of '1' we use '/' and insted of '0' we use '.'
  * We use this method for writing the .ob file.
  * @param set - the set that needs to be transformed into special binary symbol code.
  * @return - returns the new String in special binary symbol code format.

@@ -24,6 +24,7 @@
 #define STOP_STR  "STOP\n"
 #define STRING_ILlEGAL_DEFENITION_STR  "The String is illegal\n"
 
+/* TODO custom error messages for every resType; */
 char* getResultMsg(RESULT_TYPE resType) {
 
 	switch (resType) {
@@ -82,9 +83,6 @@ char* getResultMsg(RESULT_TYPE resType) {
 	case EXIT:
 		return STOP_STR;
 
-		break;
-	case CATSTROPIC_FAILURE:
-		return " CATSTROPIC_FAILURE \n";
 		break;
 	default:
 		return "default";

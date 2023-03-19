@@ -206,6 +206,7 @@ String* filenameChange(char *fileName, char *suffix) {
 	return newFileName;
 
 }
+
 int ismcrNamevalid(char *name) {
 
 	/*List of commands and label names to check against*/

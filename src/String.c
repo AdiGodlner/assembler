@@ -50,9 +50,6 @@ void setStringValue(String *str, char *charArr) {
 
 }
 
-/*
- *
- */
 String* stringNCopy(char *src, int count) {
 
 	int i = 0;
@@ -117,35 +114,9 @@ void deleteString(void *str) {
 
 }
 
-void printString(String *str) {
-
-	printf("%s", str->value);
-
-}
-
 int compareString(String *str1, String *str2) {
 
 	return strcmp(str1->value, str2->value);
-}
-
-int findNextNonBlankCharLocation(String *str, int offset) {
-
-	int i = offset;
-	char currChar;
-
-	for (; i < str->size; ++i) {
-
-		currChar = str->value[i];
-		if (!isspace(currChar) || currChar == '\n') {
-
-			return i;
-
-		}
-
-	}
-
-	return -1;
-
 }
 
 String* popByDeliminator(String *str, char delim) {

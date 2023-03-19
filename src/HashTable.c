@@ -53,16 +53,6 @@ int isKeyInTable(HashTable *table, char *key) {
 	return getValueByKey(table, key) != NULL;
 }
 
-int insertToTableIfNotExists(HashTable *table, char *key, void *data) {
-
-	if (isKeyInTable(table, key)) {
-		return 0;
-	}
-
-	insertToTable(table, key, data);
-	return 1;
-}
-
 void insertToTable(HashTable *table, char *key, void *data) {
 
 	int hash, index;
@@ -197,34 +187,6 @@ void* getValueByKeyString(HashTable *table, String *key) {
 
 	return NULL;
 
-}
-
-void printTable(HashTable *table, String* (*toStringfunc)(void*)) {
-
-	int i = 0;
-	Node *currNode = NULL;
-	Entry *entry = NULL;
-	String *entryDataString = NULL;
-	printf("======================\n");
-
-	for (i = 0; i < table->size; ++i) {
-
-		printf("%d | ", i);
-
-		currNode = table->bucketArr[i];
-		while (currNode) {
-
-			entry = (Entry*) currNode->data;
-			entryDataString = toStringfunc(entry->value);
-			printf("{ |%s| : %s } -> ", entry->key->value,
-					entryDataString->value);
-			deleteString(entryDataString);
-			currNode = currNode->next;
-		}
-		printf("NULL\n");
-
-	}
-	printf("======================\n ");
 }
 
 int getHashIndex(HashTable *table, int hash) {

@@ -128,61 +128,6 @@ RESULT_TYPE getIntFromName(char *str, int *numDest) {
 
 }
 
-int isPramsLegalforRealativeMode(char *line) {
-	/*Check for illegal comma and missing brackets*/
-
-	int i, len;
-	int bracketCount = 0;
-	String *label, *param1, *param2;
-	len = strlen(line);
-	label = createEmptyString();
-
-	for (i = 0; i < len; i++) {
-
-		if (isspace(line[i])) {
-			return 0;
-		} else if (i == 0 && !isalpha(line[i])) {
-			return 0;
-		} else if (!isalnum(line[i])) {
-			return 0;
-		} else if (line[i] == '(') {
-			bracketCount++;
-			break;
-		} else {
-			appendCharToString(label, line[i]);
-		}
-	}
-
-	param1 = createEmptyString();
-	for (; i < len; i++) {
-
-		if (isspace(line[i])) {
-			return 0;
-		} else if (line[i] == ',') {
-			break;
-		} else {
-			appendCharToString(param1, line[i]);
-		}
-
-	}
-
-	param2 = createEmptyString();
-	for (; i < len; i++) {
-
-		if (isspace(line[i])) {
-			return 0;
-		} else if (line[i] == ')') {
-			break;
-		} else {
-			appendCharToString(param2, line[i]);
-		}
-
-	}
-
-	return 1;
-
-}
-
 RESULT_TYPE checkStringIllegal(char *line) {
 
 	int i = 0;

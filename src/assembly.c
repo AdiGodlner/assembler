@@ -17,12 +17,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*TODO find all repeating macros and put them in one file with extern?*/
 #define MAX_LINE_LEN 82/*adding two to max length, for new line and null charecter*/
-#define MAX_LABEL_LENGTH 30/*TODO 30 or 31 adding one to max length, for null charecter*/
+#define MAX_LABEL_LENGTH 30
 #define RAM_START_INDEX 100
 
-void assembler(char *srcFile, HashTable *opCodeTable ) {
+void assembler(char *srcFile, HashTable *opCodeTable) {
 
 	/*src file is .am file*/
 	RESULT_TYPE resType;
@@ -33,8 +32,8 @@ void assembler(char *srcFile, HashTable *opCodeTable ) {
 	Node **dataBinarysListPtr = &dataBinarysList;
 	int IC = 0, DC = 0;
 
-	resType = firstPass(srcFile, symbolTable,opCodeTable, instructionBinarysListPtr,
-			dataBinarysListPtr, &IC, &DC);
+	resType = firstPass(srcFile, symbolTable, opCodeTable,
+			instructionBinarysListPtr, dataBinarysListPtr, &IC, &DC);
 	if (resType) {
 		/* firstPass Failed */
 		deleteList(instructionBinarysList);
@@ -60,36 +59,36 @@ void assembler(char *srcFile, HashTable *opCodeTable ) {
 
 }
 
-
-RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable ,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr, int *ICPtr,
-		int *DCPtr) {
+RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, int *ICPtr, int *DCPtr) {
 
 	Node *entryList = NULL;
 	Node **entryListPtr = &entryList;
 
 	RESULT_TYPE resType = SUCCESS;
-	resType = firstPassFileOpen(srcFile, symbolTable,opCodeTable, instructionBinarysListPtr,
-			dataBinarysListPtr, entryListPtr, ICPtr, DCPtr);
+	resType = firstPassFileOpen(srcFile, symbolTable, opCodeTable,
+			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
+			DCPtr);
 
 	if ((*ICPtr) + (*DCPtr) > 156) {
 		resType = EXCEDING_MACHINE_MEMMORY;
-		printf("IC + DC > 156 \n");
 	}
-	if (resType) {
+	else{
 
+		fixLabelCounters(symbolTable, (*ICPtr));
+		resType = writeEntryToFile(srcFile, entryList, symbolTable);
+
+	}
+
+	if (resType) {
+		/* TODO print result type error msg */
 		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
 		return resType;
 
 	} else {
 		printf(
 				"\nFIRST PASS - Was passed successfully, moving over to second pass.\n");
-	}
-
-	fixLabelCounters(symbolTable, (*ICPtr));
-
-	if (entryList != NULL) {
-		writeEntryToFile(srcFile, entryList, symbolTable);
 	}
 
 	/*chain data after instruction in the ram */
@@ -133,8 +132,15 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 
 	RESULT_TYPE resType = SUCCESS;
 	char *entSuffix = ".ent";
-	String *destFile = filenameChange(srcFile, entSuffix);
-	FILE *entFile = fopen(destFile->value, "w");
+	String *destFile;
+	FILE *entFile;
+
+	if (entryList == NULL) {
+		return SUCCESS;
+	}
+
+	destFile = filenameChange(srcFile, entSuffix);
+	entFile = fopen(destFile->value, "w");
 
 	if (!entFile) {
 		return FILE_NOT_FOUND;
@@ -183,9 +189,9 @@ RESULT_TYPE writeEntryToFile(char *srcFile, Node *entryList,
 
 }
 
-RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable, HashTable *opCodeTable,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPTR, int *DCPtr) {
+RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPTR, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -197,8 +203,9 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable, HashTable *
 	}
 
 	/*firstPassAssembler actualy doing the passing*/
-	resType = firstPassAssembler(amFile, symbolTable,opCodeTable, instructionBinarysListPtr,
-			dataBinarysListPtr, entryListPtr, ICPTR, DCPtr);
+	resType = firstPassAssembler(amFile, symbolTable, opCodeTable,
+			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPTR,
+			DCPtr);
 
 	fclose(amFile);
 
@@ -206,9 +213,9 @@ RESULT_TYPE firstPassFileOpen(char *srcFile, HashTable *symbolTable, HashTable *
 
 }
 
-RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *opCodeTable ,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) {
+RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE lineProcesingResult = SUCCESS;
 	RESULT_TYPE resType = SUCCESS;
@@ -221,16 +228,15 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *o
 		lineNumber++;
 
 		setStringValue(lineString, line);
-		lineProcesingResult = lineFirstPass(lineString, symbolTable,opCodeTable,
-				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
-				ICPtr, DCPtr);
+		lineProcesingResult = lineFirstPass(lineString, symbolTable,
+				opCodeTable, instructionBinarysListPtr, dataBinarysListPtr,
+				entryListPtr, ICPtr, DCPtr);
 
 		if (lineProcesingResult) {
 
-			/* TODO custom error messages for every resType
-			 TODO print all errors here */
-			printf("ERROR:   at line %d | resType %d \n", lineNumber,
-					getResultMsg());
+			/*  TODO print all errors here */
+			printf("ERROR:   at line %d | error message:\n %s \n", lineNumber,
+					getResultMsg(lineProcesingResult));
 
 			if (resType == SUCCESS) {
 				resType = lineProcesingResult;
@@ -245,9 +251,9 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,HashTable *o
 	return resType;
 }
 
-RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,HashTable *opCodeTable,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) {
+RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
+		HashTable *opCodeTable, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -255,14 +261,14 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,HashTable *
 
 	if (isLabel(firstWord)) {
 
-		resType = handleLabel(firstWord->value, symbolTable,opCodeTable, lineString,
-				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
-				ICPtr, DCPtr);
+		resType = handleLabel(firstWord->value, symbolTable, opCodeTable,
+				lineString, instructionBinarysListPtr, dataBinarysListPtr,
+				entryListPtr, ICPtr, DCPtr);
 	} else {
 
-		resType = handleNonLabel(firstWord->value, symbolTable,opCodeTable, lineString,
-				instructionBinarysListPtr, dataBinarysListPtr, entryListPtr,
-				ICPtr, DCPtr);
+		resType = handleNonLabel(firstWord->value, symbolTable, opCodeTable,
+				lineString, instructionBinarysListPtr, dataBinarysListPtr,
+				entryListPtr, ICPtr, DCPtr);
 		if (resType == ENTRY_CREATED || resType == EXTERN_CREATED) {
 			resType = SUCCESS;
 		}
@@ -274,9 +280,9 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,HashTable *
 
 }
 
-RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,HashTable *opCodeTable , String *line,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) {
+RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,
+		HashTable *opCodeTable, String *line, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -299,7 +305,7 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,HashTable *opCod
 
 	firstWord = popWord(line);
 
-	resType = handleNonLabel(firstWord->value, symbolTable,opCodeTable, line,
+	resType = handleNonLabel(firstWord->value, symbolTable, opCodeTable, line,
 			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 			DCPtr);
 
@@ -322,9 +328,9 @@ RESULT_TYPE handleLabel(char *labelName, HashTable *symbolTable,HashTable *opCod
 
 }
 
-RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, HashTable *opCodeTable , String *line,
-		Node **instructionBinarysListPtr, Node **dataBinarysListPtr,
-		Node **entryListPtr, int *ICPtr, int *DCPtr) {
+RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable,
+		HashTable *opCodeTable, String *line, Node **instructionBinarysListPtr,
+		Node **dataBinarysListPtr, Node **entryListPtr, int *ICPtr, int *DCPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
 
@@ -344,15 +350,15 @@ RESULT_TYPE handleNonLabel(char *word, HashTable *symbolTable, HashTable *opCode
 
 	} else {
 
-		resType = handleInstructions(word,opCodeTable, line, instructionBinarysListPtr,
-				ICPtr);
+		resType = handleInstructions(word, opCodeTable, line,
+				instructionBinarysListPtr, ICPtr);
 
 	}
 
 	return resType;
 }
 
-RESULT_TYPE handleInstructions(char *word,HashTable *opCodeTable , String *line,
+RESULT_TYPE handleInstructions(char *word, HashTable *opCodeTable, String *line,
 		Node **instructionBinarysListPtr, int *ICPtr) {
 
 	RESULT_TYPE resType = SUCCESS;
@@ -595,7 +601,7 @@ RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 		deleteString(currParamPtr);
 	}
 
-	if(!isblankLine(line->value)){
+	if (!isblankLine(line->value)) {
 		return EXTRANEOUS_TEXT;
 	}
 
