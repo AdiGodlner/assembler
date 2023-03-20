@@ -159,6 +159,10 @@ RESULT_TYPE checkStringIllegal(char *line) {
 		}
 	}
 
+	if (quoteCount <2) {
+		return MISSING_QUOTE;
+	}
+
 	return SUCCESS;
 
 }

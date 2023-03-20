@@ -19,14 +19,16 @@
 
 
 /*
- * This method receives a sorce file and looks for a macros in the text,
- * when a macro is found this method checkes if a macro with such name allready exists,
- * if not it places the macro name into a macro table,
- * and it designate the macro body to place it later in to the .am file,
- * @param asFile - the given sorce file to search for macros in.
+ * This method receives a source file and looks for a macros in the text,
+ * when a macro is found this method checks if a macro with such name already exists,
+ * if not it checks if macro name is not a reserved name like 'mov' or 'jmp'
+ *	if it is not a reserved name then
+ *  it inserts it  to the table with the macro name as key
+ * and macro body (i.e the macro definition )as the value
+ * @param asFile - the given source file to search for macros in.
  * @param table - the table we'll store macros in (if exist in file).
- * @param line - the max line lenghth a line can be till the '\n' sign.
- * @return - returns  resType SUCCESS if every thing was hendeled with success,
+ * @param line - the max line length a line can be till the '\n' sign.
+ * @return - returns  resType SUCCESS a macro with the same name did not already exist,
  * or a proper error RESULT_TYPE message.
  */
 RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
@@ -39,9 +41,10 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
  * (example prog.as is changed to prog.am)
  * The .am file contain same input as the src file, but without the macro definition,
  * just the macro body is placed in to the .am file.
- * @param srcFile - the sorce file after macro parssing, that need to be changed to .am file.
- * @return - returns  resType SUCCESS if every thing was hendeled with success,
- * or a proper error RESULT_TYPE message.
+ * @param srcFile - the source file name
+ * @return - returns  resType SUCCESS if all macros defined in the srcFile are valid
+ * a valid macro is defined in the documentation of readMacro
+ *  otherwise that method returns a RESULT_TYPE based on the error it found
  */
 RESULT_TYPE macroParse(char *srcFile);
 
@@ -62,7 +65,7 @@ void printFileError(char *fileName);
 
 /*
  * This method gates a macro 'name' as a parameter,
- * and chacks if it matches any of command or lable names.
+ * and checks if it matches any of command or label names.
  * @param name - the macro name that need to be checked.
  * @return - returns 0 if a match is found, else 1.
  */
@@ -70,13 +73,13 @@ int ismcrNamevalid(char *name);
 
 
 /*
- * This method resives a text line and it removes extra whitespace if found,
+ * This method gets a text line and it removes extra whitespace if found,
  * @param line - the cureent line.
  */
 void textCorrecter(char *line);
 
 /*
- * This method resives a text line and it removes blank lines if found,
+ * This method checks if a given string 'line' is only filled with blank spaces ,
  * @param line - the cureent line.
  */
 int isblankLine( char *line);

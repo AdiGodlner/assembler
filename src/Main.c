@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 			appendToString(fileName, ".as");
 			resType = macroParse(fileName->value);
 
-			if (resType) {
+			if (!resType) {
 
 				assembler(fileName->value, opCodeTable);
 
@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
 	}
 
 	deleteTable(opCodeTable,deleteOpcode);
+
 	printf("\n end  :-)\n");
 
 

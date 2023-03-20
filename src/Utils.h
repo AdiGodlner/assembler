@@ -58,7 +58,7 @@ RESULT_TYPE getIntFromName(char *str, int *numDest);
 /*
  * This method receives a line as a param, and checks for illegal string representation in the text.
  * @param line - the given line.
- * @return - returns the resType SUCCESS if the string is leagal ,
+ * @return - returns the resType SUCCESS if the string is legal ,
  * or RESULT_TYPE depending on the error.
  */
 RESULT_TYPE checkStringIllegal(char *line);
@@ -67,7 +67,7 @@ RESULT_TYPE checkStringIllegal(char *line);
 
 /*
  * This method receives a set parameter that need to be transformed into a special binary symbol code
- * where insted of '1' we use '/' and insted of '0' we use '.'
+ * where insted of '1' we use '/' and instead of '0' we use '.'
  * We use this method for writing the .ob file.
  * @param set - the set that needs to be transformed into special binary symbol code.
  * @return - returns the new String in special binary symbol code format.

@@ -30,7 +30,7 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 	populateAddressingSet(destAddressingPtr, destAddressingStr);
 
 	opcode->name = createNewString(name);
-	opcode->code = code; /* is the code variable really usefull? */
+	opcode->code = code;
 	opcode->numOfParameters = numOfParameters;
 	opcode->srcAddressing = srcAddressing;
 	opcode->destAddressing = destAddressing;
@@ -39,7 +39,7 @@ Opcode* createOpcode(char *name, int code, int numOfParameters,
 
 }
 
-void deleteOpcode(void* opCode){
+void deleteOpcode(void *opCode) {
 
 	Opcode *currOpCode;
 
@@ -56,36 +56,53 @@ void deleteOpcode(void* opCode){
 
 }
 
-/*TODO #define macros / numbers */
+#define ARE_START 0
+#define ARE_LENGTH 2
+#define Dest_Operand_START 2
+#define Dest_Operand_LENGTH  2
+#define Src_Operand_START  4
+#define Src_Operand_LENGTH 2
+#define Second_Parameter_START  10
+#define Second_Parameter_LENGTH 2
+#define First_Parameter_START 12
+#define First_Parameter_LENGTH 2
 
 void writeAREToBinaryWord(Set *binaryWord, int are) {
 
-	writeToBinaryWord(binaryWord, are, 0, 2);
+	writeToBinaryWord(binaryWord, are, ARE_START, ARE_LENGTH);
 
 }
 void writeDestOperandToBinaryWord(Set *binaryWord, int destOperand) {
 
-	writeToBinaryWord(binaryWord, destOperand, 2, 2);
+	writeToBinaryWord(binaryWord, destOperand, Dest_Operand_START,
+			Dest_Operand_LENGTH);
 
 }
+
 void writeSrcOperandToBinaryWord(Set *binaryWord, int srcOperand) {
 
-	writeToBinaryWord(binaryWord, srcOperand, 4, 2);
+	writeToBinaryWord(binaryWord, srcOperand, Src_Operand_START,
+			Src_Operand_LENGTH);
 
 }
+
 void writeCodeToBinaryWord(Set *binaryWord, int code) {
 
 	writeToBinaryWord(binaryWord, code, OPCODE_START_INDEX, OPCODE_LENGTH);
 
 }
+
 void writeSecondParameterToBinaryWord(Set *binaryWord, int parameter) {
 
-	writeToBinaryWord(binaryWord, parameter, 10, 2);
+	writeToBinaryWord(binaryWord, parameter, Second_Parameter_START,
+			Second_Parameter_LENGTH);
 
 }
+
 void writeFirstParameterToBinaryWord(Set *binaryWord, int parameter) {
 
-	writeToBinaryWord(binaryWord, parameter, 12, 2);
+	writeToBinaryWord(binaryWord, parameter, First_Parameter_START,
+			First_Parameter_LENGTH);
 
 }
 
@@ -93,6 +110,7 @@ void writeDestRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 2, 6);
 
 }
+
 void writeSrcRegiserToBinaryWord(Set *binaryWord, int reg) {
 	writeToBinaryWord(binaryWord, reg, 8, 6);
 

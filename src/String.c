@@ -36,7 +36,7 @@ String* duplicateString(String *str) {
 
 void setStringValue(String *str, char *charArr) {
 
-	char *temp;
+	char *temp = NULL;
 
 	str->size = strlen(charArr);
 	temp = (char*) realloc(str->value, sizeof(char) * (str->size + 1));

@@ -20,6 +20,10 @@
 #define MAX_LINE_LEN 82/*adding two to max length, for new line and null charecter*/
 #define MAX_LABEL_LENGTH 30
 #define RAM_START_INDEX 100
+#define INSTANT_ADDRESSING_TYPE 0
+#define DIRECT_ADDRESSING_TYPE 1
+#define RELATIVE_ADDRESSING_TYPE 2
+#define DIRECT_REGISTER_ADDRESSING_TYPE 3
 
 void assembler(char *srcFile, HashTable *opCodeTable) {
 
@@ -72,17 +76,15 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
 			DCPtr);
 
 	if ((*ICPtr) + (*DCPtr) > 156) {
-		resType = EXCEDING_MACHINE_MEMMORY;
-	}
-	else{
+		resType = EXCEDING_MACHINE_MEMORY;
+	} else {
 
 		fixLabelCounters(symbolTable, (*ICPtr));
 		resType = writeEntryToFile(srcFile, entryList, symbolTable);
-
+		deleteList(entryList);
 	}
 
 	if (resType) {
-		/* TODO print result type error msg */
 		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
 		return resType;
 
@@ -234,7 +236,6 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 		if (lineProcesingResult) {
 
-			/*  TODO print all errors here */
 			printf("ERROR:   at line %d | error message:\n %s \n", lineNumber,
 					getResultMsg(lineProcesingResult));
 
@@ -371,7 +372,7 @@ RESULT_TYPE handleInstructions(char *word, HashTable *opCodeTable, String *line,
 	opCode = (Opcode*) getValueByKey(opCodeTable, word);
 
 	/*check if opcode is jmp jsr or bne */
-	if (isValueInSet(opCode->destAddressing, 2)) {
+	if (isValueInSet(opCode->destAddressing, RELATIVE_ADDRESSING_TYPE)) {
 
 		resType = handleAdvancedOpcode(line, opCode, instructionBinarysListPtr,
 				ICPtr);
@@ -569,13 +570,17 @@ RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 
 	RESULT_TYPE resType = SUCCESS;
 	int isSrcRegister = 0;
-	String *currParamPtr = createEmptyString();
+	String *currParamPtr;
+
 	if (opCode->numOfParameters != 0) {
+
+		currParamPtr = createEmptyString();
 
 		if (opCode->numOfParameters == 2) {
 
 			resType = popArgument(line, currParamPtr, 0);
 			if (resType) {
+				deleteString(currParamPtr);
 				return resType;
 			}
 
@@ -594,6 +599,7 @@ RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 		resType = popArgument(line, currParamPtr, 1);
 
 		if (resType) {
+			deleteString(currParamPtr);
 			return resType;
 		}
 		resType = handleDestOperand(currParamPtr, opCode->destAddressing,
@@ -747,7 +753,7 @@ Node* createParamBinaryWord(String *param, int addresingType, int isSrc) {
 	Set *parambinaryWord;
 	int num;
 
-	if (addresingType == 3) {
+	if (addresingType == DIRECT_REGISTER_ADDRESSING_TYPE) {
 
 		parambinaryWord = createNewSet();
 		num = atoi(param->value + 1);
@@ -759,7 +765,7 @@ Node* createParamBinaryWord(String *param, int addresingType, int isSrc) {
 		node = createNode(parambinaryWord, SET, NULL);
 		node->TYPE = SET;
 
-	} else if (addresingType == 0) {
+	} else if (addresingType == INSTANT_ADDRESSING_TYPE) {
 
 		getIntFromName(param->value + 1, &num);
 		parambinaryWord = intToBinaryWordWithOffset(num, 2);
@@ -768,7 +774,7 @@ Node* createParamBinaryWord(String *param, int addresingType, int isSrc) {
 
 	} else {
 
-		/* addresingType == 1 */
+		/* addresingType == 1  == DIRECT_ADDRESSING_TYPE*/
 		paramDup = duplicateString(param);
 		node = createNode(paramDup, STRING, NULL);
 		node->TYPE = STRING;

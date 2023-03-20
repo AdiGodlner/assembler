@@ -94,6 +94,7 @@ void insertToTable(HashTable *table, char *key, void *data) {
 	/* if we got here it means there is no entry in the hashtable with the given key*/
 
 	newEntry = createEntry(hash, keyString, data);
+	deleteString(keyString);
 	newNode = createNode(newEntry, ENTRY, NULL);
 
 

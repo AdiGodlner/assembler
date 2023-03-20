@@ -281,8 +281,8 @@ int isblankLine(char *line) {
 /*Print if an error occurred when trying to open file */
 void printFileError(char *fileName) {
 
-	fprintf(stderr, "\n**************************************************\n");
-	fprintf(stderr, "   Error: Failed to open file %s\n", fileName);
-	fprintf(stderr, "\n**************************************************\n");
+	printf("\n**************************************************\n");
+	printf("   Error: Failed to open file %s\n", fileName);
+	printf( "\n**************************************************\n");
 
 }
