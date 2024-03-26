@@ -18,13 +18,15 @@ Key features of the assembler include macro unrolling, parsing of assembly instr
 
 ## Usage
 
-To run the assembler, provide a list of one or more source files to translate into binary. The assembler processes each file separately and generates the corresponding output files, as explained in the white paper.
+Open a terminal in the folder where you cloned the repository, then run the `make` command in the terminal to compile the C code. This will create a file named `assembler`.
+
+To run the `assembler`, provide a list of one or more `.as` source files as command-line arguments without the `.as` file suffix. The `assembler` will translate the given files into binary and save the binary files and all other files it creates (as noted in the white paper) in the same folder as the file it translated.
 
 ## Examples
 
-An example is included in the src file named `test1.asm`. You can run the example by providing the path to the file `test1.asm` as a command-line argument:
+An example is included in the src folder named `test1.as`. You can run the example by providing the path to the file `test1.as` as a command-line argument without the file extension:
 
-`assembler ./test1.asm`
+    `./assembler ./test/test1`
 
 ## White Paper
 

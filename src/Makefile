@@ -1,4 +1,4 @@
-TARGET :=assambler
+TARGET := assembler
 CC := gcc
 CFLAGS := -Wall -ansi -g
 FOO := -pedantic
