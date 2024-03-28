@@ -12,6 +12,7 @@
 #define MAX_LINE_LEN 82
 #include "HashTable.h"
 #include "Result.h"
+#include "Utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,13 +49,6 @@ RESULT_TYPE readMacro(FILE *asFile, HashTable *table, char line[MAX_LINE_LEN]);
  */
 RESULT_TYPE macroParse(char *srcFile);
 
-/*
- * This method receives 'fileName', 'suffix' as parameters.
- * @param fileName - the .as file name that need to be changed.
- * @param suffix - the suffix .am changes the .as file  to .am file.
- * @return - returns the ne file name.
- */
-String* filenameChange(char *fileName, char *suffix);
 
 /*
  * This method is used to print an error message when there is a problem with opening a file.

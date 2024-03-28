@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "macro.h"
+#include "Utils.h"
 #include "HashTable.h"
 #include "Result.h"
 
@@ -121,7 +122,7 @@ RESULT_TYPE macroParse(char *srcFile) {
 
 	/* Read input line by line till we see a macro,
 	 * and copy the src file into the dest file without the macro name wrap we found,
-	 *  only macro body will be passed to .am file*/
+	 * only macro body will be passed to .am file*/
 
 	lineString = createEmptyString();
 
@@ -176,7 +177,6 @@ RESULT_TYPE macroParse(char *srcFile) {
 	} else {
 
 		printf("\n %s was preprocessed successfully !\n", srcFile);
-		printf(" and written to %s \n", amFileName->value);
 
 	}
 
@@ -186,24 +186,6 @@ RESULT_TYPE macroParse(char *srcFile) {
 	deleteTable(table, deleteString);
 
 	return resType;
-
-}
-
-String* filenameChange(char *fileName, char *suffix) {
-
-	String *newFileName;
-	char *dotPos;
-
-	/*check the position of the last dot in the file name*/
-	dotPos = strrchr(fileName, '.');
-
-	/*Copy filename up to dot position */
-	newFileName = stringNCopy(fileName, dotPos - fileName);
-
-	/*Add the new filename extension */
-	appendToString(newFileName, suffix);
-
-	return newFileName;
 
 }
 

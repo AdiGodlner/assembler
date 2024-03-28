@@ -75,6 +75,7 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
 			instructionBinarysListPtr, dataBinarysListPtr, entryListPtr, ICPtr,
 			DCPtr);
 
+
 	if ((*ICPtr) + (*DCPtr) > 156) {
 		resType = EXCEDING_MACHINE_MEMORY;
 	} else {
@@ -85,12 +86,12 @@ RESULT_TYPE firstPass(char *srcFile, HashTable *symbolTable,
 	}
 
 	if (resType) {
-		printf("\nERROR:First Pass has failed, can't move to second pass.\n");
+		printf("\n ERROR:First Pass has failed, can't move to second pass.\n");
 		return resType;
 
 	} else {
 		printf(
-				"\nFIRST PASS - Was passed successfully, moving over to second pass.\n");
+				"\n FIRST PASS - Was passed successfully, moving over to second pass.\n");
 	}
 
 	/*chain data after instruction in the ram */
@@ -247,7 +248,7 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 	}
 
-	deleteString(lineString);
+
 
 	return resType;
 }
@@ -259,6 +260,8 @@ RESULT_TYPE lineFirstPass(String *lineString, HashTable *symbolTable,
 	RESULT_TYPE resType = SUCCESS;
 
 	String *firstWord = popWord(lineString);
+
+
 
 	if (isLabel(firstWord)) {
 
@@ -366,6 +369,7 @@ RESULT_TYPE handleInstructions(char *word, HashTable *opCodeTable, String *line,
 	Opcode *opCode = NULL;
 
 	if (!isKeyInTable(opCodeTable, word)) {
+		printf("in ILLEGAL_OPCODE with word '%s'",word);
 		return ILLEGAL_OPCODE;
 	}
 

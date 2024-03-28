@@ -35,8 +35,10 @@ int main(int argc, char **argv) {
 
 			if (!resType) {
 
-				assembler(fileName->value, opCodeTable);
-
+				String *amFileName = filenameChange(fileName->value, ".am");
+				assembler(amFileName->value, opCodeTable);
+				deleteString(amFileName);
+			
 			}
 
 			deleteString(fileName);

@@ -274,3 +274,21 @@ String* binaryWOrdToString(Set *set) {
 
 }
 
+
+String* filenameChange(char *fileName, char *suffix) {
+
+	String *newFileName;
+	char *dotPos;
+
+	/*check the position of the last dot in the file name*/
+	dotPos = strrchr(fileName, '.');
+
+	/*Copy filename up to dot position */
+	newFileName = stringNCopy(fileName, dotPos - fileName);
+
+	/*Add the new filename extension */
+	appendToString(newFileName, suffix);
+
+	return newFileName;
+
+}
