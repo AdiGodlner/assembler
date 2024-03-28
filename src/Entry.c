@@ -27,7 +27,7 @@ void deleteEntry(Entry *entry, void (*deleteDataFunc)(void*)) {
 	if (entry != NULL) {
 
 		deleteDataFunc(entry->value);
-		free(entry->key);
+		deleteString(entry->key);
 		free(entry);
 
 	}

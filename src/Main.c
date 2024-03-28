@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 	int i = 0;
 	RESULT_TYPE resType;
 	String * fileName ;
+
 	HashTable * opCodeTable = createDefualtHashTable();
 	initOpcode(opCodeTable);
 

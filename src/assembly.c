@@ -51,6 +51,10 @@ void assembler(char *srcFile, HashTable *opCodeTable) {
 			IC, DC);
 
 	if (resType) {
+
+		printf("ERROR:   at secound pass error message:\n %s \n",
+				getResultMsg(resType));
+
 		printf("\nERROR: Second Pass has failed.\n");
 
 	} else {
@@ -1121,7 +1125,7 @@ RESULT_TYPE secoundPassAssembly(FILE *obFile, FILE *externFile,
 			label = (Label*) getValueByKeyString(symbolTable, labelName);
 
 			if (label == NULL) {
-
+				printf("label is NULL l1128 assembler labelName :%s \n", labelName->value);
 				resType = LABEL_DOESNOT_EXISTS;
 				break;
 
