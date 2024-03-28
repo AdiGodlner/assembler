@@ -252,6 +252,8 @@ RESULT_TYPE firstPassAssembler(FILE *amFile, HashTable *symbolTable,
 
 	}
 
+	deleteString(lineString);
+
 
 
 	return resType;
@@ -613,8 +615,9 @@ RESULT_TYPE handleOperands(String *line, Opcode *opCode, Node *opCodeNode,
 		resType = handleDestOperand(currParamPtr, opCode->destAddressing,
 				opCodeNode, isSrcRegister, numOfWordsPtr);
 		deleteString(currParamPtr);
+	
 	}
-
+	
 	if (!isblankLine(line->value)) {
 		return EXTRANEOUS_TEXT;
 	}
