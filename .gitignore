@@ -1,4 +1,6 @@
 /Debug/
+src/assembler
+*.ob
 *.o
 *.am
 *.ent
